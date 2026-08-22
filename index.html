@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Mi Hogar 3D — Construye tu hogar de ensueño</title>
+  <meta name="description" content="Mi Hogar 3D: un juego de construcción de casas en 3D. Diseña, decora y pasea por tu hogar de ensueño directamente en el navegador." />
+  <meta name="theme-color" content="#1a1d29" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏠</text></svg>" />
+  <link rel="stylesheet" href="css/style.css" />
+  <script type="importmap">
+    { "imports": { "three": "./vendor/three.module.js" } }
+  </script>
+</head>
+<body>
+  <!-- Pantalla de carga -->
+  <div id="loader">
+    <div class="loader-house">🏠</div>
+    <h1>Mi Hogar 3D</h1>
+    <p>Construyendo tu mundo…</p>
+  </div>
+
+  <!-- Lienzo 3D -->
+  <canvas id="scene"></canvas>
+
+  <!-- Barra superior -->
+  <header id="topbar" class="ui">
+    <div class="brand">🏠 <span>Mi Hogar 3D</span></div>
+    <div id="money" class="money" title="Tu presupuesto">💰 <span id="money-value">0 €</span></div>
+    <div class="top-actions">
+      <button id="btn-daynight" class="icon-btn" title="Alternar día / noche">🌙</button>
+      <button id="btn-walk" class="icon-btn" title="Modo paseo (primera persona)">🚶</button>
+      <button id="btn-screenshot" class="icon-btn" title="Capturar imagen">📷</button>
+      <button id="btn-missions" class="icon-btn" title="Misiones">🏆<span id="missions-badge" class="badge hidden">0</span></button>
+      <button id="btn-save" class="icon-btn" title="Guardar partida">💾</button>
+      <button id="btn-export" class="icon-btn" title="Exportar casa (JSON)">⬇️</button>
+      <button id="btn-import" class="icon-btn" title="Importar casa (JSON)">⬆️</button>
+      <button id="btn-reset" class="icon-btn" title="Empezar de cero">🗑️</button>
+      <button id="btn-help" class="icon-btn" title="Ayuda">❓</button>
+    </div>
+  </header>
+
+  <!-- Panel lateral de construcción -->
+  <aside id="sidebar" class="ui">
+    <nav id="tabs">
+      <button class="tab active" data-tab="construccion" title="Construcción">🧱</button>
+      <button class="tab" data-tab="muebles" title="Muebles">🛋️</button>
+      <button class="tab" data-tab="exterior" title="Exterior">🌳</button>
+      <button class="tab" data-tab="herramientas" title="Herramientas">🛠️</button>
+    </nav>
+    <div id="tab-panels">
+      <div class="panel active" data-panel="construccion"></div>
+      <div class="panel" data-panel="muebles"></div>
+      <div class="panel" data-panel="exterior"></div>
+      <div class="panel" data-panel="herramientas"></div>
+    </div>
+    <div id="palette" title="Color seleccionado"></div>
+  </aside>
+
+  <!-- Controles contextuales -->
+  <div id="context-controls" class="ui hidden">
+    <button id="btn-rotate" class="pill-btn">🔄 Rotar <kbd>R</kbd></button>
+    <button id="btn-cancel" class="pill-btn">✖ Cancelar <kbd>Esc</kbd></button>
+  </div>
+
+  <!-- Panel de misiones -->
+  <aside id="missions-panel" class="ui hidden">
+    <h2>🏆 Misiones</h2>
+    <div id="missions-list"></div>
+  </aside>
+
+  <!-- Aviso / toast -->
+  <div id="toast" class="hidden"></div>
+
+  <!-- Indicador de modo paseo -->
+  <div id="walk-hint" class="ui hidden">
+    🚶 Modo paseo — <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> moverse · ratón mirar · <kbd>Esc</kbd> salir
+  </div>
+
+  <!-- Modal de ayuda -->
+  <div id="help-modal" class="modal hidden">
+    <div class="modal-card">
+      <h2>🏠 Bienvenido a Mi Hogar 3D</h2>
+      <p class="subtitle">Construye y decora tu hogar de ensueño</p>
+      <ul class="help-list">
+        <li>🧱 Elige <b>suelos, paredes, puertas y ventanas</b> en el panel izquierdo y haz clic en el terreno para construir.</li>
+        <li>🛋️ Amuebla tu casa y añade un <b>jardín</b> con árboles y flores.</li>
+        <li>🎨 Usa la <b>paleta de colores</b> y la herramienta <b>pintar</b> para personalizarlo todo.</li>
+        <li>💰 Cada pieza cuesta dinero: completa <b>misiones 🏆</b> para ganar más.</li>
+        <li>🔄 Pulsa <kbd>R</kbd> para rotar, <kbd>Esc</kbd> para cancelar, y la herramienta 🧹 para vender (recuperas el 50 %).</li>
+        <li>🚶 Activa el <b>modo paseo</b> para caminar dentro de tu casa en primera persona.</li>
+        <li>🖱️ Cámara: arrastra para orbitar, rueda para acercar, botón derecho para desplazar.</li>
+        <li>💾 Tu casa se <b>guarda automáticamente</b> en este navegador. También puedes exportarla a un archivo.</li>
+      </ul>
+      <button id="btn-close-help" class="cta">¡A construir! 🔨</button>
+    </div>
+  </div>
+
+  <input type="file" id="import-file" accept=".json,application/json" hidden />
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
