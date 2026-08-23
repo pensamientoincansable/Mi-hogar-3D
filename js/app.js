@@ -44,6 +44,21 @@ function sph(r, color, x = 0, y = 0, z = 0, paint = false) {
   if (paint) m.userData.paint = true;
   return m;
 }
+function glass(w, h, color = 0xaad4e8, opacity = 0.42, x = 0, y = 0, z = 0) {
+  const m = new THREE.Mesh(
+    new THREE.BoxGeometry(w, h, 0.035),
+    new THREE.MeshLambertMaterial({ color, transparent: true, opacity, depthWrite: false })
+  );
+  m.position.set(x, y, z);
+  m.castShadow = false;
+  return m;
+}
+function shade(color, amount) {
+  const c = new THREE.Color(color);
+  if (amount >= 0) c.lerp(new THREE.Color(0xffffff), amount);
+  else c.lerp(new THREE.Color(0x000000), -amount);
+  return c.getHex();
+}
 function grp(...children) { const g = new THREE.Group(); children.forEach(c => g.add(c)); return g; }
 
 /* ---------------- Catálogo ---------------- */
@@ -145,10 +160,94 @@ const FURNITURE = {
     }
     return g;
   } },
-  alfombra: { name: 'Alfombra', ico: '🟫', cost: 150, w: 2, d: 2, build(c = 0xc96f4a) {
+  alfombra: { name: 'Alfombra', ico: '🟫', cost: 150, w: 2, d: 2, decor: true, build(c = 0xc96f4a) {
     const m = box(1.85, 0.03, 1.85, c, 0, 0.095, 0, true);
     const b = box(1.6, 0.032, 1.6, 0xe8d9b5, 0, 0.096, 0);
     return grp(m, b);
+  } },
+  planta_interior: { name: 'Planta interior', ico: '🪴', cost: 85, w: 1, d: 1, decor: true, build(c = 0xc96f4a) {
+    const g = grp(
+      cyl(0.2, 0.28, 0.42, c, 0, 0.21, 0, 16, true),
+      cyl(0.035, 0.045, 0.75, 0x3f7d4a, 0, 0.75)
+    );
+    for (const [x, y, z, s] of [[-.2,.72,0,.23],[.2,.88,.02,.25],[0,1.08,0,.28],[-.12,.95,.16,.2],[.14,.7,-.12,.19]])
+      g.add(sph(s, 0x4c9159, x, y, z));
+    return g;
+  } },
+  cuadro: { name: 'Cuadro', ico: '🖼️', cost: 110, w: 1, d: 1, decor: true, build(c = 0x4a7fb5) {
+    return grp(
+      box(0.92, 1.05, 0.08, WOOD_D, 0, 1.15, -0.35),
+      box(0.76, 0.88, 0.035, c, 0, 1.15, -0.30, true),
+      box(0.22, 0.3, 0.025, 0xffd36b, -0.16, 1.25, -0.275),
+      sph(0.11, 0xf5f0e8, 0.19, 1.38, -0.27),
+      box(0.62, 0.08, 0.18, WOOD_D, 0, 0.1, -0.28)
+    );
+  } },
+  espejo: { name: 'Espejo', ico: '🪞', cost: 160, w: 1, d: 1, decor: true, build(c = 0xe8d9b5) {
+    return grp(
+      box(0.82, 1.55, 0.09, c, 0, 0.92, -0.32, true),
+      glass(0.68, 1.4, 0xc9e8f2, 0.7, 0, 0.92, -0.265),
+      box(0.7, 0.08, 0.34, WOOD_D, 0, 0.08, -0.24)
+    );
+  } },
+  jarron: { name: 'Jarrón', ico: '🏺', cost: 70, w: 1, d: 1, decor: true, build(c = 0x4a7fb5) {
+    return grp(
+      cyl(0.13, 0.24, 0.52, c, 0, 0.26, 0, 18, true),
+      cyl(0.17, 0.13, 0.18, c, 0, 0.61, 0, 18, true),
+      cyl(0.025, 0.025, 0.55, 0x4c9159, 0, 0.95),
+      sph(0.1, 0xe85d75, -0.08, 1.18, 0),
+      sph(0.1, 0xf2c94c, 0.08, 1.11, 0.02)
+    );
+  } },
+  reloj_pie: { name: 'Reloj de pie', ico: '🕰️', cost: 290, w: 1, d: 1, decor: true, build(c = WOOD) {
+    const face = new THREE.Mesh(new THREE.CylinderGeometry(0.27, 0.27, 0.035, 24), mat(0xf4e8c8));
+    face.rotation.x = Math.PI / 2; face.position.set(0, 1.46, 0.19);
+    return grp(
+      box(0.54, 1.75, 0.36, c, 0, 0.88, 0, true),
+      box(0.4, 0.72, 0.04, 0x5a321b, 0, 0.62, 0.195),
+      face,
+      box(0.025, 0.18, 0.025, DARK, 0, 1.48, 0.225),
+      box(0.14, 0.025, 0.025, DARK, 0.06, 1.46, 0.225)
+    );
+  } },
+  candelabro: { name: 'Candelabro', ico: '🕯️', cost: 130, w: 1, d: 1, decor: true, light: { y: 1.25, i: 7, color: 0xffb45c }, build(c = METAL) {
+    const g = grp(cyl(0.18, 0.22, 0.06, c, 0, 0.03), cyl(0.035, 0.045, 0.92, c, 0, 0.5));
+    for (const x of [-0.24, 0, 0.24]) {
+      g.add(box(0.32, 0.035, 0.035, c, x / 2, 0.88, 0));
+      g.add(cyl(0.035, 0.035, 0.28, 0xf5f0e8, x, 1.05));
+      g.add(sph(0.045, 0xffb347, x, 1.22, 0));
+    }
+    return g;
+  } },
+  acuario: { name: 'Acuario', ico: '🐠', cost: 420, w: 2, d: 1, decor: true, light: { y: 1.25, i: 5, color: 0x68cfee }, build(c = 0x4a7fb5) {
+    return grp(
+      box(1.55, 0.65, 0.52, WOOD_D, 0, 0.34, 0, true),
+      glass(1.48, 0.62, 0x4dbddd, 0.48, 0, 1.0, 0),
+      box(1.58, 0.06, 0.56, DARK, 0, 0.68, 0),
+      box(1.58, 0.07, 0.56, c, 0, 1.34, 0, true),
+      sph(0.08, 0xffb84d, -0.35, 1.02, 0.29),
+      sph(0.065, 0xe85d75, 0.3, 0.91, 0.29),
+      cyl(0.02, 0.03, 0.4, 0x3f7d4a, 0.55, 0.88, 0.1)
+    );
+  } },
+  puff: { name: 'Puf', ico: '🟠', cost: 120, w: 1, d: 1, decor: true, build(c = 0xc96f4a) {
+    return grp(cyl(0.38, 0.43, 0.42, c, 0, 0.23, 0, 18, true), cyl(0.33, 0.38, 0.08, shade(c, .15), 0, 0.48));
+  } },
+  mesa_centro: { name: 'Mesa de centro', ico: '☕', cost: 190, w: 2, d: 1, decor: true, build(c = WOOD) {
+    const g = grp(box(1.55, 0.09, 0.72, c, 0, 0.48, 0, true));
+    for (const [x, z] of [[-.65,-.26],[.65,-.26],[-.65,.26],[.65,.26]]) g.add(box(.07,.45,.07,WOOD_D,x,.23,z));
+    g.add(cyl(.12,.1,.09,0xf5f0e8,.25,.57,0,16));
+    return g;
+  } },
+  biombo: { name: 'Biombo', ico: '🎐', cost: 240, w: 2, d: 1, decor: true, build(c = 0xe8d9b5) {
+    const g = grp();
+    for (let i = 0; i < 3; i++) {
+      const x = -.62 + i * .62;
+      g.add(box(.56,1.65,.07,c,x,.85,0,true));
+      g.add(box(.47,1.46,.025,i % 2 ? 0xf5f0e8 : 0xe6cfa4,x,.87,.045));
+      g.add(cyl(.025,.025,1.65,DARK,x+.3,.85,.02,8));
+    }
+    return g;
   } },
   arbol: { name: 'Árbol', ico: '🌳', cost: 100, w: 1, d: 1, out: true, build() {
     return grp(
@@ -179,14 +278,67 @@ const FURNITURE = {
       box(0.3, 0.05, 0.3, DARK, 0, 2.58)
     );
   } },
+  banco_jardin: { name: 'Banco', ico: '🪑', cost: 210, w: 2, d: 1, out: true, build(c = WOOD) {
+    const g = grp(
+      box(1.75, .12, .55, c, 0, .48, .08, true),
+      box(1.75, .65, .1, c, 0, .83, -.22, true)
+    );
+    for (const x of [-.72,.72]) {
+      g.add(box(.1,.48,.1,DARK,x,.24,.15));
+      g.add(box(.1,.82,.1,DARK,x,.42,-.22));
+    }
+    return g;
+  } },
+  fuente: { name: 'Fuente', ico: '⛲', cost: 520, w: 2, d: 2, out: true, build(c = 0x8a8f98) {
+    return grp(
+      cyl(.78,.92,.28,c,0,.14,0,24,true),
+      cyl(.66,.66,.08,0x67b8d4,0,.3,0,24),
+      cyl(.13,.2,1.0,c,0,.77,0,18,true),
+      cyl(.42,.22,.12,c,0,1.22,0,20,true),
+      sph(.12,0x67b8d4,0,1.34,0)
+    );
+  } },
+  barbacoa: { name: 'Barbacoa', ico: '🔥', cost: 360, w: 1, d: 1, out: true, build(c = DARK) {
+    const g = grp(
+      cyl(.35,.32,.42,c,0,.86,0,18,true),
+      box(.72,.05,.58,METAL,0,1.08,0),
+      box(.7,.2,.5,c,0,1.22,-.05,true),
+      box(.5,.05,.35,0xe85d35,0,1.11,.02)
+    );
+    for (const x of [-.25,.25]) g.add(box(.055,.72,.055,METAL,x,.38,0));
+    return g;
+  } },
+  estanque: { name: 'Estanque', ico: '💧', cost: 280, w: 2, d: 2, out: true, build() {
+    const g = grp(
+      cyl(.82,.9,.16,0x6b6f74,0,.08,0,28),
+      cyl(.72,.74,.08,0x4dbddd,0,.18,0,28)
+    );
+    for (const [x,z] of [[-.55,-.5],[.55,-.42],[-.62,.38],[.5,.5]]) g.add(sph(.16,0x777b7d,x,.18,z));
+    g.add(cyl(.02,.025,.25,0x3f7d4a,.2,.34,-.1,8));
+    g.add(sph(.09,0xe85d75,.2,.49,-.1));
+    return g;
+  } },
 };
 
 const BUILD_ITEMS = {
-  suelo:   { name: 'Suelo',   ico: '🟧', cost: 20 },
-  pared:   { name: 'Pared',   ico: '🧱', cost: 60 },
-  puerta:  { name: 'Puerta',  ico: '🚪', cost: 150 },
-  ventana: { name: 'Ventana', ico: '🪟', cost: 120 },
-  techo:   { name: 'Techo',   ico: '⬜', cost: 40 },
+  suelo:            { name: 'Madera', ico: '🟫', cost: 20, kind: 'floor', section: 'Suelos', style: 'wood', color: 0xc9a06a },
+  suelo_roble:      { name: 'Roble claro', ico: '🟨', cost: 28, kind: 'floor', section: 'Suelos', style: 'planks', color: 0xd8b579 },
+  suelo_baldosa:    { name: 'Baldosa', ico: '🔳', cost: 32, kind: 'floor', section: 'Suelos', style: 'tiles', color: 0xd9d5cc },
+  suelo_marmol:     { name: 'Mármol', ico: '⬜', cost: 55, kind: 'floor', section: 'Suelos', style: 'marble', color: 0xeeeae2 },
+  suelo_terracota:  { name: 'Terracota', ico: '🟧', cost: 30, kind: 'floor', section: 'Suelos', style: 'terracotta', color: 0xb96543 },
+  suelo_parquet:    { name: 'Parqué', ico: '🟫', cost: 42, kind: 'floor', section: 'Suelos', style: 'parquet', color: 0xa8753e },
+  suelo_hormigon:   { name: 'Hormigón', ico: '◻️', cost: 24, kind: 'floor', section: 'Suelos', style: 'concrete', color: 0x969a9e },
+  pared:             { name: 'Pared', ico: '🧱', cost: 60, kind: 'wall', category: 'wall', section: 'Muros', style: 'plain', color: 0xf5f0e8 },
+  puerta:            { name: 'Clásica', ico: '🚪', cost: 150, kind: 'wall', category: 'door', section: 'Puertas', style: 'classic', color: 0xf5f0e8 },
+  puerta_moderna:    { name: 'Moderna', ico: '🚪', cost: 230, kind: 'wall', category: 'door', section: 'Puertas', style: 'modern', color: 0xe8e4dc },
+  puerta_doble:      { name: 'Doble', ico: '🚪', cost: 290, kind: 'wall', category: 'door', section: 'Puertas', style: 'double', color: 0xf5f0e8 },
+  puerta_rustica:    { name: 'Rústica', ico: '🪵', cost: 210, kind: 'wall', category: 'door', section: 'Puertas', style: 'rustic', color: 0xead9bc },
+  ventana:           { name: 'Clásica', ico: '🪟', cost: 120, kind: 'wall', category: 'window', section: 'Ventanas', style: 'classic', color: 0xf5f0e8 },
+  ventana_doble:     { name: 'Doble', ico: '🪟', cost: 175, kind: 'wall', category: 'window', section: 'Ventanas', style: 'double', color: 0xf5f0e8 },
+  ventana_panorama:  { name: 'Panorámica', ico: '🌅', cost: 220, kind: 'wall', category: 'window', section: 'Ventanas', style: 'panorama', color: 0xe8e4dc },
+  ventana_industrial:{ name: 'Industrial', ico: '🏭', cost: 195, kind: 'wall', category: 'window', section: 'Ventanas', style: 'industrial', color: 0xe6e0d4 },
+  techo:             { name: 'Teja', ico: '🏠', cost: 40, kind: 'roof', section: 'Techos', style: 'tile', color: 0xa8524a },
+  techo_moderno:     { name: 'Plano', ico: '⬜', cost: 48, kind: 'roof', section: 'Techos', style: 'flat', color: 0x777d86 },
 };
 
 /* ---------------- Sonido (WebAudio) ---------------- */
@@ -333,40 +485,106 @@ function updateDayNight(dt) {
 }
 
 /* ---------------- Construcción de mallas ---------------- */
-function buildWallMesh(type, color) {
-  const c = color ?? 0xf5f0e8;
-  let g;
-  if (type === 'pared') {
-    g = grp(box(1.02, WALL_H, 0.14, c, 0, WALL_H / 2, 0, true));
-  } else if (type === 'puerta') {
-    g = grp(
+function buildWallMesh(type = 'pared', color) {
+  const def = BUILD_ITEMS[type] || BUILD_ITEMS.pared;
+  const c = color ?? def.color ?? 0xf5f0e8;
+  if (def.category === 'wall') return grp(box(1.02, WALL_H, 0.14, c, 0, WALL_H / 2, 0, true));
+
+  if (def.category === 'door') {
+    const g = grp(
       box(1.02, 0.9, 0.14, c, 0, WALL_H - 0.45, 0, true),
       box(0.09, 2.1, 0.14, c, -0.465, 1.05, 0, true),
-      box(0.09, 2.1, 0.14, c, 0.465, 1.05, 0, true),
-      box(0.84, 2.06, 0.07, WOOD, 0, 1.03, 0),
-      sph(0.045, 0xd8b344, 0.28, 1.02, 0.06)
+      box(0.09, 2.1, 0.14, c, 0.465, 1.05, 0, true)
     );
-  } else { // ventana
-    g = grp(
-      box(1.02, 1.0, 0.14, c, 0, 0.5, 0, true),
-      box(1.02, 0.8, 0.14, c, 0, WALL_H - 0.4, 0, true),
-      box(0.09, 1.2, 0.14, c, -0.465, 1.6, 0, true),
-      box(0.09, 1.2, 0.14, c, 0.465, 1.6, 0, true),
-      new THREE.Mesh(new THREE.BoxGeometry(0.86, 1.2, 0.04),
-        new THREE.MeshLambertMaterial({ color: 0xaad4e8, transparent: true, opacity: 0.45 })),
-      box(0.86, 0.05, 0.06, WHITE, 0, 1.6, 0),
-      box(0.05, 1.2, 0.06, WHITE, 0, 1.6, 0)
-    );
-    g.children[4].position.set(0, 1.6, 0);
+    if (def.style === 'modern') {
+      g.add(box(0.84, 2.06, 0.07, 0x424a52, 0, 1.03, 0, true));
+      g.add(glass(0.2, 1.72, 0x9ed8e8, 0.62, 0.18, 1.15, 0.055));
+      g.add(box(0.05, 0.42, 0.06, METAL, -0.26, 1.05, 0.07));
+    } else if (def.style === 'double') {
+      g.add(box(0.405, 2.06, 0.07, WOOD, -0.21, 1.03, 0, true));
+      g.add(box(0.405, 2.06, 0.07, WOOD, 0.21, 1.03, 0, true));
+      g.add(box(0.025, 2.0, 0.08, WOOD_D, 0, 1.03, 0.045));
+      g.add(sph(0.035, 0xd8b344, -0.08, 1.0, 0.07));
+      g.add(sph(0.035, 0xd8b344, 0.08, 1.0, 0.07));
+    } else if (def.style === 'rustic') {
+      g.add(box(0.84, 2.06, 0.07, WOOD_D, 0, 1.03, 0, true));
+      for (const x of [-.28, 0, .28]) g.add(box(.035, 1.96, .035, shade(WOOD_D, .18), x, 1.03, .055));
+      const braceA = box(.72, .075, .04, 0x2d3035, 0, 1.03, .07); braceA.rotation.z = .65;
+      const braceB = box(.72, .075, .04, 0x2d3035, 0, 1.03, .07); braceB.rotation.z = -.65;
+      g.add(braceA, braceB, sph(.045, 0x25282d, .29, 1.02, .075));
+    } else {
+      g.add(box(0.84, 2.06, 0.07, WOOD, 0, 1.03, 0));
+      g.add(box(0.58, 0.62, 0.025, shade(WOOD, -.16), 0, 1.48, .05));
+      g.add(sph(0.045, 0xd8b344, 0.28, 1.02, 0.06));
+    }
+    return g;
+  }
+
+  const panorama = def.style === 'panorama';
+  const lowerH = panorama ? 0.72 : 1.0;
+  const upperH = panorama ? 0.5 : 0.8;
+  const openingY = panorama ? 1.61 : 1.6;
+  const openingH = WALL_H - lowerH - upperH;
+  const frameColor = def.style === 'industrial' ? 0x30343a : WHITE;
+  const g = grp(
+    box(1.02, lowerH, 0.14, c, 0, lowerH / 2, 0, true),
+    box(1.02, upperH, 0.14, c, 0, WALL_H - upperH / 2, 0, true),
+    box(0.09, openingH, 0.14, c, -0.465, openingY, 0, true),
+    box(0.09, openingH, 0.14, c, 0.465, openingY, 0, true),
+    glass(0.86, openingH, panorama ? 0x8ecfe4 : 0xaad4e8, panorama ? 0.52 : 0.43, 0, openingY, 0),
+    box(0.88, 0.05, 0.06, frameColor, 0, openingY - openingH / 2, 0.04),
+    box(0.88, 0.05, 0.06, frameColor, 0, openingY + openingH / 2, 0.04)
+  );
+  if (def.style === 'double') {
+    g.add(box(0.055, openingH, 0.065, frameColor, 0, openingY, 0.045));
+    g.add(box(0.38, 0.035, 0.07, frameColor, -.215, openingY, .045));
+    g.add(box(0.38, 0.035, 0.07, frameColor, .215, openingY, .045));
+  } else if (def.style === 'industrial') {
+    g.add(box(0.045, openingH, 0.065, frameColor, 0, openingY, 0.045));
+    g.add(box(0.88, 0.045, 0.065, frameColor, 0, openingY - openingH * .18, .045));
+    g.add(box(0.88, 0.045, 0.065, frameColor, 0, openingY + openingH * .18, .045));
+  } else if (!panorama) {
+    g.add(box(0.86, 0.05, 0.06, frameColor, 0, openingY, 0.04));
+    g.add(box(0.05, openingH, 0.06, frameColor, 0, openingY, 0.04));
   }
   return g;
 }
-function buildFloorMesh(color) {
-  const g = grp(box(0.99, 0.08, 0.99, color ?? 0xc9a06a, 0, 0.04, 0, true));
+function buildFloorMesh(type = 'suelo', color) {
+  const def = BUILD_ITEMS[type] || BUILD_ITEMS.suelo;
+  const c = color ?? def.color ?? 0xc9a06a;
+  const g = grp(box(0.99, 0.08, 0.99, c, 0, 0.04, 0, true));
+  const seam = def.style === 'tiles' || def.style === 'marble' ? 0xb4b1aa : shade(c, -.2);
+  if (def.style === 'wood' || def.style === 'planks') {
+    for (const z of [-.25, .25]) g.add(box(.97, .006, .018, seam, 0, .083, z));
+    for (const [x, z] of [[-.24,-.37],[.25,-.12],[-.12,.13],[.32,.38]]) g.add(box(.016,.006,.23,seam,x,.083,z));
+  } else if (def.style === 'tiles' || def.style === 'terracotta') {
+    g.add(box(.97,.007,.018,seam,0,.084,0), box(.018,.007,.97,seam,0,.084,0));
+    if (def.style === 'terracotta') {
+      g.add(box(.018,.007,.97,shade(c,.12),-.48,.084,0), box(.018,.007,.97,shade(c,.12),.48,.084,0));
+    }
+  } else if (def.style === 'marble') {
+    const v1 = box(1.05,.006,.018,0xa7abb1,0,.084,-.09); v1.rotation.y = .58;
+    const v2 = box(.72,.006,.012,0xc3b9ae,.15,.084,.22); v2.rotation.y = -.72;
+    g.add(v1, v2);
+  } else if (def.style === 'parquet') {
+    for (let i = 0; i < 6; i++) {
+      const slat = box(.42,.009,.12,i % 2 ? shade(c,.12) : shade(c,-.08),-.27 + (i % 2) * .54,.086,-.32 + Math.floor(i / 2) * .32);
+      slat.rotation.y = i % 2 ? Math.PI / 2 : 0;
+      g.add(slat);
+    }
+  } else if (def.style === 'concrete') {
+    for (const [x,z] of [[-.3,-.24],[.24,-.32],[-.1,.3],[.34,.18]]) g.add(cyl(.018,.018,.006,shade(c,-.22),x,.085,z,8));
+  }
   return g;
 }
-function buildRoofMesh(color) {
-  return grp(box(1.0, 0.14, 1.0, color ?? 0xa8524a, 0, WALL_H + 0.07, 0, true));
+function buildRoofMesh(type = 'techo', color) {
+  const def = BUILD_ITEMS[type] || BUILD_ITEMS.techo;
+  const c = color ?? def.color ?? 0xa8524a;
+  const g = grp(box(1.0, 0.14, 1.0, c, 0, WALL_H + 0.07, 0, true));
+  if (def.style === 'tile') {
+    for (const z of [-.32, 0, .32]) g.add(box(.98,.025,.035,shade(c,-.18),0,WALL_H+.15,z));
+  }
+  return g;
 }
 
 function wallTransform(key) {
@@ -383,14 +601,14 @@ function objTransform(obj) {
 
 function addFloorMesh(key, data) {
   const [x, z] = key.split(',').map(Number);
-  const m = buildFloorMesh(data.c);
+  const m = buildFloorMesh(data.t || 'suelo', data.c);
   m.position.set(x + 0.5 - S / 2, 0, z + 0.5 - S / 2);
   m.userData = { kind: 'floor', key };
   buildGroup.add(m); meshes.floors[key] = m;
 }
 function addRoofMesh(key, data) {
   const [x, z] = key.split(',').map(Number);
-  const m = buildRoofMesh(data.c);
+  const m = buildRoofMesh(data.t || 'techo', data.c);
   m.position.set(x + 0.5 - S / 2, 0, z + 0.5 - S / 2);
   m.userData = { kind: 'roof', key };
   buildGroup.add(m); meshes.roofs[key] = m;
@@ -458,6 +676,7 @@ function occupiedMap(exceptId = null) {
 let tool = null;        // {mode:'build'|'furniture'|'paint'|'delete', id}
 let toolRot = 0;
 let selectedColor = PALETTE[0];
+let selectedColorCustom = false;
 let ghost = null;
 const ghostMatOk = new THREE.MeshLambertMaterial({ color: 0x6ee7a0, transparent: true, opacity: 0.55, depthWrite: false });
 const ghostMatBad = new THREE.MeshLambertMaterial({ color: 0xff6b6b, transparent: true, opacity: 0.55, depthWrite: false });
@@ -474,8 +693,9 @@ function makeGhost() {
   if (!tool || tool.mode === 'paint' || tool.mode === 'delete') return;
   let g = null;
   if (tool.mode === 'build') {
-    if (tool.id === 'suelo') g = buildFloorMesh();
-    else if (tool.id === 'techo') g = buildRoofMesh();
+    const def = BUILD_ITEMS[tool.id];
+    if (def.kind === 'floor') g = buildFloorMesh(tool.id);
+    else if (def.kind === 'roof') g = buildRoofMesh(tool.id);
     else g = buildWallMesh(tool.id);
   } else {
     g = FURNITURE[tool.id].build();
@@ -486,6 +706,16 @@ function makeGhost() {
   ghost = g;
 }
 
+function selectedToolDef(t = tool) {
+  if (!t) return null;
+  if (t.mode === 'build') return BUILD_ITEMS[t.id];
+  if (t.mode === 'furniture') return FURNITURE[t.id];
+  return t.mode === 'paint' ? { name: 'Pintar', ico: '🎨' } : { name: 'Vender', ico: '🧹' };
+}
+function updateRotationUI() {
+  const btn = document.getElementById('btn-rotate');
+  if (btn) btn.innerHTML = `🔄 Rotar ${toolRot * 90}° <kbd>R</kbd>`;
+}
 function selectTool(t) {
   tool = t;
   toolRot = 0;
@@ -497,6 +727,9 @@ function selectTool(t) {
   const ctx = document.getElementById('context-controls');
   ctx.classList.toggle('hidden', !t);
   document.getElementById('btn-rotate').style.display = (t && t.mode === 'furniture') ? '' : 'none';
+  const def = selectedToolDef(t);
+  document.getElementById('selection-label').textContent = def ? `${def.ico} ${def.name}` : '';
+  updateRotationUI();
   if (t) snd.click();
 }
 
@@ -550,8 +783,9 @@ function nearestEdge(p) {
 function canPlace() {
   if (!hover) return false;
   if (tool.mode === 'build') {
-    if (tool.id === 'suelo') return hover.cellOk && !state.floors[hover.cellKey];
-    if (tool.id === 'techo') return hover.cellOk && !state.roofs[hover.cellKey];
+    const kind = BUILD_ITEMS[tool.id].kind;
+    if (kind === 'floor') return hover.cellOk && !state.floors[hover.cellKey];
+    if (kind === 'roof') return hover.cellOk && !state.roofs[hover.cellKey];
     return hover.edgeKey && !state.walls[hover.edgeKey];
   }
   if (tool.mode === 'furniture') {
@@ -586,22 +820,26 @@ function place() {
   const cost = toolCost();
   if (!spend(cost)) return;
   if (tool.mode === 'build') {
-    if (tool.id === 'suelo') {
-      state.floors[hover.cellKey] = { c: selectedColor === PALETTE[0] ? 0xc9a06a : selectedColor };
-      addFloorMesh(hover.cellKey, state.floors[hover.cellKey]);
-    } else if (tool.id === 'techo') {
-      state.roofs[hover.cellKey] = { c: 0xa8524a };
-      addRoofMesh(hover.cellKey, state.roofs[hover.cellKey]);
+    const def = BUILD_ITEMS[tool.id];
+    const data = { t: tool.id, c: selectedColorCustom ? selectedColor : def.color };
+    if (def.kind === 'floor') {
+      state.floors[hover.cellKey] = data;
+      addFloorMesh(hover.cellKey, data);
+    } else if (def.kind === 'roof') {
+      state.roofs[hover.cellKey] = data;
+      addRoofMesh(hover.cellKey, data);
     } else {
-      state.walls[hover.edgeKey] = { t: tool.id, c: selectedColor };
-      addWallMesh(hover.edgeKey, state.walls[hover.edgeKey]);
+      state.walls[hover.edgeKey] = data;
+      addWallMesh(hover.edgeKey, data);
     }
   } else {
     const id = 'o' + (state.nextId++);
     const obj = { id, t: tool.id, x: hover.cx, z: hover.cz, r: toolRot };
+    if (selectedColorCustom) obj.c = selectedColor;
     state.objects[id] = obj;
     addObjectMesh(obj);
   }
+  refreshGhost();
   snd.place();
   scheduleSave();
   checkMissions();
@@ -628,10 +866,19 @@ function deleteAt(ev) {
   if (!hit) return;
   const { kind, key } = hit.node.userData;
   let refund = 0;
-  if (kind === 'floor') { refund = BUILD_ITEMS.suelo.cost; delete state.floors[key]; }
-  else if (kind === 'roof') { refund = BUILD_ITEMS.techo.cost; delete state.roofs[key]; }
-  else if (kind === 'wall') { refund = BUILD_ITEMS[state.walls[key].t].cost; delete state.walls[key]; }
-  else if (kind === 'object') { refund = FURNITURE[state.objects[key].t].cost; delete state.objects[key]; }
+  if (kind === 'floor') {
+    refund = (BUILD_ITEMS[state.floors[key].t] || BUILD_ITEMS.suelo).cost;
+    delete state.floors[key];
+  } else if (kind === 'roof') {
+    refund = (BUILD_ITEMS[state.roofs[key].t] || BUILD_ITEMS.techo).cost;
+    delete state.roofs[key];
+  } else if (kind === 'wall') {
+    refund = (BUILD_ITEMS[state.walls[key].t] || BUILD_ITEMS.pared).cost;
+    delete state.walls[key];
+  } else if (kind === 'object') {
+    refund = (FURNITURE[state.objects[key].t] || { cost: 0 }).cost;
+    delete state.objects[key];
+  }
   removeMesh(kind, key);
   state.money += Math.floor(refund / 2);
   updateMoney(true);
@@ -643,10 +890,18 @@ function deleteAt(ev) {
 /* ---------------- Misiones ---------------- */
 function countFloors() { return Object.keys(state.floors).length; }
 function countRoofs() { return Object.keys(state.roofs).length; }
-function countWalls(type) { return Object.values(state.walls).filter(w => !type || w.t === type).length; }
+function countWalls(type) {
+  const category = { pared: 'wall', puerta: 'door', ventana: 'window' }[type];
+  return Object.values(state.walls).filter(w => {
+    if (!type) return true;
+    const def = BUILD_ITEMS[w.t];
+    return def ? def.category === category : w.t === type;
+  }).length;
+}
 function countObj(type) { return Object.values(state.objects).filter(o => o.t === type).length; }
-function countFurn() { return Object.values(state.objects).filter(o => !FURNITURE[o.t].out).length; }
-function countOut() { return Object.values(state.objects).filter(o => FURNITURE[o.t].out).length; }
+function countFurn() { return Object.values(state.objects).filter(o => FURNITURE[o.t] && !FURNITURE[o.t].out).length; }
+function countDecor() { return Object.values(state.objects).filter(o => FURNITURE[o.t]?.decor).length; }
+function countOut() { return Object.values(state.objects).filter(o => FURNITURE[o.t]?.out).length; }
 
 const MISSIONS = [
   { id: 'm1', name: '🏗️ Primeros cimientos', desc: 'Coloca 10 suelos', reward: 300, goal: 10, prog: countFloors },
@@ -660,6 +915,7 @@ const MISSIONS = [
   { id: 'm9', name: '🛁 Baño listo', desc: 'Inodoro + bañera', reward: 450, goal: 2, prog: () => Math.min(countObj('inodoro'), 1) + Math.min(countObj('banera'), 1) },
   { id: 'm10', name: '🌳 Jardín verde', desc: '5 plantas de exterior', reward: 400, goal: 5, prog: countOut },
   { id: 'm11', name: '🏆 Gran decorador', desc: 'Coloca 15 muebles', reward: 800, goal: 15, prog: countFurn },
+  { id: 'm12', name: '🪴 Toque personal', desc: 'Añade 5 adornos', reward: 450, goal: 5, prog: countDecor },
 ];
 
 function checkMissions() {
@@ -764,27 +1020,52 @@ function toast(msg, type = '') {
   toastTimer = setTimeout(() => t.classList.add('hidden'), 2600);
 }
 
+let inventoryOpen = true;
+function setInventoryOpen(open) {
+  inventoryOpen = open;
+  document.getElementById('sidebar').classList.toggle('collapsed', !open);
+  const btn = document.getElementById('btn-catalog');
+  btn.classList.toggle('active', open);
+  btn.setAttribute('aria-expanded', String(open));
+  btn.title = open ? 'Cerrar catálogo' : 'Abrir catálogo de construcción';
+}
+function addSection(panel, title) {
+  const el = document.createElement('h3');
+  el.className = 'panel-section-title';
+  el.textContent = title;
+  panel.appendChild(el);
+}
+
 function itemButton(mode, id, def) {
   const b = document.createElement('button');
   b.className = 'item-btn' + (mode === 'delete' ? ' tool-danger' : '');
   b.dataset.mode = mode; b.dataset.id = id;
+  b.title = `${def.name}${def.cost != null ? ` · ${fmt(def.cost)}` : ''}`;
   const price = def.cost != null ? `<span class="price">${fmt(def.cost)}</span>` : `<span class="price free">gratis</span>`;
   b.innerHTML = `<span class="ico">${def.ico}</span><span class="name">${def.name}</span>${price}`;
   b.addEventListener('click', () => {
     if (tool && tool.mode === mode && tool.id === id) selectTool(null);
     else selectTool({ mode, id });
+    setInventoryOpen(false);
   });
   return b;
 }
 
 function buildUI() {
   const pC = document.querySelector('[data-panel="construccion"]');
-  for (const [id, def] of Object.entries(BUILD_ITEMS)) pC.appendChild(itemButton('build', id, def));
+  let lastSection = '';
+  for (const [id, def] of Object.entries(BUILD_ITEMS)) {
+    if (def.section !== lastSection) { addSection(pC, def.section); lastSection = def.section; }
+    pC.appendChild(itemButton('build', id, def));
+  }
 
   const pM = document.querySelector('[data-panel="muebles"]');
+  const pD = document.querySelector('[data-panel="decoracion"]');
   const pE = document.querySelector('[data-panel="exterior"]');
-  for (const [id, def] of Object.entries(FURNITURE))
-    (def.out ? pE : pM).appendChild(itemButton('furniture', id, def));
+  for (const [id, def] of Object.entries(FURNITURE)) {
+    const panel = def.out ? pE : (def.decor ? pD : pM);
+    panel.appendChild(itemButton('furniture', id, def));
+  }
 
   const pH = document.querySelector('[data-panel="herramientas"]');
   pH.appendChild(itemButton('paint', 'paint', { name: 'Pintar', ico: '🎨' }));
@@ -805,10 +1086,12 @@ function buildUI() {
   const pal = document.getElementById('palette');
   PALETTE.forEach((c, i) => {
     const s = document.createElement('div');
-    s.className = 'swatch' + (i === 0 ? ' active' : '');
+    s.className = 'swatch';
+    s.title = i === 0 ? 'Blanco' : 'Usar este color';
     s.style.background = '#' + c.toString(16).padStart(6, '0');
     s.addEventListener('click', () => {
       selectedColor = c;
+      selectedColorCustom = true;
       document.querySelectorAll('.swatch').forEach(x => x.classList.remove('active'));
       s.classList.add('active');
       snd.click();
@@ -833,6 +1116,7 @@ function enterWalk() {
   document.getElementById('walk-hint').classList.remove('hidden');
   document.getElementById('btn-walk').classList.add('active');
   selectTool(null);
+  setInventoryOpen(false);
   canvas.requestPointerLock?.();
 }
 function exitWalk() {
@@ -874,49 +1158,88 @@ function updateWalk(dt) {
 }
 
 /* ---------------- Eventos ---------------- */
-let downPos = null;
-canvas.addEventListener('pointerdown', e => { downPos = { x: e.clientX, y: e.clientY }; });
-canvas.addEventListener('pointerup', e => {
-  if (walkMode) return;
-  if (!downPos) return;
-  const moved = Math.hypot(e.clientX - downPos.x, e.clientY - downPos.y);
-  downPos = null;
-  if (moved > 6 || e.button !== 0) return; // fue arrastre de cámara
-  if (!tool) return;
-  if (tool.mode === 'paint') paintAt(e);
-  else if (tool.mode === 'delete') deleteAt(e);
-  else place();
-});
-canvas.addEventListener('pointermove', e => {
-  if (walkMode || !tool || tool.mode === 'paint' || tool.mode === 'delete') { if (ghost) ghost.visible = false; hover = null; return; }
-  const p = pickGround(e);
-  if (!p) { hover = null; if (ghost) ghost.visible = false; return; }
-  const cellOk = p.cx >= 0 && p.cx < S && p.cz >= 0 && p.cz < S;
-  hover = { ...p, cellOk, cellKey: p.cx + ',' + p.cz, edgeKey: nearestEdge(p) };
-  if (!ghost) return;
+function refreshGhost() {
+  if (!ghost || !tool || !hover || tool.mode === 'paint' || tool.mode === 'delete') {
+    if (ghost) ghost.visible = false;
+    return;
+  }
   ghost.visible = true;
-  if (tool.mode === 'build' && (tool.id === 'pared' || tool.id === 'puerta' || tool.id === 'ventana')) {
+  if (tool.mode === 'build' && BUILD_ITEMS[tool.id].kind === 'wall') {
     if (!hover.edgeKey) { ghost.visible = false; return; }
     const t = wallTransform(hover.edgeKey);
     ghost.position.set(t.x, 0, t.z);
     ghost.rotation.y = t.ry;
   } else if (tool.mode === 'build') {
-    ghost.position.set(p.cx + 0.5 - S / 2, 0, p.cz + 0.5 - S / 2);
+    ghost.position.set(hover.cx + 0.5 - S / 2, 0, hover.cz + 0.5 - S / 2);
     ghost.rotation.y = 0;
   } else {
     const def = FURNITURE[tool.id];
     const w = toolRot % 2 ? def.d : def.w, d = toolRot % 2 ? def.w : def.d;
-    ghost.position.set(p.cx + w / 2 - S / 2, 0, p.cz + d / 2 - S / 2);
+    ghost.position.set(hover.cx + w / 2 - S / 2, 0, hover.cz + d / 2 - S / 2);
     ghost.rotation.y = toolRot * Math.PI / 2;
   }
   setGhostValid(canPlace());
+}
+function updatePlacementHover(e) {
+  if (walkMode || !tool || tool.mode === 'paint' || tool.mode === 'delete') {
+    if (ghost) ghost.visible = false;
+    hover = null;
+    return;
+  }
+  const p = pickGround(e);
+  if (!p) { hover = null; if (ghost) ghost.visible = false; return; }
+  const cellOk = p.cx >= 0 && p.cx < S && p.cz >= 0 && p.cz < S;
+  hover = { ...p, cellOk, cellKey: p.cx + ',' + p.cz, edgeKey: nearestEdge(p) };
+  refreshGhost();
+}
+function rotateTool() {
+  if (!tool || tool.mode !== 'furniture') return;
+  toolRot = (toolRot + 1) % 4;
+  updateRotationUI();
+  refreshGhost(); // la previsualización se actualiza aunque el ratón esté quieto
+  snd.click();
+}
+
+let downPos = null;
+let placementPointer = null;
+canvas.addEventListener('pointerdown', e => {
+  downPos = { x: e.clientX, y: e.clientY };
+  if (!walkMode && tool && e.button === 0) {
+    // OrbitControls escucha el mismo canvas. Desactivar solo el giro de este
+    // puntero evita que un clic de colocación desplace accidentalmente la cámara.
+    placementPointer = e.pointerId;
+    controls.enableRotate = false;
+  }
+}, { capture: true });
+canvas.addEventListener('pointerup', e => {
+  if (placementPointer === e.pointerId) {
+    placementPointer = null;
+    controls.enableRotate = true;
+  }
+  if (walkMode) return;
+  if (!downPos) return;
+  const moved = Math.hypot(e.clientX - downPos.x, e.clientY - downPos.y);
+  downPos = null;
+  if (moved > 6 || e.button !== 0) return;
+  if (!tool) return;
+  if (tool.mode === 'paint') paintAt(e);
+  else if (tool.mode === 'delete') deleteAt(e);
+  else { updatePlacementHover(e); place(); }
 });
+canvas.addEventListener('pointercancel', e => {
+  if (placementPointer === e.pointerId) {
+    placementPointer = null;
+    controls.enableRotate = true;
+  }
+  downPos = null;
+});
+canvas.addEventListener('pointermove', updatePlacementHover);
 
 window.addEventListener('keydown', e => {
   keys[e.code] = true;
   if (e.code === 'KeyR' && tool && tool.mode === 'furniture') {
-    toolRot = (toolRot + 1) % 4;
-    snd.click();
+    e.preventDefault();
+    rotateTool();
   }
   if (e.code === 'Escape' && !walkMode) selectTool(null);
 });
@@ -929,6 +1252,10 @@ window.addEventListener('resize', () => {
 });
 
 /* Botones superiores */
+document.getElementById('btn-catalog').addEventListener('click', () => {
+  setInventoryOpen(!inventoryOpen);
+  snd.click();
+});
 document.getElementById('btn-daynight').addEventListener('click', e => {
   isNight = !isNight;
   e.currentTarget.textContent = isNight ? '☀️' : '🌙';
@@ -969,9 +1296,7 @@ document.getElementById('btn-close-help').addEventListener('click', () => {
   localStorage.setItem(HELP_KEY, '1');
   snd.click();
 });
-document.getElementById('btn-rotate').addEventListener('click', () => {
-  if (tool && tool.mode === 'furniture') { toolRot = (toolRot + 1) % 4; snd.click(); }
-});
+document.getElementById('btn-rotate').addEventListener('click', rotateTool);
 document.getElementById('btn-cancel').addEventListener('click', () => selectTool(null));
 
 /* ---------------- Inicio ---------------- */
