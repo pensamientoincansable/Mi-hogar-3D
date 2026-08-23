@@ -15,11 +15,13 @@ python3 -m http.server 8000
 
 ## ✨ Características
 
-- 🧱 **Construcción sobre cuadrícula**: suelos, paredes, puertas, ventanas y techos.
-- 🛋️ **16 muebles y elementos** procedurales: cama, sofá, mesa, TV, cocina, baño, jardín…
+- 🧱 **Construcción sobre cuadrícula** con 7 suelos, 4 puertas, 4 ventanas, paredes y techos.
+- 🛋️ **30 muebles y elementos** procedurales: mobiliario, decoración, cocina, baño y jardín.
+- 🪴 **Catálogo de decoración** con plantas, cuadros, espejo, acuario, reloj, biombo, fuente y más.
+- 🧰 **Inventario plegable**: se oculta al elegir una pieza para dejar libre toda la vista 3D.
 - 🎨 **Paleta de colores** y herramienta de pintura para personalizar todo.
 - 💰 **Economía**: cada pieza cuesta dinero; vende con la herramienta 🧹 y recupera el 50 %.
-- 🏆 **11 misiones** con recompensas para guiar la partida.
+- 🏆 **12 misiones** con recompensas para guiar la partida.
 - 🌙 **Ciclo día / noche** con estrellas y lámparas que se encienden de noche.
 - 🚶 **Modo paseo** en primera persona (WASD + ratón) para visitar tu casa.
 - 💾 **Autoguardado** en el navegador + **exportar / importar** la casa en JSON.
@@ -30,11 +32,12 @@ python3 -m http.server 8000
 
 | Acción | Control |
 |---|---|
-| Orbitar cámara | Arrastrar con el ratón |
+| Orbitar cámara | Arrastrar con el ratón (sin herramienta activa) |
 | Zoom | Rueda del ratón |
 | Desplazar cámara | Botón derecho + arrastrar |
-| Colocar pieza | Clic izquierdo |
-| Rotar mueble | `R` |
+| Abrir/cerrar catálogo | Botón `🧰` |
+| Colocar pieza sin mover la cámara | Clic izquierdo |
+| Rotar mueble | `R` o botón `🔄` |
 | Cancelar herramienta | `Esc` |
 | Modo paseo | Botón 🚶 · `WASD` + ratón · `Esc` para salir |
 
