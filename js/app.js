@@ -16,29 +16,89 @@ const PALETTE = [0xf5f0e8, 0xe8d9b5, 0xc96f4a, 0xb8443f, 0x4a7fb5, 0x5d9b6c, 0x8
 
 /* ---------------- Utilidades de malla ---------------- */
 const materials = new Map();
+function inferSurface(color) {
+  const c = new THREE.Color(color);
+  const { r, g, b } = c;
+  const max = Math.max(r, g, b);
+  if (g > r * 1.08 && g > b * 1.08) return 'leaves';
+  if (b > r * 1.18 && b > g * 1.05) return 'stone';
+  if (max < 0.42 && Math.abs(r - g) < 0.08 && Math.abs(g - b) < 0.1) return 'stone';
+  if (r > 0.42 && g > 0.26 && g < 0.72 && g > r * 0.52 && g < r * 0.9 && b < r * 0.72) return 'wood';
+  if (max > 0.62 && max < 0.83 && Math.abs(r - g) < 0.06 && Math.abs(g - b) < 0.1 && Math.abs(r - b) < 0.12) return 'metal';
+  if (r > 0.82 && g > 0.7 && b > 0.6) return 'plaster';
+  if (Math.abs(r - g) < 0.06 && Math.abs(g - b) < 0.08) return max > 0.7 ? 'plaster' : 'concrete';
+  if (r > 0.32 && g < r * 0.42) return 'fabric';
+  return 'rough';
+}
+function makeMat(color, surface = null, opts = {}) {
+  const s = SURFACES[surface || inferSurface(color)] || SURFACES.rough;
+  const key = color + '|' + (surface || '') + '|' + JSON.stringify(opts);
+  if (materials.has(key)) return materials.get(key);
+  const m = new THREE.MeshStandardMaterial({
+    color,
+    roughness: opts.roughness ?? s.roughness,
+    metalness: opts.metalness ?? s.metalness,
+    map: opts.map ?? s.map,
+    bumpMap: opts.bumpMap ?? s.bump,
+    bumpScale: opts.bumpScale ?? s.bumpScale,
+    envMapIntensity: opts.envMapIntensity ?? s.envMapIntensity,
+    emissive: opts.emissive ?? 0x000000,
+    emissiveIntensity: opts.emissiveIntensity ?? 1,
+    transparent: opts.transparent ?? false,
+    opacity: opts.opacity ?? 1,
+    side: opts.side ?? THREE.FrontSide,
+    depthWrite: opts.depthWrite ?? true,
+    flatShading: opts.flatShading ?? false,
+    wireframe: opts.wireframe ?? false,
+  });
+  materials.set(key, m);
+  return m;
+}
 function mat(color, opts = {}) {
-  const key = color + '|' + JSON.stringify(opts);
-  if (!materials.has(key)) {
-    materials.set(key, new THREE.MeshLambertMaterial({ color, ...opts }));
-  }
-  return materials.get(key);
+  const { surface = null, ...rest } = opts;
+  return makeMat(color, surface, rest);
 }
-function box(w, h, d, color, x = 0, y = 0, z = 0, paint = false) {
-  const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), paint ? mat(color).clone() : mat(color));
+function tiledMaterial(color, surface, rx = 1, ry = 1, opts = {}) {
+  const s = SURFACES[surface || inferSurface(color)] || SURFACES.rough;
+  const map = s.map ? s.map.clone() : null;
+  if (map) { map.repeat.set(rx, ry); map.needsUpdate = true; }
+  const bump = s.bump ? s.bump.clone() : null;
+  if (bump) { bump.repeat.set(rx, ry); bump.needsUpdate = true; }
+  return new THREE.MeshStandardMaterial({
+    color,
+    roughness: opts.roughness ?? s.roughness,
+    metalness: opts.metalness ?? s.metalness,
+    map,
+    bumpMap: bump,
+    bumpScale: opts.bumpScale ?? s.bumpScale,
+    envMapIntensity: opts.envMapIntensity ?? s.envMapIntensity,
+    emissive: opts.emissive ?? 0x000000,
+    emissiveIntensity: opts.emissiveIntensity ?? 1,
+    transparent: opts.transparent ?? false,
+    opacity: opts.opacity ?? 1,
+    side: opts.side ?? THREE.FrontSide,
+    depthWrite: opts.depthWrite ?? true,
+  });
+}
+function box(w, h, d, color, x = 0, y = 0, z = 0, paint = false, surface = null) {
+  const base = mat(color, surface ? { surface } : {});
+  const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), paint ? base.clone() : base);
   m.position.set(x, y, z);
   m.castShadow = true; m.receiveShadow = true;
   if (paint) m.userData.paint = true;
   return m;
 }
-function cyl(rt, rb, h, color, x = 0, y = 0, z = 0, seg = 14, paint = false) {
-  const m = new THREE.Mesh(new THREE.CylinderGeometry(rt, rb, h, seg), paint ? mat(color).clone() : mat(color));
+function cyl(rt, rb, h, color, x = 0, y = 0, z = 0, seg = 18, paint = false, surface = null) {
+  const base = mat(color, surface ? { surface } : {});
+  const m = new THREE.Mesh(new THREE.CylinderGeometry(rt, rb, h, seg), paint ? base.clone() : base);
   m.position.set(x, y, z);
   m.castShadow = true; m.receiveShadow = true;
   if (paint) m.userData.paint = true;
   return m;
 }
-function sph(r, color, x = 0, y = 0, z = 0, paint = false) {
-  const m = new THREE.Mesh(new THREE.SphereGeometry(r, 12, 10), paint ? mat(color).clone() : mat(color));
+function sph(r, color, x = 0, y = 0, z = 0, paint = false, surface = null) {
+  const base = mat(color, surface ? { surface } : {});
+  const m = new THREE.Mesh(new THREE.SphereGeometry(r, 16, 12), paint ? base.clone() : base);
   m.position.set(x, y, z);
   m.castShadow = true; m.receiveShadow = true;
   if (paint) m.userData.paint = true;
@@ -47,7 +107,11 @@ function sph(r, color, x = 0, y = 0, z = 0, paint = false) {
 function glass(w, h, color = 0xaad4e8, opacity = 0.42, x = 0, y = 0, z = 0) {
   const m = new THREE.Mesh(
     new THREE.BoxGeometry(w, h, 0.035),
-    new THREE.MeshLambertMaterial({ color, transparent: true, opacity, depthWrite: false })
+    new THREE.MeshPhysicalMaterial({
+      color, transparent: true, opacity, depthWrite: false,
+      roughness: 0.08, metalness: 0.0, envMapIntensity: 1.4,
+      side: THREE.DoubleSide
+    })
   );
   m.position.set(x, y, z);
   m.castShadow = false;
@@ -60,6 +124,60 @@ function shade(color, amount) {
   return c.getHex();
 }
 function grp(...children) { const g = new THREE.Group(); children.forEach(c => g.add(c)); return g; }
+
+/* ---------------- Plantillas orgánicas ---------------- */
+function leafMat(color) { return mat(color, { surface: 'leaves', roughness: 0.82, envMapIntensity: 0.55 }); }
+function barkMat(color = 0x6b4423) { return mat(color, { surface: 'bark', roughness: 0.9, envMapIntensity: 0.4 }); }
+function petalMat(color) { return mat(color, { surface: 'fabric', roughness: 0.7, envMapIntensity: 0.6 }); }
+function leafBlob(r, color, x = 0, y = 0, z = 0, sx = 1, sy = 1, sz = 1) {
+  const m = new THREE.Mesh(new THREE.SphereGeometry(r, 20, 14), leafMat(color));
+  m.position.set(x, y, z);
+  m.scale.set(sx, sy, sz);
+  m.castShadow = true; m.receiveShadow = true;
+  return m;
+}
+function branch(rt, rb, h, x, y, z, color = 0x6b4423, seg = 10) {
+  const m = new THREE.Mesh(new THREE.CylinderGeometry(rt, rb, h, seg), barkMat(color));
+  m.position.set(x, y, z);
+  m.castShadow = true; m.receiveShadow = true;
+  return m;
+}
+function trunk(rb, h, color = 0x6b4423, seg = 12) {
+  const m = new THREE.Mesh(new THREE.CylinderGeometry(rb * 0.8, rb, h, seg), barkMat(color));
+  m.position.y = h / 2;
+  m.castShadow = true; m.receiveShadow = true;
+  return m;
+}
+function flowerBloom(r, color, x, y, z) {
+  const m = new THREE.Mesh(new THREE.SphereGeometry(r, 12, 10), petalMat(color));
+  m.position.set(x, y, z);
+  m.castShadow = true; m.receiveShadow = true;
+  return m;
+}
+function flowerStem(x, y, z, h, color = 0x3f7d4a) {
+  const m = new THREE.Mesh(new THREE.CylinderGeometry(0.014, 0.018, h, 7), mat(color, { surface: 'leaves', roughness: 0.8, envMapIntensity: 0.5 }));
+  m.position.set(x, y + h / 2, z);
+  m.castShadow = true; m.receiveShadow = true;
+  return m;
+}
+function grassTuft(x, z, color = 0x4c9159, scale = 1) {
+  const g = new THREE.Group();
+  for (let i = 0; i < 6; i++) {
+    const a = i / 6 * Math.PI * 2;
+    const b = new THREE.Mesh(new THREE.ConeGeometry(0.04 * scale, 0.24 * scale, 5), mat(color, { surface: 'leaves', roughness: 0.85, envMapIntensity: 0.5 }));
+    b.position.set(Math.cos(a) * 0.07 * scale, 0.11 * scale, Math.sin(a) * 0.07 * scale);
+    b.rotation.set(Math.sin(a * 3) * 0.18, 0, Math.cos(a * 4) * 0.18);
+    b.castShadow = true;
+    g.add(b);
+  }
+  g.position.set(x, 0, z);
+  return g;
+}
+function trellisBranchAngles(n) {
+  const arr = [];
+  for (let i = 0; i < n; i++) arr.push((i / n) * Math.PI * 2 + 0.35);
+  return arr;
+}
 
 /* ---------------- Catálogo ---------------- */
 const WOOD = 0x8b5a2b, WOOD_D = 0x6b4423, WHITE = 0xf2f2f2, METAL = 0xb9bec7, DARK = 0x2b2f38;
@@ -133,7 +251,7 @@ const FURNITURE = {
       cyl(0.18, 0.18, 0.03, 0x3a3f4a, -0.2, 1.09, -0.12)
     );
     for (let i = 0; i < 3; i++) {
-      const s = new THREE.Mesh(new THREE.SphereGeometry(0.055, 10, 8), new THREE.MeshLambertMaterial({ color: 0xf5f7fa, transparent: true, opacity: 0.4, depthWrite: false }));
+      const s = new THREE.Mesh(new THREE.SphereGeometry(0.055, 10, 8), new THREE.MeshStandardMaterial({ color: 0xf5f7fa, transparent: true, opacity: 0.4, depthWrite: false, roughness: 0.2, envMapIntensity: 1.0 }));
       s.position.set(-0.2, 1.12, -0.12);
       s.userData.anim = 'steam';
       s.castShadow = false;
@@ -271,29 +389,205 @@ const FURNITURE = {
     return g;
   } },
   arbol: { name: 'Árbol', ico: '🌳', cost: 100, w: 1, d: 1, out: true, anim: 'sway', build() {
+    const t = grp(trunk(0.14, 1.25, 0x6b4423));
+    const b1 = branch(0.035, 0.055, 0.5, 0.0, 1.0, 0.0, 0x6b4423); b1.rotation.z = 0.7;
+    const b2 = branch(0.03, 0.05, 0.42, 0.0, 1.0, 0.0, 0x6b4423); b2.rotation.z = -0.75; b2.rotation.y = 1.4;
+    t.add(b1, b2);
     const f = grp(
-      sph(0.55, 0x3f7d4a, 0, 1.45),
-      sph(0.4, 0x4c9159, -0.3, 1.2),
-      sph(0.38, 0x4c9159, 0.28, 1.7)
+      leafBlob(0.58, 0x3f7d4a, 0, 1.62, 0, 1.05, 0.82, 1),
+      leafBlob(0.44, 0x4c9159, -0.36, 1.42, 0.1, 1, 0.9, 1),
+      leafBlob(0.42, 0x356f40, 0.34, 1.5, -0.08, 1, 0.88, 1),
+      leafBlob(0.4, 0x4c9159, -0.05, 1.98, -0.02, 1, 0.78, 1),
+      leafBlob(0.34, 0x5aa266, 0.3, 1.82, 0.24, 1, 0.82, 1),
+      leafBlob(0.32, 0x4c9159, -0.3, 1.78, -0.24, 1, 0.8, 1)
     );
     f.userData.anim = 'sway';
-    return grp(cyl(0.09, 0.13, 1.1, 0x6b4423, 0, 0.55), f);
+    return grp(t, f);
   } },
   flores: { name: 'Flores', ico: '🌷', cost: 40, w: 1, d: 1, out: true, anim: 'sway', build() {
-    const g = grp(box(0.8, 0.08, 0.8, 0x4a3626, 0, 0.05));
+    const g = grp(box(0.85, 0.08, 0.85, 0x4a3626, 0, 0.05, 0, true, 'clay'));
     const p = grp();
-    const cols = [0xe85d75, 0xf2c94c, 0xa06fc9, 0xff8a5c];
-    for (let i = 0; i < 6; i++) {
-      const px = -0.28 + (i % 3) * 0.28, pz = -0.15 + Math.floor(i / 3) * 0.3;
-      p.add(cyl(0.015, 0.015, 0.25, 0x4c9159, px, 0.2, pz, 6));
-      p.add(sph(0.07, cols[i % 4], px, 0.35, pz));
+    const cols = [0xe85d75, 0xf2c94c, 0xa06fc9, 0xff8a5c, 0x78b4ff, 0xff6fa0];
+    for (let i = 0; i < 9; i++) {
+      const px = -0.3 + (i % 3) * 0.3, pz = -0.3 + Math.floor(i / 3) * 0.3;
+      const clr = cols[i % cols.length];
+      p.add(flowerStem(px, 0, pz, 0.26 + (i % 2) * 0.08));
+      const bloom = grp();
+      bloom.position.set(px, 0.34 + (i % 2) * 0.08, pz);
+      bloom.add(sph(0.045, shade(clr, -0.14), 0, 0.02, 0, false, 'fabric'));
+      for (let k = 0; k < 5; k++) {
+        const a = (k / 5) * Math.PI * 2 + i;
+        bloom.add(sph(0.06, clr, Math.cos(a) * 0.055, 0.005, Math.sin(a) * 0.055, false, 'fabric'));
+      }
+      p.add(bloom);
+      if (i % 3 === 0) p.add(leafBlob(0.08, 0x4c9159, px + 0.05, 0.22, pz + 0.05, 1.2, 0.7, 0.9));
+    }
+    p.userData.anim = 'sway';
+    g.add(p);
+    g.add(grassTuft(-0.34, 0.32, 0x3f7d4a, 0.8));
+    g.add(grassTuft(0.34, -0.32, 0x4c9159, 0.9));
+    return g;
+  } },
+  seto: { name: 'Seto', ico: '🌿', cost: 60, w: 1, d: 1, out: true, build() {
+    const g = grp(box(0.9, 0.62, 0.45, 0x2f6b3a, 0, 0.31, 0, true, 'leaves'));
+    for (let i = 0; i < 6; i++) g.add(leafBlob(0.2, i % 2 ? 0x3f7d4a : 0x4c9159, -0.36 + (i % 3) * 0.36, 0.66, (Math.floor(i / 3) - 0.5) * 0.34, 1.1, 0.62, 1));
+    return g;
+  } },
+  cerezo: { name: 'Cerezo', ico: '🌸', cost: 135, w: 1, d: 1, out: true, anim: 'sway', build() {
+    const t = grp(trunk(0.12, 1.35, 0x6b4423));
+    const b = branch(0.035, 0.06, 0.5, 0.03, 1.05, 0, 0x6b4423); b.rotation.z = 0.7;
+    t.add(b);
+    const f = grp(
+      leafBlob(0.56, 0xf2a6c6, 0, 1.72, 0, 1.05, 0.8, 1),
+      leafBlob(0.42, 0xff9fc0, -0.36, 1.5, 0.06, 1, 0.9, 1),
+      leafBlob(0.4, 0xf28bb0, 0.36, 1.56, -0.08, 1, 0.86, 1),
+      leafBlob(0.36, 0xffb2cf, -0.02, 2.05, 0, 1, 0.74, 1)
+    );
+    for (let i = 0; i < 8; i++) {
+      const a = (i / 8) * Math.PI * 2;
+      f.add(flowerBloom(0.05, 0xff6fa0, Math.cos(a) * 0.48, 1.72 + Math.sin(i * 1.7) * 0.28, Math.sin(a) * 0.48));
+    }
+    f.userData.anim = 'sway';
+    return grp(t, f);
+  } },
+  arce: { name: 'Arce', ico: '🍁', cost: 130, w: 1, d: 1, out: true, anim: 'sway', build() {
+    const t = grp(trunk(0.13, 1.3, 0x66503a));
+    const f = grp(
+      leafBlob(0.55, 0xd8542f, 0, 1.62, 0, 1.1, 0.82, 1),
+      leafBlob(0.42, 0xe8753a, -0.34, 1.46, 0.1, 1, 0.9, 1),
+      leafBlob(0.38, 0xc74328, 0.36, 1.5, -0.1, 1, 0.88, 1),
+      leafBlob(0.34, 0xf08a3f, -0.02, 2.0, 0, 1, 0.8, 1)
+    );
+    f.userData.anim = 'sway';
+    return grp(t, f);
+  } },
+  abedul: { name: 'Abedul', ico: '🌳', cost: 115, w: 1, d: 1, out: true, anim: 'sway', build() {
+    const t = grp(trunk(0.1, 1.6, 0xe8e2d5));
+    for (const s of [-0.35, 0.3, -0.1, 0.42]) t.add(box(0.03, 0.12 + Math.abs(s) * 0.1, 0.015, 0x3a3a3a, s * 0.12, 1.2 + (s + 0.35) * 0.2, 0.08));
+    const f = grp(
+      leafBlob(0.48, 0x5aa266, 0, 1.82, 0),
+      leafBlob(0.38, 0x4c9159, -0.3, 1.75, 0.08),
+      leafBlob(0.36, 0x6bad5f, 0.3, 1.8, -0.05),
+      leafBlob(0.3, 0x4c9159, 0, 2.15, 0)
+    );
+    f.userData.anim = 'sway';
+    return grp(t, f);
+  } },
+  manzano: { name: 'Manzano', ico: '🍎', cost: 150, w: 1, d: 1, out: true, anim: 'sway', build() {
+    const t = grp(trunk(0.14, 1.2, 0x6b4423));
+    const f = grp(
+      leafBlob(0.6, 0x3f7d4a, 0, 1.55, 0, 1.1, 0.82, 1),
+      leafBlob(0.44, 0x4c9159, -0.4, 1.4, 0.05, 1, 0.9, 1),
+      leafBlob(0.42, 0x4c9159, 0.38, 1.44, -0.06, 1, 0.88, 1),
+      leafBlob(0.34, 0x5aa266, 0, 1.95, 0.02, 1, 0.8, 1)
+    );
+    const apples = [[-0.3, 1.62, 0.22], [0.22, 1.72, -0.05], [0.38, 1.48, 0.24], [-0.15, 1.4, -0.3], [0.05, 1.9, 0.14]];
+    for (const [x, y, z] of apples) f.add(sph(0.09, 0xd23b2f, x, y, z, false, 'fabric'));
+    f.userData.anim = 'sway';
+    return grp(t, f);
+  } },
+  sauce: { name: 'Sauce', ico: '🌳', cost: 165, w: 1, d: 1, out: true, anim: 'sway', build() {
+    const t = grp(trunk(0.13, 1.5, 0x6b4423));
+    const f = grp(leafBlob(0.5, 0x4c9159, 0, 1.8, 0, 1.1, 0.7, 1.1));
+    for (let i = 0; i < 10; i++) {
+      const a = (i / 10) * Math.PI * 2;
+      const s = leafBlob(0.2, i % 2 ? 0x5aa266 : 0x3f7d4a, Math.cos(a) * 0.5, 1.5 - (i % 3) * 0.12, Math.sin(a) * 0.5, 1, 1.8, 1);
+      f.add(s);
+    }
+    f.userData.anim = 'sway';
+    return grp(t, f);
+  } },
+  rosal: { name: 'Rosal', ico: '🌹', cost: 75, w: 1, d: 1, out: true, anim: 'sway', build() {
+    const g = grp(...(() => { const a = []; for (let i = 0; i < 6; i++) a.push(leafBlob(0.24, 0x3f7d4a, -0.28 + (i % 3) * 0.28, 0.34 + Math.floor(i / 3) * 0.2, (Math.floor(i / 3) - 0.5) * 0.24, 1.1, 0.8, 1)); return a; })());
+    const roses = [0xe85d75, 0xff6fa0, 0xd23b7a, 0xf2c94c];
+    for (let i = 0; i < 5; i++) {
+      const x = -0.24 + (i % 3) * 0.24, z = -0.16 + Math.floor(i / 3) * 0.32;
+      g.add(flowerStem(x, 0.05, z, 0.26, 0x2f6b3a));
+      g.add(flowerBloom(0.09, roses[i % 4], x, 0.38, z));
+    }
+    return g;
+  } },
+  margaritas: { name: 'Margaritas', ico: '🌼', cost: 55, w: 1, d: 1, out: true, anim: 'sway', build() {
+    const g = grp(box(0.8, 0.07, 0.8, 0x3f4a3a, 0, 0.045, 0, true, 'clay'));
+    const p = grp();
+    const cols = [0xf5f0e8, 0xfff6d9, 0xf2c94c, 0xfdf3d0];
+    for (let i = 0; i < 5; i++) {
+      const px = -0.26 + (i % 3) * 0.26, pz = -0.2 + Math.floor(i / 3) * 0.4;
+      p.add(flowerStem(px, 0, pz, 0.3));
+      const bloom = grp(); bloom.position.set(px, 0.38, pz);
+      for (let k = 0; k < 8; k++) {
+        const a = (k / 8) * Math.PI * 2;
+        bloom.add(sph(0.045, cols[i % cols.length], Math.cos(a) * 0.07, 0, Math.sin(a) * 0.07, false, 'fabric'));
+      }
+      bloom.add(sph(0.045, 0xf2b50a, 0, 0.02, 0, false, 'fabric'));
+      p.add(bloom);
     }
     p.userData.anim = 'sway';
     g.add(p);
     return g;
   } },
-  seto: { name: 'Seto', ico: '🌿', cost: 60, w: 1, d: 1, out: true, build() {
-    return grp(box(0.9, 0.7, 0.45, 0x3f7d4a, 0, 0.35, 0, true));
+  girasoles: { name: 'Girasoles', ico: '🌻', cost: 80, w: 1, d: 1, out: true, anim: 'sway', build() {
+    const g = grp(box(0.82, 0.08, 0.82, 0x4a3626, 0, 0.05, 0, true, 'clay'));
+    const p = grp();
+    for (let i = 0; i < 4; i++) {
+      const px = -0.24 + (i % 2) * 0.48, pz = -0.14 + Math.floor(i / 2) * 0.34;
+      const h = 0.75 + (i % 2) * 0.15;
+      p.add(flowerStem(px, 0, pz, h, 0x3f7d4a));
+      const bloom = grp(); bloom.position.set(px, h + 0.08, pz);
+      for (let k = 0; k < 10; k++) {
+        const a = (k / 10) * Math.PI * 2;
+        bloom.add(sph(0.055, 0xf2c94c, Math.cos(a) * 0.085, 0, Math.sin(a) * 0.085, false, 'fabric'));
+      }
+      bloom.add(sph(0.075, 0x6b4423, 0, 0.02, 0, false, 'wood'));
+      p.add(bloom);
+      p.add(leafBlob(0.12, 0x4c9159, px - 0.04, h * 0.55, pz, 0.5, 1.5, 0.8));
+    }
+    p.userData.anim = 'sway';
+    g.add(p);
+    return g;
+  } },
+  lavanda: { name: 'Lavanda', ico: '💜', cost: 65, w: 1, d: 1, out: true, anim: 'sway', build() {
+    const g = grp(box(0.8, 0.06, 0.8, 0x8a8f98, 0, 0.04, 0, true, 'stone'));
+    const p = grp();
+    for (let i = 0; i < 12; i++) {
+      const px = -0.34 + (i % 4) * 0.23, pz = -0.26 + Math.floor(i / 4) * 0.18;
+      p.add(flowerStem(px, 0, pz, 0.42, 0x4c9159));
+      const tip = new THREE.Mesh(new THREE.ConeGeometry(0.045, 0.24, 7), petalMat(i % 2 ? 0x9b7fd4 : 0x8a63c9));
+      tip.position.set(px, 0.5, pz);
+      tip.castShadow = true;
+      p.add(tip);
+    }
+    p.userData.anim = 'sway';
+    g.add(p);
+    return g;
+  } },
+  hortensia: { name: 'Hortensia', ico: '💠', cost: 85, w: 1, d: 1, out: true, anim: 'sway', build() {
+    const g = grp(...(() => { const a = []; for (let i = 0; i < 5; i++) a.push(leafBlob(0.22, 0x3f7d4a, -0.26 + (i % 3) * 0.26, 0.3 + Math.floor(i / 3) * 0.16, (Math.floor(i / 3) - 0.5) * 0.22, 1.1, 0.9, 1)); return a; })());
+    const dome = grp();
+    const cols = [0x9bb8e8, 0xb6d2ef, 0xbf9bdc, 0x88a7dd];
+    for (let i = 0; i < 18; i++) {
+      const a = (i / 18) * Math.PI * 2, rr = 0.18 + (i % 4) * 0.05;
+      dome.add(flowerBloom(0.06, cols[i % cols.length], Math.cos(a) * rr, 0.4 + (i % 3) * 0.05, Math.sin(a) * rr));
+    }
+    dome.add(flowerBloom(0.08, 0x9bb8e8, 0, 0.42, 0));
+    dome.userData.anim = 'sway';
+    g.add(dome);
+    return g;
+  } },
+  helecho: { name: 'Helecho', ico: '🌿', cost: 60, w: 1, d: 1, out: true, anim: 'sway', build() {
+    const g = grp(...(() => { const a = []; for (let i = 0; i < 5; i++) a.push(leafBlob(0.16, 0x3f7d4a, -0.28 + (i % 3) * 0.28, 0.16 + Math.floor(i / 3) * 0.12, (Math.floor(i / 3) - 0.5) * 0.28, 1, 0.7, 1)); return a; })());
+    const blades = grp();
+    for (let i = 0; i < 10; i++) {
+      const a = (i / 10) * Math.PI * 2;
+      const b = new THREE.Mesh(new THREE.ConeGeometry(0.07, 0.62, 6), leafMat(i % 2 ? 0x4c9159 : 0x3f7d4a));
+      b.position.set(Math.cos(a) * 0.16, 0.34, Math.sin(a) * 0.16);
+      b.rotation.z = 0.7 * Math.cos(a); b.rotation.x = -0.7 * Math.sin(a);
+      b.castShadow = true;
+      blades.add(b);
+    }
+    blades.userData.anim = 'sway';
+    g.add(blades);
+    return g;
   } },
   farola: { name: 'Farola', ico: '🏮', cost: 180, w: 1, d: 1, out: true, light: { y: 2.35, i: 18, color: 0xffe2b0 }, build() {
     return grp(
@@ -316,19 +610,19 @@ const FURNITURE = {
   } },
   fuente: { name: 'Fuente', ico: '⛲', cost: 520, w: 2, d: 2, out: true, anim: 'fuente', build(c = 0x8a8f98) {
     const g = grp(
-      cyl(.78,.92,.28,c,0,.14,0,24,true),
-      cyl(.66,.66,.08,0x67b8d4,0,.3,0,24),
-      cyl(.13,.2,1.0,c,0,.77,0,18,true),
-      cyl(.42,.22,.12,c,0,1.22,0,20,true),
-      sph(.12,0x67b8d4,0,1.34,0)
+      cyl(.78,.92,.28,c,0,.14,0,24,true,'stone'),
+      cyl(.66,.66,.08,0x67b8d4,0,.3,0,24,false,'water'),
+      cyl(.13,.2,1.0,c,0,.77,0,18,true,'stone'),
+      cyl(.42,.22,.12,c,0,1.22,0,20,true,'stone'),
+      sph(.12,0x67b8d4,0,1.34,0,false,'water')
     );
     g.children[1].userData.anim = 'fwater'; // agua de la cuenca (ondula)
-    const jet = new THREE.Mesh(new THREE.CylinderGeometry(0.028, 0.05, 0.44, 8), new THREE.MeshLambertMaterial({ color: 0x8fd0e8, transparent: true, opacity: 0.45, depthWrite: false }));
+    const jet = new THREE.Mesh(new THREE.CylinderGeometry(0.028, 0.05, 0.44, 8), new THREE.MeshStandardMaterial({ color: 0x8fd0e8, transparent: true, opacity: 0.45, depthWrite: false, roughness: 0.08, envMapIntensity: 1.6 }));
     jet.position.set(0, 1.5, 0);
     jet.userData.anim = 'fjet';
     g.add(jet);
     for (let i = 0; i < 6; i++) {
-      const d = new THREE.Mesh(new THREE.SphereGeometry(0.035, 8, 6), new THREE.MeshLambertMaterial({ color: 0x8fd0e8, transparent: true, opacity: 0.75, depthWrite: false }));
+      const d = new THREE.Mesh(new THREE.SphereGeometry(0.035, 8, 6), new THREE.MeshStandardMaterial({ color: 0x8fd0e8, transparent: true, opacity: 0.75, depthWrite: false, roughness: 0.1, envMapIntensity: 1.6 }));
       d.position.set(0, 1.4, 0);
       d.userData.anim = 'fdrop';
       d.castShadow = false;
@@ -348,13 +642,13 @@ const FURNITURE = {
   } },
   estanque: { name: 'Estanque', ico: '💧', cost: 280, w: 2, d: 2, out: true, anim: 'estanque', build() {
     const g = grp(
-      cyl(.82,.9,.16,0x6b6f74,0,.08,0,28),
-      cyl(.72,.74,.08,0x4dbddd,0,.18,0,28)
+      cyl(.82,.9,.16,0x6b6f74,0,.08,0,28,false,'stone'),
+      cyl(.72,.74,.08,0x4dbddd,0,.18,0,28,false,'water')
     );
     g.children[1].userData.anim = 'ewater';
-    for (const [x,z] of [[-.55,-.5],[.55,-.42],[-.62,.38],[.5,.5]]) g.add(sph(.16,0x777b7d,x,.18,z));
-    g.add(cyl(.02,.025,.25,0x3f7d4a,.2,.34,-.1,8));
-    g.add(sph(.09,0xe85d75,.2,.49,-.1));
+    for (const [x,z] of [[-.55,-.5],[.55,-.42],[-.62,.38],[.5,.5]]) g.add(sph(.16,0x777b7d,x,.18,z,false,'stone'));
+    g.add(cyl(.02,.025,.25,0x3f7d4a,.2,.34,-.1,8,false,'leaves'));
+    g.add(sph(.09,0xe85d75,.2,.49,-.1,false,'fabric'));
     return g;
   } },
   /* ---- Nuevas decoraciones de interior ---- */
@@ -415,7 +709,7 @@ const FURNITURE = {
   neon: { name: 'Neón luna', ico: '🌙', cost: 260, w: 1, d: 1, decor: true, anim: 'neon', light: { y: 1.3, i: 7, color: 0xff7ad9 }, build(c = 0x1e222c) {
     const torus = new THREE.Mesh(
       new THREE.TorusGeometry(0.26, 0.035, 10, 28),
-      new THREE.MeshLambertMaterial({ color: 0xff9ae0, emissive: 0xff3fae, emissiveIntensity: 0.9 })
+      new THREE.MeshStandardMaterial({ color: 0xff9ae0, emissive: 0xff3fae, emissiveIntensity: 0.9, roughness: 0.18, envMapIntensity: 1.0 })
     );
     torus.position.set(0, 1.25, 0.05);
     torus.userData.anim = 'neon';
@@ -428,29 +722,37 @@ const FURNITURE = {
   } },
   /* ---- Nuevas decoraciones de exterior ---- */
   pino: { name: 'Pino', ico: '🌲', cost: 120, w: 1, d: 1, out: true, anim: 'sway', build() {
-    const f = grp(
-      cyl(0.42, 0.42, 0.5, 0x2f6b3f, 0, 0.75, 0, 12),
-      cyl(0.32, 0.32, 0.45, 0x357a48, 0, 1.1, 0, 12),
-      cyl(0.22, 0.22, 0.4, 0x3d8a52, 0, 1.42, 0, 12)
-    );
+    const f = grp();
+    const coneDefs = [[0.42, 0.55, 0.78, 0x2f6b3f], [0.34, 0.52, 1.08, 0x357a48], [0.25, 0.48, 1.38, 0x3d8a52], [0.16, 0.4, 1.66, 0x4c9159]];
+    for (const [r, h, y, col] of coneDefs) {
+      const cone = new THREE.Mesh(new THREE.ConeGeometry(r, h, 18), leafMat(col));
+      cone.position.y = y; cone.castShadow = true; cone.receiveShadow = true;
+      f.add(cone);
+    }
     f.userData.anim = 'sway';
-    return grp(cyl(0.08, 0.12, 0.5, 0x5a3a22, 0, 0.25, 0), f);
+    return grp(trunk(0.1, 0.55, 0x5a3a22), f);
   } },
   palmera: { name: 'Palmera', ico: '🌴', cost: 140, w: 1, d: 1, out: true, anim: 'sway', build() {
     const fr = grp();
-    for (let i = 0; i < 6; i++) {
+    for (let i = 0; i < 8; i++) {
       const w = new THREE.Group();
-      w.rotation.y = (i / 6) * Math.PI * 2;
-      const leaf = box(0.75, 0.05, 0.2, 0x4c9159, 0.34, 0, 0);
-      leaf.rotation.z = -0.55;
+      w.rotation.y = (i / 8) * Math.PI * 2;
+      const leaf = new THREE.Mesh(new THREE.ConeGeometry(0.12, 0.95, 8), leafMat(i % 2 ? 0x4c9159 : 0x5aa266));
+      leaf.scale.set(1, 1, 0.5);
+      leaf.position.set(0.48, 0.02, 0);
+      leaf.rotation.z = -1.15;
+      leaf.castShadow = true;
       w.add(leaf);
       fr.add(w);
     }
-    fr.add(sph(0.09, 0x8b5a2b, 0.1, -0.08, 0.05));
-    fr.add(sph(0.09, 0x8b5a2b, -0.12, -0.08, -0.05));
-    fr.position.y = 1.45;
+    fr.add(sph(0.11, 0x8b5a2b, 0.06, -0.02, 0.05, false, 'clay'));
+    fr.add(sph(0.11, 0x9c7a4a, -0.06, -0.02, -0.05, false, 'clay'));
+    fr.position.y = 1.5;
     fr.userData.anim = 'sway';
-    return grp(cyl(0.07, 0.12, 1.5, 0x9c7a4a, 0, 0.75, 0, 10), fr);
+    const trunkMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.075, 0.13, 1.55, 12), barkMat(0x9c7a4a));
+    trunkMesh.position.y = 0.78;
+    trunkMesh.castShadow = true; trunkMesh.receiveShadow = true;
+    return grp(trunkMesh, fr);
   } },
   cactus: { name: 'Cactus', ico: '🌵', cost: 45, w: 1, d: 1, out: true, build() {
     const arm = cyl(0.07, 0.07, 0.22, 0x3f8a4f, -0.18, 0.72, 0, 10);
@@ -610,9 +912,291 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.12;
+
+/* ---------------- Texturas procedurales ---------------- */
+const SURFACES = {};
+function texRng(seed) { let s = (seed + 17) >>> 0; return () => { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296; }; }
+function texCanvas(size, fn) {
+  const c = document.createElement('canvas');
+  c.width = c.height = size;
+  const ctx = c.getContext('2d');
+  fn(ctx, size);
+  return c;
+}
+function mapTexture(canvas, repeat = 1) {
+  const t = new THREE.CanvasTexture(canvas);
+  t.wrapS = t.wrapT = THREE.RepeatWrapping;
+  t.repeat.set(repeat, repeat);
+  t.colorSpace = THREE.SRGBColorSpace;
+  t.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
+  t.needsUpdate = true;
+  return t;
+}
+function bumpTexture(canvas, repeat = 1) {
+  const t = new THREE.CanvasTexture(canvas);
+  t.wrapS = t.wrapT = THREE.RepeatWrapping;
+  t.repeat.set(repeat, repeat);
+  t.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
+  t.needsUpdate = true;
+  return t;
+}
+function defineSurface(name, cfg) { SURFACES[name] = cfg; }
+function makeSurface(name, seed, draw, opts = {}) {
+  const color = texCanvas(256, (c, s) => draw(c, s, texRng(seed), false));
+  const bump = texCanvas(256, (c, s) => draw(c, s, texRng(seed + 7), true));
+  const map = mapTexture(color);
+  const bmp = bumpTexture(bump);
+  defineSurface(name, {
+    map, bump: bmp,
+    roughness: opts.roughness ?? 0.85,
+    metalness: opts.metalness ?? 0.0,
+    envMapIntensity: opts.envMapIntensity ?? 0.7,
+    bumpScale: opts.bumpScale ?? 0.05
+  });
+}
+function drawNoise(ctx, s, rnd, amt, baseA = 0.16) {
+  for (let i = 0; i < 900; i++) {
+    const x = rnd() * s, y = rnd() * s, r = rnd() * 2 + 0.4;
+    ctx.fillStyle = `rgba(${rnd() > 0.5 ? 255 : 0},${rnd() > 0.5 ? 255 : 0},${rnd() > 0.5 ? 255 : 0},${(rnd() * amt).toFixed(3)})`;
+    ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
+  }
+}
+function drawSpeckle(ctx, s, rnd, colors, amt = 0.3) {
+  for (let i = 0; i < 300; i++) {
+    ctx.fillStyle = colors[Math.floor(rnd() * colors.length)];
+    ctx.globalAlpha = amt * (0.3 + rnd() * 0.7);
+    ctx.beginPath(); ctx.arc(rnd() * s, rnd() * s, rnd() * 1.7 + 0.4, 0, Math.PI * 2); ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+}
+
+makeSurface('grass', 1, (ctx, s, rnd, bump) => {
+  ctx.fillStyle = bump ? '#8b8b8b' : '#5f9b4e';
+  ctx.fillRect(0, 0, s, s);
+  const cols = bump ? ['#777','#999'] : ['#4f8c43','#6aa95a','#57914b','#77b264'];
+  for (let i = 0; i < 700; i++) {
+    const x = rnd() * s, y = rnd() * s, l = 3 + rnd() * 7;
+    ctx.strokeStyle = cols[Math.floor(rnd() * cols.length)];
+    ctx.lineWidth = bump ? 0.8 : (0.7 + rnd() * 0.7);
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.quadraticCurveTo(x + (rnd() - 0.5) * 2, y - l * 0.6, x + (rnd() - 0.5) * 3, y - l);
+    ctx.stroke();
+  }
+});
+makeSurface('wood', 2, (ctx, s, rnd, bump) => {
+  const base = bump ? '#8a8a8a' : '#8b5a2b';
+  ctx.fillStyle = base; ctx.fillRect(0, 0, s, s);
+  const rows = 4, h = s / rows;
+  for (let r = 0; r < rows; r++) {
+    const tone = bump ? (0.5 + rnd() * 0.14) : (0.78 + rnd() * 0.2);
+    ctx.fillStyle = bump ? `rgb(${tone * 255|0},${tone * 255|0},${tone * 255|0})` : hsl(`hsl(${28 + rnd() * 8},${45 + rnd() * 10}%,${30 + rnd() * 12}%)`);
+    ctx.fillRect(0, r * h, s, h);
+    for (let g = 0; g < 22; g++) {
+      ctx.strokeStyle = bump ? 'rgba(50,50,50,0.4)' : 'rgba(40,22,8,0.28)';
+      ctx.lineWidth = 0.6 + rnd() * 0.7; ctx.beginPath();
+      const y = r * h + rnd() * h;
+      ctx.moveTo(s, y); ctx.bezierCurveTo(s * 0.66, y + (rnd() - 0.5) * 5, s * 0.33, y + (rnd() - 0.5) * 5, 0, y + (rnd() - 0.5) * 4); ctx.stroke();
+    }
+    ctx.fillStyle = bump ? 'rgba(30,30,30,0.5)' : 'rgba(30,18,6,0.5)';
+    ctx.fillRect(0, r * h + h - 2, s, 2);
+    const seam = (rnd() * 0.7 + 0.15) * s;
+    ctx.fillRect(seam, r * h, 2, h);
+  }
+});
+makeSurface('planks', 3, (ctx, s, rnd, bump) => {
+  ctx.fillStyle = bump ? '#8f8f8f' : '#d8b579'; ctx.fillRect(0, 0, s, s);
+  const rows = 5;
+  for (let r = 0; r < rows; r++) {
+    const shade = 0.82 + rnd() * 0.28;
+    ctx.fillStyle = bump ? `rgba(${shade * 225|0},${shade * 225|0},${shade * 225|0},1)` : `rgba(${218 * shade|0},${181 * shade|0},${121 * shade|0},1)`;
+    ctx.fillRect(0, r * (s / rows), s, s / rows);
+    ctx.fillStyle = bump ? 'rgba(64,64,64,0.62)' : 'rgba(120,82,38,0.55)';
+    ctx.fillRect(0, r * (s / rows), s, 2);
+    ctx.fillStyle = bump ? 'rgba(64,64,64,0.45)' : 'rgba(120,82,38,0.35)';
+    ctx.fillRect(rnd() * s * 0.7, r * (s / rows), 2, s / rows);
+  }
+  drawNoise(ctx, s, rnd, 0.08);
+});
+makeSurface('tiles', 4, (ctx, s, rnd, bump) => {
+  ctx.fillStyle = bump ? '#7e7e7e' : '#b8b3a9'; ctx.fillRect(0, 0, s, s);
+  const n = 4, g = s / n;
+  for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) {
+    const tone = bump ? 0.76 + rnd() * 0.18 : 0.86 + rnd() * 0.14;
+    ctx.fillStyle = bump ? `rgb(${tone * 240|0},${tone * 240|0},${tone * 240|0})` : `rgb(${225*tone|0},${220*tone|0},${212*tone|0})`;
+    ctx.fillRect(i * g + 1.5, j * g + 1.5, g - 3, g - 3);
+    ctx.fillStyle = bump ? 'rgba(70,70,70,0.65)' : 'rgba(150,145,137,0.8)';
+    ctx.fillRect(i * g, j * g, g, 1.6); ctx.fillRect(i * g, j * g, 1.6, g);
+  }
+  drawSpeckle(ctx, s, rnd, bump ? ['#666','#999'] : ['#cfcac1','#b0aba1'], 0.16);
+});
+makeSurface('marble', 5, (ctx, s, rnd, bump) => {
+  ctx.fillStyle = bump ? '#d8d8d8' : '#eeeae2'; ctx.fillRect(0, 0, s, s);
+  for (let i = 0; i < 12; i++) {
+    const cx = rnd() * s, cy = rnd() * s;
+    ctx.strokeStyle = bump ? `rgba(40,40,40,${0.22 + rnd() * 0.2})` : `rgba(160,160,168,${0.16 + rnd() * 0.22})`;
+    ctx.lineWidth = 0.5 + rnd() * 1.6;
+    ctx.beginPath(); ctx.moveTo(cx, cy);
+    ctx.bezierCurveTo(cx + (rnd() - 0.5) * 100, cy + (rnd() - 0.5) * 100, cx + (rnd() - 0.5) * 100, cy + (rnd() - 0.5) * 100, rnd() * s, rnd() * s);
+    ctx.stroke();
+  }
+  drawSpeckle(ctx, s, rnd, bump ? ['#eee','#aaa'] : ['#ffffff','#dedad1'], 0.12);
+});
+makeSurface('terracotta', 6, (ctx, s, rnd, bump) => {
+  ctx.fillStyle = bump ? '#7f7f7f' : '#b96543'; ctx.fillRect(0, 0, s, s);
+  const n = 3, g = s / n;
+  for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) {
+    const tone = 0.86 + rnd() * 0.24;
+    ctx.fillStyle = bump ? `rgb(${tone*215|0},${tone*215|0},${tone*215|0})` : `rgb(${185*tone|0},${101*tone|0},${67*tone|0})`;
+    ctx.fillRect(i * g + 1.5, j * g + 1.5, g - 3, g - 3);
+    ctx.fillStyle = bump ? 'rgba(60,60,60,0.6)' : 'rgba(96,48,36,0.7)';
+    ctx.fillRect(i * g, j * g, g, 2); ctx.fillRect(i * g, j * g, 2, g);
+  }
+  drawSpeckle(ctx, s, rnd, bump ? ['#777','#999'] : ['#cf7e5b','#a2523b'], 0.16);
+});
+makeSurface('parquet', 7, (ctx, s, rnd, bump) => {
+  ctx.fillStyle = bump ? '#8d8d8d' : '#a8753e'; ctx.fillRect(0, 0, s, s);
+  const rows = 6;
+  for (let r = 0; r < rows; r++) for (let k = 0; k < 6; k++) {
+    const tone = 0.9 + rnd() * 0.2;
+    ctx.save(); ctx.translate(k * (s / 6) + (r % 2 ? s / 12 : 0), r * (s / rows));
+    ctx.rotate(r % 2 ? Math.PI / 4 : -Math.PI / 4);
+    ctx.fillStyle = bump ? `rgb(${tone*220|0},${tone*220|0},${tone*220|0})` : `rgb(${168*tone|0},${117*tone|0},${62*tone|0})`;
+    ctx.fillRect(-s / 8, -s / rows * 0.7, s / 4, s / rows * 1.3);
+    ctx.restore();
+  }
+  drawNoise(ctx, s, rnd, 0.05);
+});
+makeSurface('concrete', 8, (ctx, s, rnd, bump) => {
+  ctx.fillStyle = bump ? '#888888' : '#969a9e'; ctx.fillRect(0, 0, s, s);
+  drawSpeckle(ctx, s, rnd, bump ? ['#5e5e5e','#adadad'] : ['#7d828a', '#aeb2b6', '#878c91'], 0.28);
+  ctx.strokeStyle = bump ? 'rgba(35,35,35,0.28)' : 'rgba(60,64,70,0.24)';
+  for (let i = 0; i < 8; i++) {
+    ctx.lineWidth = 0.5 + rnd(); ctx.beginPath();
+    let x = rnd() * s, y = rnd() * s; ctx.moveTo(x, y);
+    for (let j = 0; j < 3; j++) { x += (rnd() - 0.5) * 60; y += (rnd() - 0.5) * 60; ctx.lineTo(x, y); }
+    ctx.stroke();
+  }
+});
+makeSurface('brick', 9, (ctx, s, rnd, bump) => {
+  ctx.fillStyle = bump ? '#6e6e6e' : '#c8c0b2'; ctx.fillRect(0, 0, s, s);
+  const rows = 6, h = s / rows, bw = s / 3;
+  for (let r = 0; r < rows; r++) {
+    const off = (r % 2) * bw * 0.5;
+    for (let i = -1; i < 3; i++) {
+      const x = i * bw + off, tone = 0.84 + rnd() * 0.26;
+      ctx.fillStyle = bump ? `rgb(${tone*230|0},${tone*230|0},${tone*230|0})` : `rgb(${190*tone|0},${92*tone|0},${72*tone|0})`;
+      ctx.fillRect(x + 2, r * h + 2, bw - 4, h - 4);
+    }
+  }
+  ctx.strokeStyle = '#f3efe6'; ctx.lineWidth = 2;
+  for (let r = 0; r <= rows; r++) { ctx.beginPath(); ctx.moveTo(0, r * h); ctx.lineTo(s, r * h); ctx.stroke(); }
+  drawSpeckle(ctx, s, rnd, bump ? ['#555','#aaa'] : ['#c76f57','#a85247'], 0.2);
+});
+makeSurface('plaster', 10, (ctx, s, rnd, bump) => {
+  ctx.fillStyle = bump ? '#ababab' : '#f3eee6'; ctx.fillRect(0, 0, s, s);
+  drawSpeckle(ctx, s, rnd, bump ? ['#ddd','#888'] : ['#efe9de','#e1d8ca','#f7f3ec'], 0.22);
+  drawNoise(ctx, s, rnd, 0.07);
+});
+makeSurface('roofTile', 11, (ctx, s, rnd, bump) => {
+  ctx.fillStyle = bump ? '#7c7c7c' : '#a8524a'; ctx.fillRect(0, 0, s, s);
+  const rows = 8, rw = 8;
+  for (let r = 0; r < rows; r++) for (let i = 0; i < rw; i++) {
+    const tone = 0.86 + rnd() * 0.24;
+    const x = i * (s / rw), y = r * (s / rows);
+    ctx.fillStyle = bump ? `rgb(${tone*210|0},${tone*210|0},${tone*210|0})` : `rgb(${168*tone|0},${82*tone|0},${74*tone|0})`;
+    ctx.beginPath(); ctx.arc(x + s / rw / 2, y + s / rows / 2, s / rw / 2 - 1, 0, Math.PI); ctx.fill();
+  }
+});
+makeSurface('leaves', 12, (ctx, s, rnd, bump) => {
+  ctx.fillStyle = bump ? '#858585' : '#3f7d4a'; ctx.fillRect(0, 0, s, s);
+  const cols = bump ? ['#6d6d6d','#a3a3a3'] : ['#2f6b3a','#4c9159','#356f40','#5aa266'];
+  for (let i = 0; i < 500; i++) {
+    const x = rnd() * s, y = rnd() * s, a = rnd() * Math.PI * 2;
+    ctx.fillStyle = cols[Math.floor(rnd() * cols.length)];
+    ctx.globalAlpha = 0.35 + rnd() * 0.45;
+    ctx.beginPath(); ctx.ellipse(x, y, 1 + rnd() * 2.5, 0.6 + rnd() * 1.4, a, 0, Math.PI * 2); ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+  for (let i = 0; i < 22; i++) {
+    const x = rnd() * s, y = rnd() * s;
+    ctx.strokeStyle = bump ? 'rgba(50,50,50,0.4)' : 'rgba(20,50,24,0.28)';
+    ctx.lineWidth = 0.6; ctx.beginPath(); ctx.moveTo(x - 4, y); ctx.lineTo(x + 4, y); ctx.stroke();
+  }
+});
+makeSurface('fabric', 13, (ctx, s, rnd, bump) => {
+  ctx.fillStyle = bump ? '#919191' : '#b8443f'; ctx.fillRect(0, 0, s, s);
+  ctx.fillStyle = bump ? 'rgba(70,70,70,0.25)' : 'rgba(255,255,255,0.08)';
+  for (let i = 0; i < s; i += 4) ctx.fillRect(i, 0, 1, s);
+  ctx.fillStyle = bump ? 'rgba(140,140,140,0.2)' : 'rgba(0,0,0,0.06)';
+  for (let i = 0; i < s; i += 4) ctx.fillRect(0, i, s, 1);
+  drawNoise(ctx, s, rnd, 0.06);
+});
+makeSurface('metal', 14, (ctx, s, rnd, bump) => {
+  ctx.fillStyle = bump ? '#909090' : '#b9bec7'; ctx.fillRect(0, 0, s, s);
+  for (let i = 0; i < s; i += 3) {
+    ctx.fillStyle = bump ? (i % 6 ? 'rgba(80,80,80,0.35)' : 'rgba(200,200,200,0.35)') : (i % 6 ? 'rgba(70,76,88,0.12)' : 'rgba(255,255,255,0.2)');
+    ctx.fillRect(0, i, s, 1);
+  }
+}, { roughness: 0.22, metalness: 0.82, envMapIntensity: 1.25, bumpScale: 0.03 });
+makeSurface('stone', 15, (ctx, s, rnd, bump) => {
+  ctx.fillStyle = bump ? '#858585' : '#8a8f98'; ctx.fillRect(0, 0, s, s);
+  drawSpeckle(ctx, s, rnd, bump ? ['#5d5d5d','#ababab'] : ['#6f747c','#a4a9b2','#7d828b'], 0.3);
+  drawNoise(ctx, s, rnd, 0.08);
+});
+makeSurface('bark', 16, (ctx, s, rnd, bump) => {
+  ctx.fillStyle = bump ? '#7c7c7c' : '#6b4423'; ctx.fillRect(0, 0, s, s);
+  for (let i = 0; i < 40; i++) {
+    const x = rnd() * s;
+    ctx.strokeStyle = bump ? (i % 2 ? 'rgba(60,60,60,0.5)' : 'rgba(150,150,150,0.4)') : (i % 2 ? 'rgba(30,16,5,0.4)' : 'rgba(120,80,38,0.35)');
+    ctx.lineWidth = 0.8 + rnd() * 1.8;
+
+    ctx.beginPath(); ctx.moveTo(x, s);
+    ctx.bezierCurveTo(x + (rnd() - 0.5) * 8, s * 0.66, x + (rnd() - 0.5) * 8, s * 0.33, x + (rnd() - 0.5) * 6, 0);
+    ctx.stroke();
+  }
+});
+makeSurface('clay', 17, (ctx, s, rnd, bump) => {
+  ctx.fillStyle = bump ? '#8e8e8e' : '#c96f4a'; ctx.fillRect(0, 0, s, s);
+  drawSpeckle(ctx, s, rnd, bump ? ['#777','#aaa'] : ['#d98762','#b55f3f','#e0a080'], 0.2);
+  drawNoise(ctx, s, rnd, 0.05);
+});
+makeSurface('water', 18, (ctx, s, rnd, bump) => {
+  ctx.fillStyle = bump ? '#d0d0d0' : '#67b8d4'; ctx.fillRect(0, 0, s, s);
+  for (let i = 0; i < 90; i++) {
+    const x = rnd() * s, y = rnd() * s, r = 3 + rnd() * 12;
+    ctx.strokeStyle = bump ? `rgba(40,40,40,${0.15 + rnd() * 0.2})` : `rgba(255,255,255,${0.12 + rnd() * 0.18})`;
+    ctx.lineWidth = 1 + rnd() * 1.4;
+    ctx.beginPath(); ctx.arc(x, y, r, rnd() * Math.PI, rnd() * Math.PI + Math.PI * (1 + rnd())); ctx.stroke();
+  }
+}, { roughness: 0.06, envMapIntensity: 1.55, bumpScale: 0.04 });
+makeSurface('rough', 19, (ctx, s, rnd, bump) => {
+  ctx.fillStyle = bump ? '#8a8a8a' : '#9a9a9a'; ctx.fillRect(0, 0, s, s);
+  drawNoise(ctx, s, rnd, bump ? 0.18 : 0.09);
+}, { roughness: 0.72 });
+function hsl(v) { return v; }
 
 const scene = new THREE.Scene();
 scene.fog = new THREE.Fog(0xbfd9ea, 60, 160);
+
+/* Iluminación ambiental (reflejos suaves estilo videojuego) */
+const pmrem = new THREE.PMREMGenerator(renderer);
+{
+  const envScene = new THREE.Scene();
+  const sky = new THREE.Mesh(new THREE.SphereGeometry(50, 24, 16), new THREE.MeshBasicMaterial({ color: 0xb9dcf5, side: THREE.BackSide }));
+  envScene.add(sky);
+  const sunBall = new THREE.Mesh(new THREE.SphereGeometry(4.5, 16, 12), new THREE.MeshBasicMaterial({ color: 0xfff2c9 }));
+  sunBall.position.set(22, 32, 12); envScene.add(sunBall);
+  const glow = new THREE.Mesh(new THREE.SphereGeometry(13, 16, 12), new THREE.MeshBasicMaterial({ color: 0xffe6ad, transparent: true, opacity: 0.5 }));
+  glow.position.set(22, 32, 12); envScene.add(glow);
+  const envGround = new THREE.Mesh(new THREE.CircleGeometry(46, 24), new THREE.MeshBasicMaterial({ color: 0x557a45 }));
+  envGround.rotation.x = -Math.PI / 2; envGround.position.y = -5; envScene.add(envGround);
+  scene.environment = pmrem.fromScene(envScene, 0.04).texture;
+  pmrem.dispose();
+}
 
 const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 400);
 camera.position.set(26, 22, 26);
@@ -644,7 +1228,7 @@ scene.add(moon);
 /* Suelo del mundo */
 const ground = new THREE.Mesh(
   new THREE.PlaneGeometry(400, 400),
-  new THREE.MeshLambertMaterial({ color: 0x6da35e })
+  tiledMaterial(0x6da35e, 'grass', 68, 68, { roughness: 0.94, envMapIntensity: 0.55 })
 );
 ground.rotation.x = -Math.PI / 2;
 ground.receiveShadow = true;
@@ -652,7 +1236,7 @@ scene.add(ground);
 
 const plot = new THREE.Mesh(
   new THREE.PlaneGeometry(S, S),
-  new THREE.MeshLambertMaterial({ color: 0x79b169 })
+  tiledMaterial(0x79b169, 'grass', 9, 9, { roughness: 0.95, envMapIntensity: 0.5 })
 );
 plot.rotation.x = -Math.PI / 2;
 plot.position.y = 0.01;
@@ -661,7 +1245,7 @@ scene.add(plot);
 
 const gridHelper = new THREE.GridHelper(S, S, 0xffffff, 0xffffff);
 gridHelper.material.transparent = true;
-gridHelper.material.opacity = 0.12;
+gridHelper.material.opacity = 0.06;
 gridHelper.position.y = 0.02;
 scene.add(gridHelper);
 
@@ -725,7 +1309,7 @@ scene.add(envGroup);
 const clouds = [];
 const CLOUD_DAY = new THREE.Color(0xffffff), CLOUD_NIGHT = new THREE.Color(0x39415f);
 {
-  const m = new THREE.MeshLambertMaterial({ color: 0xffffff, transparent: true, opacity: 0.9 });
+  const m = new THREE.MeshStandardMaterial({ color: 0xffffff, transparent: true, opacity: 0.9, roughness: 1, metalness: 0, envMapIntensity: 0.4 });
   for (let i = 0; i < 5; i++) {
     const g = new THREE.Group();
     const n = 3 + (i % 3);
@@ -743,7 +1327,7 @@ const CLOUD_DAY = new THREE.Color(0xffffff), CLOUD_NIGHT = new THREE.Color(0x394
 }
 const birds = [];
 {
-  const bm = new THREE.MeshLambertMaterial({ color: 0x39404d });
+  const bm = new THREE.MeshStandardMaterial({ color: 0x39404d, roughness: 0.9, envMapIntensity: 0.3 });
   for (let i = 0; i < 4; i++) {
     const g = new THREE.Group();
     g.add(new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.08, 0.42), bm));
@@ -759,10 +1343,10 @@ const butterflies = [];
   const cols = [0xe85d75, 0xf2c94c, 0xa06fc9, 0xff8a5c];
   for (let i = 0; i < 4; i++) {
     const g = new THREE.Group();
-    const wm = new THREE.MeshLambertMaterial({ color: cols[i], side: THREE.DoubleSide });
+    const wm = new THREE.MeshStandardMaterial({ color: cols[i], side: THREE.DoubleSide, roughness: 0.75, envMapIntensity: 0.6 });
     const wl = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.012, 0.07), wm); wl.position.x = -0.055;
     const wr = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.012, 0.07), wm); wr.position.x = 0.055;
-    const bd = new THREE.Mesh(new THREE.BoxGeometry(0.018, 0.03, 0.09), new THREE.MeshLambertMaterial({ color: 0x4a3f35 }));
+    const bd = new THREE.Mesh(new THREE.BoxGeometry(0.018, 0.03, 0.09), new THREE.MeshStandardMaterial({ color: 0x4a3f35, roughness: 0.9, envMapIntensity: 0.4 }));
     g.add(wl, wr, bd);
     envGroup.add(g);
     butterflies.push({ g, wl, wr, cx: (Math.random() - 0.5) * 20, cz: (Math.random() - 0.5) * 20, r: 2 + Math.random() * 4, h: 0.7 + Math.random() * 1.3, v: 0.5 + Math.random() * 0.6, ph: Math.random() * 6 });
@@ -814,7 +1398,7 @@ function updateEnv(t, dt) {
 function buildWallMesh(type = 'pared', color) {
   const def = BUILD_ITEMS[type] || BUILD_ITEMS.pared;
   const c = color ?? def.color ?? 0xf5f0e8;
-  if (def.category === 'wall') return grp(box(1.02, WALL_H, 0.14, c, 0, WALL_H / 2, 0, true));
+  if (def.category === 'wall') return grp(box(1.02, WALL_H, 0.14, c, 0, WALL_H / 2, 0, true, 'brick'));
 
   if (def.category === 'door') {
     const g = grp(
@@ -878,7 +1462,9 @@ function buildWallMesh(type = 'pared', color) {
 function buildFloorMesh(type = 'suelo', color) {
   const def = BUILD_ITEMS[type] || BUILD_ITEMS.suelo;
   const c = color ?? def.color ?? 0xc9a06a;
-  const g = grp(box(0.99, 0.08, 0.99, c, 0, 0.04, 0, true));
+  const surfaceMap = { wood: 'wood', plans: 'planks', tiles: 'tiles', marble: 'marble', terracotta: 'terracotta', parquet: 'parquet', concrete: 'concrete' };
+  const surface = surfaceMap[def.style] || 'wood';
+  const g = grp(box(0.99, 0.08, 0.99, c, 0, 0.04, 0, true, surface));
   const seam = def.style === 'tiles' || def.style === 'marble' ? 0xb4b1aa : shade(c, -.2);
   if (def.style === 'wood' || def.style === 'planks') {
     for (const z of [-.25, .25]) g.add(box(.97, .006, .018, seam, 0, .083, z));
@@ -906,7 +1492,8 @@ function buildFloorMesh(type = 'suelo', color) {
 function buildRoofMesh(type = 'techo', color) {
   const def = BUILD_ITEMS[type] || BUILD_ITEMS.techo;
   const c = color ?? def.color ?? 0xa8524a;
-  const g = grp(box(1.0, 0.14, 1.0, c, 0, WALL_H + 0.07, 0, true));
+  const surface = def.style === 'flat' ? 'concrete' : 'roofTile';
+  const g = grp(box(1.0, 0.14, 1.0, c, 0, WALL_H + 0.07, 0, true, surface));
   if (def.style === 'tile') {
     for (const z of [-.32, 0, .32]) g.add(box(.98,.025,.035,shade(c,-.18),0,WALL_H+.15,z));
   }

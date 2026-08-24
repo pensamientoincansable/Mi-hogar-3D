@@ -16,7 +16,9 @@ python3 -m http.server 8000
 ## ✨ Características
 
 - 🧱 **Construcción sobre cuadrícula** con 7 suelos, 4 puertas, 4 ventanas, paredes y techos.
-- 🛋️ **30 muebles y elementos** procedurales: mobiliario, decoración, cocina, baño y jardín.
+- 🎨 **Texturas procedurales** con sombreado, bump y reflejos: madera, ladrillo, tejado, baldosa, mármol, hierba, corteza, metal y más. Iluminación con tono de videojuego (ACES + reflejos ambientales).
+- 🌳 **Gran variedad de exterior**: roble, pino, palmera, cerezo, arce, abedul, manzano, sauce, cactus, hongos y setos, más un jardín lleno de rosas, margaritas, girasoles, lavanda, hortensias, helechos y flores silvestres.
+- 🛋️ **30+ muebles y elementos** procedurales: mobiliario, decoración, cocina, baño y jardín.
 - 🪴 **Catálogo de decoración** con plantas, cuadros, espejo, acuario, reloj, biombo, fuente y más.
 - 🧰 **Inventario plegable**: se oculta al elegir una pieza para dejar libre toda la vista 3D.
 - 🎨 **Paleta de colores** y herramienta de pintura para personalizar todo.
