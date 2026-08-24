@@ -180,6 +180,32 @@ kbd {
 }
 .pill-btn:hover { background: rgba(255,255,255,0.16); }
 
+/* ---------- Panel de selección (mano) ---------- */
+#select-panel {
+  position: fixed; right: 14px; bottom: 16px; z-index: 20;
+  width: 252px;
+  background: var(--panel); backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 184, 77, 0.45); border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 12px;
+  animation: panel-in 0.2s ease;
+}
+@keyframes panel-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+#select-panel .sp-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 10px; }
+#select-panel .sp-head span { font-weight: 700; color: var(--accent); font-size: 14.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#sp-close { width: 30px; height: 30px; flex: 0 0 auto; font-size: 13px; display: flex; align-items: center; justify-content: center; padding: 0; }
+.sp-row { display: flex; align-items: center; gap: 8px; margin-bottom: 9px; }
+.sp-label { font-size: 10.5px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text-dim); width: 50px; flex: 0 0 auto; }
+#sp-colors { display: grid; grid-template-columns: repeat(8, 1fr); gap: 4px; flex: 1; }
+#sp-colors .swatch { aspect-ratio: 1; border-width: 1.5px; }
+.sp-sizes { display: flex; gap: 6px; flex: 1; }
+.size-btn { flex: 1; padding: 6px 0; font-size: 12.5px; }
+.size-btn.active { background: rgba(255, 184, 77, 0.28); border-color: var(--accent); }
+.sp-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+.sp-actions .pill-btn { flex: 1; padding: 8px 6px; font-size: 12px; white-space: nowrap; }
+.sp-actions .pill-btn.danger { border-color: rgba(255, 107, 107, 0.5); color: var(--danger); }
+.sp-actions .pill-btn.danger:hover { background: rgba(255, 107, 107, 0.18); }
+
 /* ---------- Misiones ---------- */
 #missions-panel {
   position: fixed; right: 10px; top: 70px;
@@ -264,4 +290,5 @@ kbd {
   #missions-panel { width: min(260px, calc(100vw - 20px)); }
   #context-controls { bottom: 10px; gap: 6px; flex-wrap: wrap; width: calc(100vw - 12px); }
   .selection-pill, .pill-btn { padding: 8px 12px; font-size: 12px; }
+  #select-panel { width: min(252px, calc(100vw - 20px)); right: 10px; bottom: 10px; }
 }
