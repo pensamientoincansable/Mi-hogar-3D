@@ -121,15 +121,25 @@ const FURNITURE = {
       box(0.05, 0.3, 0.06, METAL, 0.3, 0.6, 0.39)
     );
   } },
-  cocina: { name: 'Cocina', ico: '🍳', cost: 550, w: 1, d: 1, build(c = 0x8a8f98) {
-    return grp(
+  cocina: { name: 'Cocina', ico: '🍳', cost: 550, w: 1, d: 1, anim: 'cocina', build(c = 0x8a8f98) {
+    const g = grp(
       box(0.95, 0.85, 0.65, c, 0, 0.43, 0, true),
       box(0.98, 0.06, 0.68, 0x3a3f4a, 0, 0.89),
       cyl(0.11, 0.11, 0.02, 0x14161c, -0.2, 0.93, -0.12),
       cyl(0.11, 0.11, 0.02, 0x14161c, 0.22, 0.93, -0.12),
       cyl(0.11, 0.11, 0.02, 0x14161c, -0.2, 0.93, 0.18),
-      cyl(0.11, 0.11, 0.02, 0x14161c, 0.22, 0.93, 0.18)
+      cyl(0.11, 0.11, 0.02, 0x14161c, 0.22, 0.93, 0.18),
+      cyl(0.15, 0.17, 0.16, 0x30343a, -0.2, 1.0, -0.12),
+      cyl(0.18, 0.18, 0.03, 0x3a3f4a, -0.2, 1.09, -0.12)
     );
+    for (let i = 0; i < 3; i++) {
+      const s = new THREE.Mesh(new THREE.SphereGeometry(0.055, 10, 8), new THREE.MeshLambertMaterial({ color: 0xf5f7fa, transparent: true, opacity: 0.4, depthWrite: false }));
+      s.position.set(-0.2, 1.12, -0.12);
+      s.userData.anim = 'steam';
+      s.castShadow = false;
+      g.add(s);
+    }
+    return g;
   } },
   inodoro: { name: 'Inodoro', ico: '🚽', cost: 250, w: 1, d: 1, build() {
     return grp(
@@ -199,15 +209,20 @@ const FURNITURE = {
       sph(0.1, 0xf2c94c, 0.08, 1.11, 0.02)
     );
   } },
-  reloj_pie: { name: 'Reloj de pie', ico: '🕰️', cost: 290, w: 1, d: 1, decor: true, build(c = WOOD) {
+  reloj_pie: { name: 'Reloj de pie', ico: '🕰️', cost: 290, w: 1, d: 1, decor: true, anim: 'reloj', build(c = WOOD) {
     const face = new THREE.Mesh(new THREE.CylinderGeometry(0.27, 0.27, 0.035, 24), mat(0xf4e8c8));
     face.rotation.x = Math.PI / 2; face.position.set(0, 1.46, 0.19);
+    const h2 = new THREE.Group(); h2.position.set(0, 1.46, 0.225);
+    h2.add(box(0.13, 0.025, 0.02, DARK, 0.06, 0, 0));
+    h2.userData.anim = 'hand2';
+    const h1 = new THREE.Group(); h1.position.set(0, 1.46, 0.225);
+    h1.add(box(0.025, 0.2, 0.02, DARK, 0, 0.1, 0));
+    h1.userData.anim = 'hand1';
     return grp(
       box(0.54, 1.75, 0.36, c, 0, 0.88, 0, true),
       box(0.4, 0.72, 0.04, 0x5a321b, 0, 0.62, 0.195),
-      face,
-      box(0.025, 0.18, 0.025, DARK, 0, 1.48, 0.225),
-      box(0.14, 0.025, 0.025, DARK, 0.06, 1.46, 0.225)
+      face, h2, h1,
+      sph(0.02, DARK, 0, 1.46, 0.24)
     );
   } },
   candelabro: { name: 'Candelabro', ico: '🕯️', cost: 130, w: 1, d: 1, decor: true, light: { y: 1.25, i: 7, color: 0xffb45c }, build(c = METAL) {
@@ -219,8 +234,8 @@ const FURNITURE = {
     }
     return g;
   } },
-  acuario: { name: 'Acuario', ico: '🐠', cost: 420, w: 2, d: 1, decor: true, light: { y: 1.25, i: 5, color: 0x68cfee }, build(c = 0x4a7fb5) {
-    return grp(
+  acuario: { name: 'Acuario', ico: '🐠', cost: 420, w: 2, d: 1, decor: true, light: { y: 1.25, i: 5, color: 0x68cfee }, anim: 'acuario', build(c = 0x4a7fb5) {
+    const g = grp(
       box(1.55, 0.65, 0.52, WOOD_D, 0, 0.34, 0, true),
       glass(1.48, 0.62, 0x4dbddd, 0.48, 0, 1.0, 0),
       box(1.58, 0.06, 0.56, DARK, 0, 0.68, 0),
@@ -229,6 +244,12 @@ const FURNITURE = {
       sph(0.065, 0xe85d75, 0.3, 0.91, 0.29),
       cyl(0.02, 0.03, 0.4, 0x3f7d4a, 0.55, 0.88, 0.1)
     );
+    for (const [col] of [[0xff8a5c], [0x4ad9c5]]) {
+      const f = grp(sph(0.06, col, 0, 0, 0), box(0.07, 0.03, 0.02, col, 0, 0, -0.08));
+      f.userData.anim = 'afish';
+      g.add(f);
+    }
+    return g;
   } },
   puff: { name: 'Puf', ico: '🟠', cost: 120, w: 1, d: 1, decor: true, build(c = 0xc96f4a) {
     return grp(cyl(0.38, 0.43, 0.42, c, 0, 0.23, 0, 18, true), cyl(0.33, 0.38, 0.08, shade(c, .15), 0, 0.48));
@@ -249,22 +270,26 @@ const FURNITURE = {
     }
     return g;
   } },
-  arbol: { name: 'Árbol', ico: '🌳', cost: 100, w: 1, d: 1, out: true, build() {
-    return grp(
-      cyl(0.09, 0.13, 1.1, 0x6b4423, 0, 0.55),
+  arbol: { name: 'Árbol', ico: '🌳', cost: 100, w: 1, d: 1, out: true, anim: 'sway', build() {
+    const f = grp(
       sph(0.55, 0x3f7d4a, 0, 1.45),
       sph(0.4, 0x4c9159, -0.3, 1.2),
       sph(0.38, 0x4c9159, 0.28, 1.7)
     );
+    f.userData.anim = 'sway';
+    return grp(cyl(0.09, 0.13, 1.1, 0x6b4423, 0, 0.55), f);
   } },
-  flores: { name: 'Flores', ico: '🌷', cost: 40, w: 1, d: 1, out: true, build() {
+  flores: { name: 'Flores', ico: '🌷', cost: 40, w: 1, d: 1, out: true, anim: 'sway', build() {
     const g = grp(box(0.8, 0.08, 0.8, 0x4a3626, 0, 0.05));
+    const p = grp();
     const cols = [0xe85d75, 0xf2c94c, 0xa06fc9, 0xff8a5c];
     for (let i = 0; i < 6; i++) {
       const px = -0.28 + (i % 3) * 0.28, pz = -0.15 + Math.floor(i / 3) * 0.3;
-      g.add(cyl(0.015, 0.015, 0.25, 0x4c9159, px, 0.2, pz, 6));
-      g.add(sph(0.07, cols[i % 4], px, 0.35, pz));
+      p.add(cyl(0.015, 0.015, 0.25, 0x4c9159, px, 0.2, pz, 6));
+      p.add(sph(0.07, cols[i % 4], px, 0.35, pz));
     }
+    p.userData.anim = 'sway';
+    g.add(p);
     return g;
   } },
   seto: { name: 'Seto', ico: '🌿', cost: 60, w: 1, d: 1, out: true, build() {
@@ -289,14 +314,27 @@ const FURNITURE = {
     }
     return g;
   } },
-  fuente: { name: 'Fuente', ico: '⛲', cost: 520, w: 2, d: 2, out: true, build(c = 0x8a8f98) {
-    return grp(
+  fuente: { name: 'Fuente', ico: '⛲', cost: 520, w: 2, d: 2, out: true, anim: 'fuente', build(c = 0x8a8f98) {
+    const g = grp(
       cyl(.78,.92,.28,c,0,.14,0,24,true),
       cyl(.66,.66,.08,0x67b8d4,0,.3,0,24),
       cyl(.13,.2,1.0,c,0,.77,0,18,true),
       cyl(.42,.22,.12,c,0,1.22,0,20,true),
       sph(.12,0x67b8d4,0,1.34,0)
     );
+    g.children[1].userData.anim = 'fwater'; // agua de la cuenca (ondula)
+    const jet = new THREE.Mesh(new THREE.CylinderGeometry(0.028, 0.05, 0.44, 8), new THREE.MeshLambertMaterial({ color: 0x8fd0e8, transparent: true, opacity: 0.45, depthWrite: false }));
+    jet.position.set(0, 1.5, 0);
+    jet.userData.anim = 'fjet';
+    g.add(jet);
+    for (let i = 0; i < 6; i++) {
+      const d = new THREE.Mesh(new THREE.SphereGeometry(0.035, 8, 6), new THREE.MeshLambertMaterial({ color: 0x8fd0e8, transparent: true, opacity: 0.75, depthWrite: false }));
+      d.position.set(0, 1.4, 0);
+      d.userData.anim = 'fdrop';
+      d.castShadow = false;
+      g.add(d);
+    }
+    return g;
   } },
   barbacoa: { name: 'Barbacoa', ico: '🔥', cost: 360, w: 1, d: 1, out: true, build(c = DARK) {
     const g = grp(
@@ -308,15 +346,209 @@ const FURNITURE = {
     for (const x of [-.25,.25]) g.add(box(.055,.72,.055,METAL,x,.38,0));
     return g;
   } },
-  estanque: { name: 'Estanque', ico: '💧', cost: 280, w: 2, d: 2, out: true, build() {
+  estanque: { name: 'Estanque', ico: '💧', cost: 280, w: 2, d: 2, out: true, anim: 'estanque', build() {
     const g = grp(
       cyl(.82,.9,.16,0x6b6f74,0,.08,0,28),
       cyl(.72,.74,.08,0x4dbddd,0,.18,0,28)
     );
+    g.children[1].userData.anim = 'ewater';
     for (const [x,z] of [[-.55,-.5],[.55,-.42],[-.62,.38],[.5,.5]]) g.add(sph(.16,0x777b7d,x,.18,z));
     g.add(cyl(.02,.025,.25,0x3f7d4a,.2,.34,-.1,8));
     g.add(sph(.09,0xe85d75,.2,.49,-.1));
     return g;
+  } },
+  /* ---- Nuevas decoraciones de interior ---- */
+  piano: { name: 'Piano', ico: '🎹', cost: 950, w: 2, d: 1, build(c = 0x2b2f38) {
+    const g = grp(
+      box(1.5, 0.85, 0.5, c, 0, 0.43, 0, true),
+      box(1.55, 0.1, 0.55, c, 0, 0.93, -0.12),
+      box(1.4, 0.06, 0.4, WHITE, 0, 0.9, 0.08),
+      box(1.3, 0.02, 0.1, 0x14161c, 0, 0.935, 0.16)
+    );
+    for (const x of [-0.65, 0, 0.65]) g.add(box(0.08, 0.42, 0.06, c, x, 0.21, 0.26));
+    return g;
+  } },
+  peluche: { name: 'Peluche', ico: '🧸', cost: 95, w: 1, d: 1, decor: true, anim: 'bob', build(c = 0xb98850) {
+    const f = grp(
+      sph(0.22, c, 0, 0.22, 0),
+      sph(0.16, c, 0, 0.5, 0),
+      sph(0.055, c, -0.14, 0.58, 0),
+      sph(0.055, c, 0.14, 0.58, 0),
+      sph(0.03, 0x2b2f38, -0.06, 0.52, 0.13),
+      sph(0.03, 0x2b2f38, 0.06, 0.52, 0.13),
+      sph(0.04, 0xd8b344, 0, 0.45, 0.14)
+    );
+    f.userData.anim = 'bob';
+    return grp(box(0.5, 0.05, 0.3, 0x4a3626, 0, 0.025), f);
+  } },
+  globo: { name: 'Globos', ico: '🎈', cost: 60, w: 1, d: 1, decor: true, anim: 'bob', build(c = 0xe85d75) {
+    const b = grp();
+    const cols = [c, 0xf2c94c, 0x4a7fb5];
+    for (let i = 0; i < 3; i++) {
+      const x = (i - 1) * 0.22;
+      b.add(sph(0.16, cols[i], x, 1.25 + (i % 2) * 0.12, 0));
+      b.add(cyl(0.008, 0.008, 0.4, 0xe8e2d5, x, 0.95, 0, 6));
+    }
+    b.userData.anim = 'bob';
+    return grp(cyl(0.015, 0.015, 1.1, METAL, 0, 0.55), b);
+  } },
+  pizarra: { name: 'Pizarra', ico: '📋', cost: 130, w: 1, d: 1, decor: true, build(c = WOOD) {
+    const l1 = box(0.08, 0.95, 0.05, c, -0.34, 0.47, -0.2); l1.rotation.x = -0.28;
+    const l2 = box(0.08, 0.95, 0.05, c, 0.34, 0.47, -0.2); l2.rotation.x = -0.28;
+    return grp(
+      l1, l2,
+      box(0.8, 0.62, 0.05, c, 0, 1.02, -0.14, true),
+      box(0.68, 0.5, 0.04, 0x33474f, 0, 1.02, -0.11),
+      box(0.05, 0.09, 0.02, 0xf5f0e8, -0.15, 1.15, -0.085),
+      box(0.05, 0.09, 0.02, 0xe85d75, 0.1, 0.95, -0.085),
+      box(0.72, 0.05, 0.12, c, 0, 0.72, -0.1),
+      box(0.12, 0.02, 0.03, WHITE, -0.1, 0.76, -0.1)
+    );
+  } },
+  lampara_mesa: { name: 'Lámpara de mesa', ico: '🪔', cost: 75, w: 1, d: 1, decor: true, light: { y: 0.55, i: 6, color: 0xffd9a0 }, build(c = METAL) {
+    return grp(
+      cyl(0.14, 0.18, 0.04, c, 0, 0.02),
+      cyl(0.02, 0.02, 0.4, c, 0, 0.22),
+      cyl(0.12, 0.18, 0.22, 0xf5e6c8, 0, 0.5, 0, 12, true)
+    );
+  } },
+  neon: { name: 'Neón luna', ico: '🌙', cost: 260, w: 1, d: 1, decor: true, anim: 'neon', light: { y: 1.3, i: 7, color: 0xff7ad9 }, build(c = 0x1e222c) {
+    const torus = new THREE.Mesh(
+      new THREE.TorusGeometry(0.26, 0.035, 10, 28),
+      new THREE.MeshLambertMaterial({ color: 0xff9ae0, emissive: 0xff3fae, emissiveIntensity: 0.9 })
+    );
+    torus.position.set(0, 1.25, 0.05);
+    torus.userData.anim = 'neon';
+    return grp(
+      box(0.85, 1.0, 0.06, c, 0, 1.2, -0.05, true),
+      torus,
+      cyl(0.02, 0.02, 0.7, 0x30343a, 0, 0.35),
+      cyl(0.22, 0.26, 0.05, 0x30343a, 0, 0.025)
+    );
+  } },
+  /* ---- Nuevas decoraciones de exterior ---- */
+  pino: { name: 'Pino', ico: '🌲', cost: 120, w: 1, d: 1, out: true, anim: 'sway', build() {
+    const f = grp(
+      cyl(0.42, 0.42, 0.5, 0x2f6b3f, 0, 0.75, 0, 12),
+      cyl(0.32, 0.32, 0.45, 0x357a48, 0, 1.1, 0, 12),
+      cyl(0.22, 0.22, 0.4, 0x3d8a52, 0, 1.42, 0, 12)
+    );
+    f.userData.anim = 'sway';
+    return grp(cyl(0.08, 0.12, 0.5, 0x5a3a22, 0, 0.25, 0), f);
+  } },
+  palmera: { name: 'Palmera', ico: '🌴', cost: 140, w: 1, d: 1, out: true, anim: 'sway', build() {
+    const fr = grp();
+    for (let i = 0; i < 6; i++) {
+      const w = new THREE.Group();
+      w.rotation.y = (i / 6) * Math.PI * 2;
+      const leaf = box(0.75, 0.05, 0.2, 0x4c9159, 0.34, 0, 0);
+      leaf.rotation.z = -0.55;
+      w.add(leaf);
+      fr.add(w);
+    }
+    fr.add(sph(0.09, 0x8b5a2b, 0.1, -0.08, 0.05));
+    fr.add(sph(0.09, 0x8b5a2b, -0.12, -0.08, -0.05));
+    fr.position.y = 1.45;
+    fr.userData.anim = 'sway';
+    return grp(cyl(0.07, 0.12, 1.5, 0x9c7a4a, 0, 0.75, 0, 10), fr);
+  } },
+  cactus: { name: 'Cactus', ico: '🌵', cost: 45, w: 1, d: 1, out: true, build() {
+    const arm = cyl(0.07, 0.07, 0.22, 0x3f8a4f, -0.18, 0.72, 0, 10);
+    arm.rotation.z = Math.PI / 2;
+    return grp(
+      cyl(0.12, 0.16, 0.16, 0xc96f4a, 0, 0.08, 0, 12),
+      cyl(0.13, 0.15, 0.7, 0x3f8a4f, 0, 0.5, 0, 12),
+      arm,
+      cyl(0.07, 0.07, 0.3, 0x3f8a4f, -0.28, 0.86, 0, 10),
+      sph(0.07, 0xe85d75, 0, 0.9, 0)
+    );
+  } },
+  hoguera: { name: 'Hoguera', ico: '🔥', cost: 300, w: 1, d: 1, out: true, anim: 'hoguera', light: { y: 0.7, i: 9, color: 0xff7a2a }, build() {
+    const g = grp();
+    for (let i = 0; i < 7; i++) {
+      const a = (i / 7) * Math.PI * 2;
+      g.add(sph(0.07, 0x777b7d, Math.cos(a) * 0.42, 0.05, Math.sin(a) * 0.42));
+    }
+    for (let i = 0; i < 4; i++) {
+      const l = cyl(0.05, 0.06, 0.7, 0x6b4423, 0, 0.16, 0, 8);
+      l.rotation.z = Math.PI / 2;
+      l.rotation.y = (i / 4) * Math.PI;
+      g.add(l);
+    }
+    const flames = [
+      [0, 0.4, 0, 0.17, 0xff5a1f],
+      [0, 0.5, 0, 0.12, 0xffa02a],
+      [0, 0.58, 0, 0.07, 0xffd36b]
+    ];
+    for (const [x, y, z, r, col] of flames) {
+      const f = sph(r, col, x, y, z);
+      f.userData.anim = 'fire';
+      g.add(f);
+    }
+    return g;
+  } },
+  valla: { name: 'Valla', ico: '🚧', cost: 45, w: 1, d: 1, out: true, build(c = 0xd8b579) {
+    const g = grp();
+    for (const x of [-0.42, 0, 0.42]) {
+      g.add(box(0.08, 0.68, 0.08, c, x, 0.34, 0, true));
+      g.add(cyl(0, 0.055, 0.14, c, x, 0.72, 0, 4));
+    }
+    g.add(box(0.98, 0.07, 0.05, c, 0, 0.55, 0, true));
+    g.add(box(0.98, 0.07, 0.05, c, 0, 0.28, 0, true));
+    return g;
+  } },
+  camino: { name: 'Camino de piedras', ico: '🪨', cost: 55, w: 1, d: 2, out: true, build(c = 0xb9bec7) {
+    const g = grp();
+    const spots = [[-0.15, -0.62, 0.34], [0.18, -0.2, 0.3], [-0.12, 0.22, 0.32], [0.1, 0.62, 0.28]];
+    for (const [x, z, r] of spots) g.add(cyl(r, r * 1.08, 0.06, c, x, 0.03, z, 10, true));
+    return g;
+  } },
+  estatua: { name: 'Estatua', ico: '🗿', cost: 380, w: 1, d: 1, out: true, build(c = 0xcfd4da) {
+    return grp(
+      cyl(0.42, 0.5, 0.3, 0x9aa0a8, 0, 0.15, 0, 18),
+      box(0.34, 0.8, 0.26, c, 0, 0.7, 0, true),
+      sph(0.18, c, 0, 1.28, 0, true),
+      box(0.1, 0.5, 0.1, c, -0.26, 0.95, 0, true),
+      box(0.1, 0.5, 0.1, c, 0.26, 0.95, 0, true)
+    );
+  } },
+  carpa: { name: 'Carpa', ico: '⛺', cost: 450, w: 2, d: 2, out: true, build(c = 0xb8443f) {
+    const py = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 1.05, 1.5, 4), mat(c));
+    py.position.set(0, 0.75, 0);
+    py.rotation.y = Math.PI / 4;
+    py.castShadow = true; py.receiveShadow = true;
+    py.userData.paint = true;
+    const door = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.26, 0.5, 4), mat(0x3a3f4a));
+    door.position.set(0, 0.25, 0.72);
+    door.rotation.y = Math.PI / 4;
+    return grp(py, door, cyl(0.012, 0.012, 0.2, DARK, 0, 1.55, 0, 6), sph(0.045, 0xf2c94c, 0, 1.65, 0));
+  } },
+  arco_florido: { name: 'Arco de flores', ico: '🌸', cost: 280, w: 2, d: 1, out: true, build(c = 0xe8d9b5) {
+    const g = grp(
+      cyl(0.05, 0.05, 1.6, c, -0.85, 0.8, 0, 10, true),
+      cyl(0.05, 0.05, 1.6, c, 0.85, 0.8, 0, 10, true)
+    );
+    const arch = new THREE.Mesh(new THREE.TorusGeometry(0.85, 0.05, 8, 20, Math.PI), mat(c));
+    arch.position.set(0, 1.6, 0);
+    arch.castShadow = true;
+    arch.userData.paint = true;
+    g.add(arch);
+    const cols = [0xe85d75, 0xf2c94c, 0xa06fc9];
+    for (let i = 0; i <= 8; i++) {
+      const a = (i / 8) * Math.PI;
+      g.add(sph(0.07, cols[i % 3], Math.cos(a) * 0.85, 1.6 + Math.sin(a) * 0.85, 0));
+      g.add(sph(0.05, cols[(i + 1) % 3], Math.cos(a) * 0.95, 1.6 + Math.sin(a) * 0.95, 0.04));
+    }
+    return g;
+  } },
+  hongo: { name: 'Hongo gigante', ico: '🍄', cost: 65, w: 1, d: 1, out: true, build(c = 0xe85d35) {
+    return grp(
+      cyl(0.14, 0.18, 0.5, 0xf5f0e8, 0, 0.25, 0, 12),
+      cyl(0.32, 0.1, 0.3, c, 0, 0.6, 0, 14, true),
+      sph(0.05, 0xf5f0e8, 0.12, 0.52, 0.2),
+      sph(0.045, 0xf5f0e8, -0.15, 0.5, 0.14),
+      sph(0.04, 0xf5f0e8, 0.05, 0.48, -0.2)
+    );
   } },
 };
 
@@ -361,6 +593,8 @@ const snd = {
   error: () => { beep(140, 0.18, 'square', 0.06); },
   cash: () => { beep(660, 0.08, 'sine', 0.12); setTimeout(() => beep(880, 0.12, 'sine', 0.12), 80); },
   click: () => { beep(520, 0.04, 'triangle', 0.06); },
+  select: () => { beep(640, 0.05, 'sine', 0.09, 200); },
+  hammer: () => { beep(90, 0.22, 'square', 0.2, -50); setTimeout(() => beep(150, 0.09, 'triangle', 0.08, 80), 40); },
 };
 
 /* ---------------- Estado ---------------- */
@@ -482,6 +716,98 @@ function updateDayNight(dt) {
   moon.intensity = 0.5 * (1 - dayT);
   stars.material.opacity = (1 - dayT) * 0.9;
   for (const l of lampLights.values()) l.intensity = l.userData.max * (1 - dayT);
+}
+
+/* ---------------- Vida ambiental (nubes, pájaros, mariposas, luciérnagas) ---------------- */
+const envGroup = new THREE.Group();
+scene.add(envGroup);
+
+const clouds = [];
+const CLOUD_DAY = new THREE.Color(0xffffff), CLOUD_NIGHT = new THREE.Color(0x39415f);
+{
+  const m = new THREE.MeshLambertMaterial({ color: 0xffffff, transparent: true, opacity: 0.9 });
+  for (let i = 0; i < 5; i++) {
+    const g = new THREE.Group();
+    const n = 3 + (i % 3);
+    for (let j = 0; j < n; j++) {
+      const p = new THREE.Mesh(new THREE.SphereGeometry(1.5 + Math.random() * 1.1, 10, 8), m);
+      p.position.set(j * 1.7 - (n - 1) * 0.85, Math.random() * 0.4, Math.random() * 1.1);
+      p.scale.y = 0.5;
+      g.add(p);
+    }
+    g.position.set((Math.random() - 0.5) * 150, 24 + Math.random() * 12, (Math.random() - 0.5) * 130);
+    g.scale.setScalar(1.3 + Math.random() * 1.2);
+    envGroup.add(g);
+    clouds.push({ g, v: 0.5 + Math.random() * 0.7, m });
+  }
+}
+const birds = [];
+{
+  const bm = new THREE.MeshLambertMaterial({ color: 0x39404d });
+  for (let i = 0; i < 4; i++) {
+    const g = new THREE.Group();
+    g.add(new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.08, 0.42), bm));
+    const wl = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.02, 0.16), bm); wl.position.x = -0.26;
+    const wr = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.02, 0.16), bm); wr.position.x = 0.26;
+    g.add(wl, wr);
+    envGroup.add(g);
+    birds.push({ g, wl, wr, r: 24 + i * 5, h: 15 + i * 2.5, v: 0.22 + i * 0.05, ph: i * 1.9 });
+  }
+}
+const butterflies = [];
+{
+  const cols = [0xe85d75, 0xf2c94c, 0xa06fc9, 0xff8a5c];
+  for (let i = 0; i < 4; i++) {
+    const g = new THREE.Group();
+    const wm = new THREE.MeshLambertMaterial({ color: cols[i], side: THREE.DoubleSide });
+    const wl = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.012, 0.07), wm); wl.position.x = -0.055;
+    const wr = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.012, 0.07), wm); wr.position.x = 0.055;
+    const bd = new THREE.Mesh(new THREE.BoxGeometry(0.018, 0.03, 0.09), new THREE.MeshLambertMaterial({ color: 0x4a3f35 }));
+    g.add(wl, wr, bd);
+    envGroup.add(g);
+    butterflies.push({ g, wl, wr, cx: (Math.random() - 0.5) * 20, cz: (Math.random() - 0.5) * 20, r: 2 + Math.random() * 4, h: 0.7 + Math.random() * 1.3, v: 0.5 + Math.random() * 0.6, ph: Math.random() * 6 });
+  }
+}
+const fireflies = [];
+{
+  for (let i = 0; i < 10; i++) {
+    const m = new THREE.Mesh(new THREE.SphereGeometry(0.05, 8, 6), new THREE.MeshBasicMaterial({ color: 0xd9ff86, transparent: true, opacity: 0 }));
+    envGroup.add(m);
+    fireflies.push({ m, cx: (Math.random() - 0.5) * 30, cz: (Math.random() - 0.5) * 30, h: 0.4 + Math.random() * 1.8, v: 0.25 + Math.random() * 0.4, ph: Math.random() * 6 });
+  }
+}
+function updateEnv(t, dt) {
+  for (const c of clouds) {
+    c.g.position.x += c.v * dt;
+    if (c.g.position.x > 95) c.g.position.x = -95;
+  }
+  if (clouds.length) clouds[0].m.color.lerpColors(CLOUD_NIGHT, CLOUD_DAY, dayT);
+  for (const b of birds) {
+    b.g.visible = dayT > 0.25;
+    if (!b.g.visible) continue;
+    const a = t * b.v + b.ph;
+    b.g.position.set(Math.cos(a) * b.r, b.h + Math.sin(t * 0.6 + b.ph) * 1.6, Math.sin(a) * b.r);
+    b.g.rotation.y = -a;
+    const f = Math.sin(t * 9 + b.ph) * 0.55;
+    b.wl.rotation.z = f;
+    b.wr.rotation.z = -f;
+  }
+  const showButterflies = dayT > 0.3;
+  for (const b of butterflies) {
+    b.g.visible = showButterflies;
+    if (!showButterflies) continue;
+    const a = t * b.v + b.ph;
+    b.g.position.set(b.cx + Math.cos(a) * b.r, b.h + Math.sin(t * 2.1 + b.ph) * 0.35, b.cz + Math.sin(a * 0.9 + 1.3) * b.r * 0.75);
+    b.g.rotation.y = -a;
+    const f = Math.sin(t * 14 + b.ph) * 0.9;
+    b.wl.rotation.z = f;
+    b.wr.rotation.z = -f;
+  }
+  const night = 1 - dayT;
+  for (const f of fireflies) {
+    f.m.position.set(f.cx + Math.cos(t * f.v + f.ph) * 2, f.h + Math.sin(t * 0.7 + f.ph * 2) * 0.5, f.cz + Math.sin(t * f.v * 0.8 + f.ph) * 2);
+    f.m.material.opacity = night * (0.35 + 0.65 * Math.abs(Math.sin(t * 1.3 + f.ph)));
+  }
 }
 
 /* ---------------- Construcción de mallas ---------------- */
@@ -625,8 +951,10 @@ function addObjectMesh(obj) {
   const m = def.build(obj.c);
   const t = objTransform(obj);
   m.position.set(t.x, 0, t.z); m.rotation.y = t.ry;
+  m.scale.setScalar(obj.s || 1);
   m.userData = { kind: 'object', key: obj.id };
   buildGroup.add(m); meshes.objects[obj.id] = m;
+  attachAnims(obj);
   if (def.light) {
     const pl = new THREE.PointLight(def.light.color, 0, 9, 1.6);
     pl.position.set(t.x, def.light.y, t.z);
@@ -640,9 +968,12 @@ function removeMesh(kind, key) {
   const store = meshes[kind + 's'];
   const m = store[key];
   if (m) { buildGroup.remove(m); delete store[key]; }
-  if (kind === 'object' && lampLights.has(key)) {
-    scene.remove(lampLights.get(key));
-    lampLights.delete(key);
+  if (kind === 'object') {
+    objAnims.delete(key);
+    if (lampLights.has(key)) {
+      scene.remove(lampLights.get(key));
+      lampLights.delete(key);
+    }
   }
 }
 function rebuildAll() {
@@ -654,6 +985,133 @@ function rebuildAll() {
   for (const [k, v] of Object.entries(state.walls)) addWallMesh(k, v);
   for (const [k, v] of Object.entries(state.roofs)) addRoofMesh(k, v);
   for (const o of Object.values(state.objects)) addObjectMesh(o);
+  clearSelection();
+}
+
+/* ---------------- Animaciones por objeto (objetos "vivos") ---------------- */
+const objAnims = new Map(); // objId -> (t) => void
+
+const ANIM_BUILDERS = {
+  fuente: (p, ctx) => (t) => {
+    (p.fwater || []).forEach(w => w.scale.setScalar(1 + 0.04 * Math.sin(t * 2.7)));
+    const jet = (p.fjet || [])[0];
+    if (jet) {
+      const s = 0.55 + 0.45 * Math.abs(Math.sin(t * 2.3 + ctx.ph(1)));
+      jet.scale.y = s;
+      jet.position.y = 1.38 + 0.22 * s;
+      jet.material.opacity = 0.3 + 0.25 * s;
+    }
+    (p.fdrop || []).forEach((d, i) => {
+      const q = (t * 0.85 + i / 6) % 1;
+      const a = i * 1.05 + ctx.ph(2);
+      const r = 0.1 + q * 0.55;
+      d.position.set(Math.cos(a) * r, 1.42 - q * 1.05, Math.sin(a) * r);
+      d.scale.setScalar(1 - q * 0.35);
+    });
+  },
+  cocina: (p, ctx) => (t) => {
+    (p.steam || []).forEach((s, i) => {
+      const q = (t * 0.42 + i / 3 + 0.1 * ctx.ph(3)) % 1;
+      s.position.y = 1.12 + q * 0.6;
+      s.position.x = -0.2 + Math.sin(t * 2 + i * 2) * 0.03;
+      s.scale.setScalar(0.7 + q * 1.6);
+      s.material.opacity = 0.42 * (1 - q);
+    });
+  },
+  acuario: (p, ctx) => (t) => {
+    (p.afish || []).forEach((f, i) => {
+      const a = t * 0.9 + i * Math.PI + ctx.ph(4);
+      f.position.set(Math.cos(a) * 0.5, 1.0 + Math.sin(t * 1.5 + i * 2) * 0.1, i % 2 ? 0.16 : -0.14);
+      f.rotation.y = -a;
+    });
+  },
+  estanque: (p) => (t) => {
+    (p.ewater || []).forEach(w => w.scale.setScalar(1 + 0.05 * Math.sin(t * 1.8)));
+  },
+  reloj: (p) => (t) => {
+    const h1 = (p.hand1 || [])[0], h2 = (p.hand2 || [])[0];
+    if (h1) h1.rotation.z = -t * 0.5;
+    if (h2) h2.rotation.z = -t * 0.042;
+  },
+  hoguera: (p, ctx) => (t) => {
+    (p.fire || []).forEach((f, i) => {
+      f.scale.set(
+        1 + 0.18 * Math.sin(t * 12 + i * 2.3),
+        0.8 + 0.35 * Math.sin(t * 10 + i * 1.7) + 0.12 * Math.sin(t * 21 + i),
+        1 + 0.18 * Math.cos(t * 11 + i * 2.9)
+      );
+      f.position.y = f.userData.baseY + 0.02 * Math.sin(t * 9 + i);
+    });
+    const l = lampLights.get(ctx.id);
+    if (l) l.intensity = l.userData.max * (1 - dayT) * (0.75 + 0.25 * Math.abs(Math.sin(t * 9 + ctx.ph(5))));
+  },
+  sway: (p, ctx) => (t) => {
+    (p.sway || []).forEach((g, i) => {
+      g.rotation.z = 0.028 * Math.sin(t * 0.8 + ctx.ph(i));
+      g.rotation.x = 0.02 * Math.cos(t * 0.63 + ctx.ph(i + 3));
+    });
+  },
+  bob: (p, ctx) => (t) => {
+    (p.bob || []).forEach((g, i) => {
+      g.position.y = g.userData.baseY + 0.05 * Math.sin(t * 1.9 + ctx.ph(i));
+    });
+  },
+  neon: (p, ctx) => (t) => {
+    const pulse = 0.75 + 0.3 * Math.sin(t * 2.4 + ctx.ph(6));
+    (p.neon || []).forEach(n => { if (n.material && n.material.emissiveIntensity !== undefined) n.material.emissiveIntensity = pulse; });
+    const l = lampLights.get(ctx.id);
+    if (l) l.intensity = l.userData.max * (1 - dayT) * (0.4 + pulse * 0.8);
+  },
+};
+
+function attachAnims(obj) {
+  const def = FURNITURE[obj.t];
+  const m = meshes.objects[obj.id];
+  if (!def || !def.anim || !m) return;
+  const parts = {};
+  m.traverse(n => { if (n.userData.anim) (parts[n.userData.anim] = parts[n.userData.anim] || []).push(n); });
+  for (const k of ['fire', 'bob']) (parts[k] || []).forEach(n => { n.userData.baseY = n.userData.baseY ?? n.position.y; });
+  const seed = obj.id.charCodeAt(obj.id.length - 1) * 7.13 + 3;
+  const f = ANIM_BUILDERS[def.anim];
+  if (f) objAnims.set(obj.id, f(parts, { id: obj.id, ph: (i = 0) => Math.sin(seed + i * 12.9) * 4.7 }));
+}
+function runObjAnims(t) {
+  for (const fn of objAnims.values()) fn(t);
+}
+
+/* ---------------- Partículas (polvo al romper / vender) ---------------- */
+const particles = [];
+function spawnDust(pos, n = 9, color = 0xd6cfc2) {
+  for (let i = 0; i < n; i++) {
+    const size = 0.05 + Math.random() * 0.09;
+    const m = new THREE.Mesh(
+      new THREE.SphereGeometry(size, 7, 6),
+      new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.9 })
+    );
+    m.position.copy(pos).add(new THREE.Vector3((Math.random() - 0.5) * 0.4, (Math.random() - 0.3) * 0.3, (Math.random() - 0.5) * 0.4));
+    scene.add(m);
+    particles.push({ m, vx: (Math.random() - 0.5) * 1.6, vy: 0.8 + Math.random() * 1.2, vz: (Math.random() - 0.5) * 1.6, t: 0, life: 0.5 + Math.random() * 0.35 });
+  }
+}
+function updateParticles(dt) {
+  for (let i = particles.length - 1; i >= 0; i--) {
+    const p = particles[i];
+    p.t += dt;
+    if (p.t >= p.life) {
+      scene.remove(p.m);
+      p.m.geometry.dispose();
+      p.m.material.dispose();
+      particles.splice(i, 1);
+      continue;
+    }
+    p.vy -= 2.2 * dt;
+    p.m.position.x += p.vx * dt;
+    p.m.position.y += p.vy * dt;
+    p.m.position.z += p.vz * dt;
+    const k = p.t / p.life;
+    p.m.scale.setScalar(1 + k * 1.6);
+    p.m.material.opacity = 0.9 * (1 - k);
+  }
 }
 
 /* ---------------- Ocupación ---------------- */
@@ -690,7 +1148,7 @@ function clearGhost() {
 }
 function makeGhost() {
   clearGhost();
-  if (!tool || tool.mode === 'paint' || tool.mode === 'delete') return;
+  if (!tool || ['paint', 'delete', 'select', 'hammer'].includes(tool.mode)) return;
   let g = null;
   if (tool.mode === 'build') {
     const def = BUILD_ITEMS[tool.id];
@@ -710,7 +1168,10 @@ function selectedToolDef(t = tool) {
   if (!t) return null;
   if (t.mode === 'build') return BUILD_ITEMS[t.id];
   if (t.mode === 'furniture') return FURNITURE[t.id];
-  return t.mode === 'paint' ? { name: 'Pintar', ico: '🎨' } : { name: 'Vender', ico: '🧹' };
+  if (t.mode === 'paint') return { name: 'Pintar', ico: '🎨' };
+  if (t.mode === 'select') return { name: 'Seleccionar', ico: '🖐️' };
+  if (t.mode === 'hammer') return { name: 'Mazo', ico: '🔨' };
+  return { name: 'Vender', ico: '🧹' };
 }
 function updateRotationUI() {
   const btn = document.getElementById('btn-rotate');
@@ -861,30 +1322,158 @@ function paintAt(ev) {
   scheduleSave();
 }
 
+/* ---------------- Eliminación unificada (vender / mazo / panel) ---------------- */
+function removeBuildItem(kind, key, refund) {
+  const store = state[kind + 's'];
+  const data = store[key];
+  if (!data) return;
+  let cost = 0;
+  if (kind === 'floor') cost = (BUILD_ITEMS[data.t] || BUILD_ITEMS.suelo).cost;
+  else if (kind === 'roof') cost = (BUILD_ITEMS[data.t] || BUILD_ITEMS.techo).cost;
+  else if (kind === 'wall') cost = (BUILD_ITEMS[data.t] || BUILD_ITEMS.pared).cost;
+  else cost = (FURNITURE[data.t] || { cost: 0 }).cost;
+  delete store[key];
+  removeMesh(kind, key);
+  if (refund) {
+    const r = Math.floor(cost / 2);
+    state.money += r;
+    updateMoney(true);
+    toast(`Vendido por ${fmt(r)} ♻️`, 'success');
+  }
+  if (selection && selection.kind === kind && selection.key === key) clearSelection();
+  scheduleSave();
+}
 function deleteAt(ev) {
   const hit = pickBuild(ev);
   if (!hit) return;
   const { kind, key } = hit.node.userData;
-  let refund = 0;
-  if (kind === 'floor') {
-    refund = (BUILD_ITEMS[state.floors[key].t] || BUILD_ITEMS.suelo).cost;
-    delete state.floors[key];
-  } else if (kind === 'roof') {
-    refund = (BUILD_ITEMS[state.roofs[key].t] || BUILD_ITEMS.techo).cost;
-    delete state.roofs[key];
-  } else if (kind === 'wall') {
-    refund = (BUILD_ITEMS[state.walls[key].t] || BUILD_ITEMS.pared).cost;
-    delete state.walls[key];
-  } else if (kind === 'object') {
-    refund = (FURNITURE[state.objects[key].t] || { cost: 0 }).cost;
-    delete state.objects[key];
-  }
-  removeMesh(kind, key);
-  state.money += Math.floor(refund / 2);
-  updateMoney(true);
-  toast(`Vendido por ${fmt(Math.floor(refund / 2))} ♻️`, 'success');
+  const center = new THREE.Box3().setFromObject(hit.node).getCenter(new THREE.Vector3());
+  removeBuildItem(kind, key, true);
+  spawnDust(center, 6);
   snd.remove();
+}
+function hammerAt(ev) {
+  const hit = pickBuild(ev);
+  if (!hit) { snd.error(); return; }
+  const { kind, key } = hit.node.userData;
+  const center = new THREE.Box3().setFromObject(hit.node).getCenter(new THREE.Vector3());
+  removeBuildItem(kind, key, false);
+  spawnDust(center, 10);
+  snd.hammer();
+}
+
+/* ---------------- Seleccionar con la mano 🖐️ ---------------- */
+let selection = null; // {kind:'floor'|'wall'|'roof'|'object', key}
+let selHelper = null;
+const selPanelEl = document.getElementById('select-panel');
+
+function clearSelection() {
+  selection = null;
+  if (selHelper) { scene.remove(selHelper); selHelper = null; }
+  if (selPanelEl) selPanelEl.classList.add('hidden');
+}
+function refreshSelHelper() {
+  if (!selection) return;
+  const node = selection.kind === 'object' ? meshes.objects[selection.key] : meshes[selection.kind + 's'][selection.key];
+  if (!node) { clearSelection(); return; }
+  if (selHelper) scene.remove(selHelper);
+  selHelper = new THREE.BoxHelper(node, 0xffd36b);
+  selHelper.material.transparent = true;
+  scene.add(selHelper);
+}
+function selectAt(ev) {
+  const hit = pickBuild(ev);
+  if (!hit) { clearSelection(); return; }
+  const { kind, key } = hit.node.userData;
+  selection = { kind, key };
+  refreshSelHelper();
+  renderSelectPanel();
+  snd.select();
+}
+function selTarget() {
+  if (!selection) return null;
+  return state[selection.kind + 's'][selection.key] || null;
+}
+function renderSelectPanel() {
+  const tgt = selTarget();
+  if (!tgt || !selPanelEl) { clearSelection(); return; }
+  const def = selection.kind === 'object' ? FURNITURE[tgt.t] : BUILD_ITEMS[tgt.t];
+  const refund = Math.floor((def ? def.cost : 0) / 2);
+  document.getElementById('sp-name').textContent = def ? `${def.ico} ${def.name}` : 'Pieza';
+  document.getElementById('sp-sell').textContent = `♻️ Vender +${fmt(refund)}`;
+  const isObj = selection.kind === 'object';
+  document.getElementById('sp-size-row').classList.toggle('hidden', !isObj);
+  document.getElementById('sp-rotate').classList.toggle('hidden', !isObj);
+  const s = isObj ? (tgt.s || 1) : 1;
+  document.querySelectorAll('.size-btn').forEach(b => b.classList.toggle('active', Math.abs(+b.dataset.scale - s) < 0.01));
+  selPanelEl.classList.remove('hidden');
+}
+function applySelColor(c) {
+  if (!selection) return;
+  if (selection.kind === 'object') {
+    const obj = state.objects[selection.key];
+    obj.c = c;
+    removeMesh('object', selection.key);
+    addObjectMesh(obj);
+  } else {
+    const store = state[selection.kind + 's'];
+    store[selection.key].c = c;
+    const adder = { floor: addFloorMesh, wall: addWallMesh, roof: addRoofMesh }[selection.kind];
+    removeMesh(selection.kind, selection.key);
+    adder(selection.key, store[selection.key]);
+  }
+  refreshSelHelper();
+  snd.click();
   scheduleSave();
+}
+function applySelScale(s) {
+  if (!selection || selection.kind !== 'object') return;
+  const obj = state.objects[selection.key];
+  obj.s = s;
+  const m = meshes.objects[selection.key];
+  if (m) m.scale.setScalar(s);
+  refreshSelHelper();
+  renderSelectPanel();
+  snd.click();
+  scheduleSave();
+}
+function rotateSelected() {
+  if (!selection || selection.kind !== 'object') return;
+  const obj = state.objects[selection.key];
+  const def = FURNITURE[obj.t];
+  const nr = (obj.r + 1) % 4;
+  const w = nr % 2 ? def.d : def.w, d = nr % 2 ? def.w : def.d;
+  if (obj.x < 0 || obj.z < 0 || obj.x + w > S || obj.z + d > S) { toast('No cabe ahí 🚫', 'error'); snd.error(); return; }
+  const occ = occupiedMap(obj.id);
+  const tmp = { ...obj, r: nr };
+  for (const c of objCells(tmp)) if (occ.has(c)) { toast('No cabe ahí 🚫', 'error'); snd.error(); return; }
+  obj.r = nr;
+  const m = meshes.objects[obj.id];
+  if (m) {
+    const t = objTransform(obj);
+    m.position.set(t.x, 0, t.z);
+    m.rotation.y = t.ry;
+  }
+  refreshSelHelper();
+  snd.click();
+  scheduleSave();
+}
+function initSelectPanel() {
+  const pal = document.getElementById('sp-colors');
+  if (!pal) return;
+  PALETTE.forEach(c => {
+    const s = document.createElement('div');
+    s.className = 'swatch';
+    s.title = 'Pintar de este color';
+    s.style.background = '#' + c.toString(16).padStart(6, '0');
+    s.addEventListener('click', () => applySelColor(c));
+    pal.appendChild(s);
+  });
+  document.querySelectorAll('.size-btn').forEach(b => b.addEventListener('click', () => applySelScale(+b.dataset.scale)));
+  document.getElementById('sp-rotate').addEventListener('click', rotateSelected);
+  document.getElementById('sp-sell').addEventListener('click', () => { if (selection) removeBuildItem(selection.kind, selection.key, true); });
+  document.getElementById('sp-delete').addEventListener('click', () => { if (selection) { const { kind, key } = selection; const node = state[kind + 's'][key] && (kind === 'object' ? meshes.objects[key] : meshes[kind + 's'][key]); if (node) spawnDust(new THREE.Box3().setFromObject(node).getCenter(new THREE.Vector3()), 8); removeBuildItem(kind, key, false); } });
+  document.getElementById('sp-close').addEventListener('click', clearSelection);
 }
 
 /* ---------------- Misiones ---------------- */
@@ -916,6 +1505,10 @@ const MISSIONS = [
   { id: 'm10', name: '🌳 Jardín verde', desc: '5 plantas de exterior', reward: 400, goal: 5, prog: countOut },
   { id: 'm11', name: '🏆 Gran decorador', desc: 'Coloca 15 muebles', reward: 800, goal: 15, prog: countFurn },
   { id: 'm12', name: '🪴 Toque personal', desc: 'Añade 5 adornos', reward: 450, goal: 5, prog: countDecor },
+  { id: 'm13', name: '🎹 Alma de músico', desc: 'Coloca un piano', reward: 400, goal: 1, prog: () => countObj('piano') },
+  { id: 'm14', name: '🌴 Jardín tropical', desc: 'Pino, palmera y cactus', reward: 500, goal: 3, prog: () => Math.min(countObj('pino'), 1) + Math.min(countObj('palmera'), 1) + Math.min(countObj('cactus'), 1) },
+  { id: 'm15', name: '🔥 Ronda de fuego', desc: 'Hoguera + barbacoa', reward: 450, goal: 2, prog: () => Math.min(countObj('hoguera'), 1) + Math.min(countObj('barbacoa'), 1) },
+  { id: 'm16', name: '🌙 Noche con encanto', desc: 'Farola + neón o candelabro', reward: 450, goal: 2, prog: () => Math.min(countObj('farola'), 1) + Math.min(Math.min(countObj('neon'), 1) + Math.min(countObj('candelabro'), 1), 1) },
 ];
 
 function checkMissions() {
@@ -1068,8 +1661,11 @@ function buildUI() {
   }
 
   const pH = document.querySelector('[data-panel="herramientas"]');
+  pH.appendChild(itemButton('select', 'select', { name: 'Seleccionar', ico: '🖐️' }));
   pH.appendChild(itemButton('paint', 'paint', { name: 'Pintar', ico: '🎨' }));
   pH.appendChild(itemButton('delete', 'delete', { name: 'Vender', ico: '🧹' }));
+  pH.appendChild(itemButton('hammer', 'hammer', { name: 'Mazo', ico: '🔨' }));
+  initSelectPanel();
 
   // Pestañas
   document.querySelectorAll('.tab').forEach(tab => {
@@ -1116,6 +1712,7 @@ function enterWalk() {
   document.getElementById('walk-hint').classList.remove('hidden');
   document.getElementById('btn-walk').classList.add('active');
   selectTool(null);
+  clearSelection();
   setInventoryOpen(false);
   canvas.requestPointerLock?.();
 }
@@ -1181,7 +1778,7 @@ function refreshGhost() {
   setGhostValid(canPlace());
 }
 function updatePlacementHover(e) {
-  if (walkMode || !tool || tool.mode === 'paint' || tool.mode === 'delete') {
+  if (walkMode || !tool || ['paint', 'delete', 'select', 'hammer'].includes(tool.mode)) {
     if (ghost) ghost.visible = false;
     hover = null;
     return;
@@ -1224,6 +1821,8 @@ canvas.addEventListener('pointerup', e => {
   if (!tool) return;
   if (tool.mode === 'paint') paintAt(e);
   else if (tool.mode === 'delete') deleteAt(e);
+  else if (tool.mode === 'hammer') hammerAt(e);
+  else if (tool.mode === 'select') selectAt(e);
   else { updatePlacementHover(e); place(); }
 });
 canvas.addEventListener('pointercancel', e => {
@@ -1237,11 +1836,14 @@ canvas.addEventListener('pointermove', updatePlacementHover);
 
 window.addEventListener('keydown', e => {
   keys[e.code] = true;
-  if (e.code === 'KeyR' && tool && tool.mode === 'furniture') {
-    e.preventDefault();
-    rotateTool();
+  if (e.code === 'KeyR') {
+    if (selection && selection.kind === 'object') { e.preventDefault(); rotateSelected(); }
+    else if (tool && tool.mode === 'furniture') { e.preventDefault(); rotateTool(); }
   }
-  if (e.code === 'Escape' && !walkMode) selectTool(null);
+  if (e.code === 'Escape' && !walkMode) {
+    if (selection) clearSelection();
+    else selectTool(null);
+  }
 });
 window.addEventListener('keyup', e => { keys[e.code] = false; });
 
@@ -1307,12 +1909,21 @@ renderMissions();
 if (!localStorage.getItem(HELP_KEY)) document.getElementById('help-modal').classList.remove('hidden');
 
 const clock = new THREE.Clock();
+let elapsed = 0;
 function animate() {
   requestAnimationFrame(animate);
   const dt = Math.min(clock.getDelta(), 0.1);
+  elapsed += dt;
   if (walkMode) updateWalk(dt);
   else controls.update();
   updateDayNight(dt);
+  runObjAnims(elapsed);
+  updateEnv(elapsed, dt);
+  updateParticles(dt);
+  if (selHelper) {
+    selHelper.material.opacity = 0.55 + 0.35 * Math.sin(elapsed * 5);
+    selHelper.update();
+  }
   renderer.render(scene, camera);
 }
 animate();
