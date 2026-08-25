@@ -4,6 +4,9 @@
    ============================================================ */
 import * as THREE from 'three';
 import { OrbitControls } from '../vendor/OrbitControls.js';
+import { GLTFLoader } from '../vendor/loaders/GLTFLoader.js';
+import { FBXLoader } from '../vendor/loaders/FBXLoader.js';
+import { RoundedBoxGeometry } from '../vendor/geometries/RoundedBoxGeometry.js';
 
 /* ---------------- Constantes ---------------- */
 const S = 40;             // tamaño de la parcela (celdas)
@@ -88,6 +91,17 @@ function box(w, h, d, color, x = 0, y = 0, z = 0, paint = false, surface = null)
   if (paint) m.userData.paint = true;
   return m;
 }
+// Caja con cantos suavizados para piezas que se ven de cerca. Los muebles ya no
+// parecen bloques de prototipo y las aristas capturan mejor la luz ambiental.
+function rbox(w, h, d, color, x = 0, y = 0, z = 0, radius = 0.045, paint = false, surface = null) {
+  const base = mat(color, surface ? { surface } : {});
+  const safeRadius = Math.min(radius, w * 0.24, h * 0.24, d * 0.24);
+  const m = new THREE.Mesh(new RoundedBoxGeometry(w, h, d, 2, safeRadius), paint ? base.clone() : base);
+  m.position.set(x, y, z);
+  m.castShadow = true; m.receiveShadow = true;
+  if (paint) m.userData.paint = true;
+  return m;
+}
 function cyl(rt, rb, h, color, x = 0, y = 0, z = 0, seg = 18, paint = false, surface = null) {
   const base = mat(color, surface ? { surface } : {});
   const m = new THREE.Mesh(new THREE.CylinderGeometry(rt, rb, h, seg), paint ? base.clone() : base);
@@ -124,6 +138,38 @@ function shade(color, amount) {
   return c.getHex();
 }
 function grp(...children) { const g = new THREE.Group(); children.forEach(c => g.add(c)); return g; }
+function ellipsoid(rx, ry, rz, color, x = 0, y = 0, z = 0, paint = false, surface = null, seg = 20) {
+  const base = mat(color, surface ? { surface } : {});
+  const m = new THREE.Mesh(new THREE.SphereGeometry(1, seg, Math.max(10, seg - 6)), paint ? base.clone() : base);
+  m.scale.set(rx, ry, rz);
+  m.position.set(x, y, z);
+  m.castShadow = true; m.receiveShadow = true;
+  if (paint) m.userData.paint = true;
+  return m;
+}
+function lathe(profile, color, x = 0, y = 0, z = 0, paint = false, surface = null, seg = 32) {
+  const points = profile.map(([px, py]) => new THREE.Vector2(px, py));
+  const base = mat(color, surface ? { surface } : {});
+  const m = new THREE.Mesh(new THREE.LatheGeometry(points, seg), paint ? base.clone() : base);
+  m.position.set(x, y, z);
+  m.castShadow = true; m.receiveShadow = true;
+  if (paint) m.userData.paint = true;
+  return m;
+}
+function tube(points, radius, color, tubularSegments = 18, radialSegments = 8, surface = null) {
+  const path = new THREE.CatmullRomCurve3(points.map(p => new THREE.Vector3(...p)));
+  const m = new THREE.Mesh(new THREE.TubeGeometry(path, tubularSegments, radius, radialSegments, false), mat(color, surface ? { surface } : {}));
+  m.castShadow = true; m.receiveShadow = true;
+  return m;
+}
+function roughRock(rx, ry, rz, color, x = 0, y = 0, z = 0, rot = 0) {
+  const m = new THREE.Mesh(new THREE.DodecahedronGeometry(1, 1), mat(color, { surface: 'stone', roughness: .92 }));
+  m.scale.set(rx, ry, rz);
+  m.position.set(x, y, z);
+  m.rotation.set(rot * .47, rot, rot * .23);
+  m.castShadow = true; m.receiveShadow = true;
+  return m;
+}
 
 /* ---------------- Plantillas orgánicas ---------------- */
 function leafMat(color) { return mat(color, { surface: 'leaves', roughness: 0.82, envMapIntensity: 0.55 }); }
@@ -304,11 +350,12 @@ const FURNITURE = {
   } },
   cuadro: { name: 'Cuadro', ico: '🖼️', cost: 110, w: 1, d: 1, decor: true, build(c = 0x4a7fb5) {
     return grp(
-      box(0.92, 1.05, 0.08, WOOD_D, 0, 1.15, -0.35),
-      box(0.76, 0.88, 0.035, c, 0, 1.15, -0.30, true),
-      box(0.22, 0.3, 0.025, 0xffd36b, -0.16, 1.25, -0.275),
-      sph(0.11, 0xf5f0e8, 0.19, 1.38, -0.27),
-      box(0.62, 0.08, 0.18, WOOD_D, 0, 0.1, -0.28)
+      rbox(0.94, 1.07, 0.09, WOOD_D, 0, 1.15, -0.35, .035, false, 'wood'),
+      rbox(0.78, 0.9, 0.035, c, 0, 1.15, -0.292, .015, true, 'fabric'),
+      ellipsoid(.16,.25,.018,0xffd36b,-.16,1.23,-.265,false,'fabric',18),
+      ellipsoid(.12,.12,.018,0xf5f0e8,.2,1.4,-.262,false,'fabric',18),
+      tube([[-.32,.88,-.257],[-.05,1.15,-.257],[.31,.94,-.257]],.018,shade(c,-.28),16,6,'fabric'),
+      rbox(0.62, 0.08, 0.18, WOOD_D, 0, 0.1, -0.28, .02, false, 'wood')
     );
   } },
   espejo: { name: 'Espejo', ico: '🪞', cost: 160, w: 1, d: 1, decor: true, build(c = 0xe8d9b5) {
@@ -319,13 +366,16 @@ const FURNITURE = {
     );
   } },
   jarron: { name: 'Jarrón', ico: '🏺', cost: 70, w: 1, d: 1, decor: true, build(c = 0x4a7fb5) {
-    return grp(
-      cyl(0.13, 0.24, 0.52, c, 0, 0.26, 0, 18, true),
-      cyl(0.17, 0.13, 0.18, c, 0, 0.61, 0, 18, true),
-      cyl(0.025, 0.025, 0.55, 0x4c9159, 0, 0.95),
-      sph(0.1, 0xe85d75, -0.08, 1.18, 0),
-      sph(0.1, 0xf2c94c, 0.08, 1.11, 0.02)
-    );
+    const g = grp(lathe([[.13,0],[.22,.06],[.27,.22],[.25,.42],[.17,.58],[.13,.61],[.13,.69],[.17,.71]], c, 0, 0, 0, true, 'clay', 36));
+    g.add(lathe([[0,0],[.16,.012],[.17,.025]], 0x2d2620, 0, .69, 0, false, 'rough', 28));
+    const stems = [[-.06,.68,.01,-.12,1.15,.02],[.04,.68,0,.14,1.08,.02],[0,.68,-.02,.02,1.26,-.04]];
+    for (const [x1,y1,z1,x2,y2,z2] of stems) g.add(tube([[x1,y1,z1],[(x1+x2)*.5,(y1+y2)*.5+.04,(z1+z2)*.5],[x2,y2,z2]], .012, 0x3f7d4a, 10, 6, 'leaves'));
+    const blooms = [[-.12,1.16,.02,0xe85d75],[.14,1.1,.02,0xf2c94c],[.02,1.27,-.04,0xf0a5bd]];
+    for (const [x,y,z,col] of blooms) {
+      for (let i=0;i<6;i++) { const a=i/6*Math.PI*2; const p=ellipsoid(.055,.028,.09,col,x+Math.cos(a)*.055,y,z+Math.sin(a)*.055,false,'fabric',14); p.rotation.y=-a; g.add(p); }
+      g.add(sph(.035,shade(col,-.25),x,y+.025,z,false,'fabric'));
+    }
+    return g;
   } },
   reloj_pie: { name: 'Reloj de pie', ico: '🕰️', cost: 290, w: 1, d: 1, decor: true, anim: 'reloj', build(c = WOOD) {
     const face = new THREE.Mesh(new THREE.CylinderGeometry(0.27, 0.27, 0.035, 24), mat(0xf4e8c8));
@@ -336,36 +386,46 @@ const FURNITURE = {
     const h1 = new THREE.Group(); h1.position.set(0, 1.46, 0.225);
     h1.add(box(0.025, 0.2, 0.02, DARK, 0, 0.1, 0));
     h1.userData.anim = 'hand1';
-    return grp(
-      box(0.54, 1.75, 0.36, c, 0, 0.88, 0, true),
-      box(0.4, 0.72, 0.04, 0x5a321b, 0, 0.62, 0.195),
-      face, h2, h1,
-      sph(0.02, DARK, 0, 1.46, 0.24)
+    const body = grp(
+      rbox(0.56, 1.72, 0.38, c, 0, .88, 0, .055, true, 'wood'),
+      rbox(.43,.8,.055,0x4c2e1c,0,.58,.205,.025,false,'wood'),
+      glass(.36,.7,0xd7e8e8,.34,0,.58,.242),
+      face, h2, h1, sph(0.02, DARK, 0, 1.46, 0.24)
     );
+    const pendulum = grp(cyl(.012,.012,.43,0xc6a347,0,.6,.255,10),sph(.075,0xc6a347,0,.36,.255));
+    body.add(pendulum);
+    body.add(rbox(.7,.11,.48,c,0,.08,0,.04,true,'wood'), rbox(.66,.09,.45,c,0,1.76,0,.035,true,'wood'));
+    return body;
   } },
   candelabro: { name: 'Candelabro', ico: '🕯️', cost: 130, w: 1, d: 1, decor: true, light: { y: 1.25, i: 7, color: 0xffb45c }, build(c = METAL) {
-    const g = grp(cyl(0.18, 0.22, 0.06, c, 0, 0.03), cyl(0.035, 0.045, 0.92, c, 0, 0.5));
-    for (const x of [-0.24, 0, 0.24]) {
-      g.add(box(0.32, 0.035, 0.035, c, x / 2, 0.88, 0));
-      g.add(cyl(0.035, 0.035, 0.28, 0xf5f0e8, x, 1.05));
-      g.add(sph(0.045, 0xffb347, x, 1.22, 0));
+    const g = grp(lathe([[.22,0],[.22,.025],[.15,.07],[.055,.1]],c,0,0,0,true,'metal',28),cyl(.03,.045,.86,c,0,.52,0,16,true,'metal'));
+    for (const x of [-.28, 0, .28]) {
+      if(x) g.add(tube([[0,.78,0],[x*.45,.82,0],[x,.91,0]],.022,c,18,8,'metal'));
+      g.add(lathe([[.07,0],[.075,.025],[.045,.05]],c,x,.91,0,true,'metal',18));
+      g.add(cyl(.028,.03,.28,0xf5f0e8,x,1.08,0,14,false,'fabric'));
+      const flame=ellipsoid(.035,.065,.027,0xffb347,x,1.27,0,false,'fabric',14); flame.material=new THREE.MeshStandardMaterial({color:0xffbb55,emissive:0xff7b24,emissiveIntensity:.8,roughness:.4}); g.add(flame);
     }
     return g;
   } },
   acuario: { name: 'Acuario', ico: '🐠', cost: 420, w: 2, d: 1, decor: true, light: { y: 1.25, i: 5, color: 0x68cfee }, anim: 'acuario', build(c = 0x4a7fb5) {
+    const waterMat = new THREE.MeshPhysicalMaterial({ color:0x55bad2,transparent:true,opacity:.2,transmission:.2,roughness:.04,depthWrite:false,side:THREE.DoubleSide });
+    const water = new THREE.Mesh(new THREE.BoxGeometry(1.42,.58,.48),waterMat); water.position.set(0,1.01,0); water.castShadow=false;
     const g = grp(
-      box(1.55, 0.65, 0.52, WOOD_D, 0, 0.34, 0, true),
-      glass(1.48, 0.62, 0x4dbddd, 0.48, 0, 1.0, 0),
-      box(1.58, 0.06, 0.56, DARK, 0, 0.68, 0),
-      box(1.58, 0.07, 0.56, c, 0, 1.34, 0, true),
-      sph(0.08, 0xffb84d, -0.35, 1.02, 0.29),
-      sph(0.065, 0xe85d75, 0.3, 0.91, 0.29),
-      cyl(0.02, 0.03, 0.4, 0x3f7d4a, 0.55, 0.88, 0.1)
+      rbox(1.58,.64,.56,WOOD_D,0,.33,0,.055,true,'wood'),
+      rbox(1.46,.48,.045,shade(WOOD_D,-.18),0,.35,.303,.018),
+      rbox(1.6,.065,.58,DARK,0,.69,0,.02),
+      rbox(1.6,.07,.58,c,0,1.34,0,.025,true,'metal'), water,
+      glass(1.46,.6,0xb5ebf3,.3,0,1.02,.275)
     );
-    for (const [col] of [[0xff8a5c], [0x4ad9c5]]) {
-      const f = grp(sph(0.06, col, 0, 0, 0), box(0.07, 0.03, 0.02, col, 0, 0, -0.08));
-      f.userData.anim = 'afish';
-      g.add(f);
+    for (const [x,z,s] of [[-.55,.16,.09],[-.3,.13,.065],[.05,.17,.08],[.38,.12,.07],[.62,.15,.06]]) g.add(roughRock(s,s*.55,s*.8,0x8b806f,x,.75,z,x*4));
+    for (const x of [-.58,.48]) {
+      g.add(tube([[x,.76,.05],[x+.08,.98,.03],[x-.04,1.22,0]],.012,0x3f7d4a,10,6,'leaves'));
+      for (let i=0;i<4;i++) g.add(ellipsoid(.06,.025,.12,0x4f9258,x+(i%2?-.04:.06),.9+i*.08,.02,false,'leaves',12));
+    }
+    for (const [i,col] of [[0,0xff8a5c],[1,0x4ad9c5],[2,0xf2c94c]]) {
+      const f = grp(ellipsoid(.1,.055,.045,col,0,0,0,false,'fabric',16));
+      const tail = new THREE.Mesh(new THREE.ConeGeometry(.065,.13,3),petalMat(col)); tail.rotation.z=Math.PI/2; tail.position.x=-.12; f.add(tail,sph(.012,0x111820,.07,.018,.04));
+      f.userData.anim='afish'; f.userData.fishIndex=i; g.add(f);
     }
     return g;
   } },
@@ -382,8 +442,8 @@ const FURNITURE = {
     const g = grp();
     for (let i = 0; i < 3; i++) {
       const x = -.62 + i * .62;
-      g.add(box(.56,1.65,.07,c,x,.85,0,true));
-      g.add(box(.47,1.46,.025,i % 2 ? 0xf5f0e8 : 0xe6cfa4,x,.87,.045));
+      g.add(rbox(.56,1.65,.07,c,x,.85,0,.035,true,'wood'));
+      g.add(rbox(.47,1.46,.025,i % 2 ? 0xf5f0e8 : 0xe6cfa4,x,.87,.045,.012,false,'fabric'));
       g.add(cyl(.025,.025,1.65,DARK,x+.3,.85,.02,8));
     }
     return g;
@@ -590,12 +650,18 @@ const FURNITURE = {
     return g;
   } },
   farola: { name: 'Farola', ico: '🏮', cost: 180, w: 1, d: 1, out: true, light: { y: 2.35, i: 18, color: 0xffe2b0 }, build() {
-    return grp(
-      cyl(0.14, 0.18, 0.1, DARK, 0, 0.05),
-      cyl(0.04, 0.05, 2.2, DARK, 0, 1.2),
-      box(0.24, 0.3, 0.24, 0xffe9c4, 0, 2.4),
-      box(0.3, 0.05, 0.3, DARK, 0, 2.58)
+    const glowMat = new THREE.MeshPhysicalMaterial({color:0xffe1a3,emissive:0xffb861,emissiveIntensity:.5,transparent:true,opacity:.78,roughness:.12,envMapIntensity:1.5});
+    const glow = new THREE.Mesh(new THREE.CylinderGeometry(.16,.19,.34,8),glowMat); glow.position.y=2.35;
+    const g=grp(
+      lathe([[.2,0],[.2,.05],[.14,.1],[.09,.15]],DARK,0,0,0,false,'metal',28),
+      cyl(.038,.052,2.13,DARK,0,1.18,0,16,false,'metal'),
+      cyl(.11,.07,.08,DARK,0,2.22,0,16,false,'metal'),glow,
+      cyl(.23,.19,.055,DARK,0,2.55,0,8,false,'metal'),
+      new THREE.Mesh(new THREE.ConeGeometry(.25,.16,8),mat(DARK,{surface:'metal'}))
     );
+    g.children[g.children.length-1].position.y=2.66;
+    for(let i=0;i<4;i++){const a=i*Math.PI/2; g.add(cyl(.012,.012,.34,DARK,Math.cos(a)*.17,2.35,Math.sin(a)*.17,6,false,'metal'));}
+    return g;
   } },
   banco_jardin: { name: 'Banco', ico: '🪑', cost: 210, w: 2, d: 1, out: true, build(c = WOOD) {
     const g = grp(
@@ -631,13 +697,15 @@ const FURNITURE = {
     return g;
   } },
   barbacoa: { name: 'Barbacoa', ico: '🔥', cost: 360, w: 1, d: 1, out: true, build(c = DARK) {
-    const g = grp(
-      cyl(.35,.32,.42,c,0,.86,0,18,true),
-      box(.72,.05,.58,METAL,0,1.08,0),
-      box(.7,.2,.5,c,0,1.22,-.05,true),
-      box(.5,.05,.35,0xe85d35,0,1.11,.02)
-    );
-    for (const x of [-.25,.25]) g.add(box(.055,.72,.055,METAL,x,.38,0));
+    const bowl=new THREE.Mesh(new THREE.SphereGeometry(.39,28,14,0,Math.PI*2,Math.PI/2,Math.PI/2),mat(c,{surface:'metal',roughness:.28,metalness:.65})); bowl.position.y=.92; bowl.scale.z=.82; bowl.userData.paint=true;
+    const lid=new THREE.Mesh(new THREE.SphereGeometry(.39,28,12,0,Math.PI*2,0,Math.PI/2),mat(c,{surface:'metal',roughness:.28,metalness:.65})); lid.position.set(0,1.11,-.22); lid.rotation.x=-.68; lid.scale.z=.82; lid.userData.paint=true;
+    const g=grp(bowl,lid,cyl(.055,.055,.16,DARK,0,1.48,-.05,14,false,'metal'));
+    const handle=tube([[-.15,1.48,-.05],[-.15,1.58,-.05],[.15,1.58,-.05],[.15,1.48,-.05]],.025,0x2b2f32,16,8,'metal'); g.add(handle);
+    for(const z of [-.22,-.11,0,.11,.22]) g.add(box(.65,.012,.012,METAL,0,1.12,z));
+    for(const x of [-.25,.25]) g.add(cyl(.025,.038,.76,METAL,x,.43,0,12,false,'metal'));
+    const axle=cyl(.025,.025,.56,METAL,0,.12,0,10,false,'metal'); axle.rotation.z=Math.PI/2; g.add(axle);
+    for(const x of [-.29,.29]){const wheel=new THREE.Mesh(new THREE.TorusGeometry(.1,.025,8,18),mat(0x25282c,{surface:'rough'})); wheel.position.set(x,.12,0); wheel.rotation.y=Math.PI/2; g.add(wheel);}
+    g.add(rbox(.56,.04,.32,0x6b4423,0,.43,0,.015,false,'wood'));
     return g;
   } },
   estanque: { name: 'Estanque', ico: '💧', cost: 280, w: 2, d: 2, out: true, anim: 'estanque', build() {
@@ -646,20 +714,27 @@ const FURNITURE = {
       cyl(.72,.74,.08,0x4dbddd,0,.18,0,28,false,'water')
     );
     g.children[1].userData.anim = 'ewater';
-    for (const [x,z] of [[-.55,-.5],[.55,-.42],[-.62,.38],[.5,.5]]) g.add(sph(.16,0x777b7d,x,.18,z,false,'stone'));
-    g.add(cyl(.02,.025,.25,0x3f7d4a,.2,.34,-.1,8,false,'leaves'));
-    g.add(sph(.09,0xe85d75,.2,.49,-.1,false,'fabric'));
+    for (const [i,x,z] of [[0,-.55,-.5],[1,.55,-.42],[2,-.62,.38],[3,.5,.5],[4,0,-.72],[5,.72,.05]]) g.add(roughRock(.2+(i%2)*.035,.1,.17, i%2?0x7f817d:0x696d6d,x,.16,z,i*.73));
+    g.add(tube([[.2,.2,-.1],[.22,.36,-.1],[.2,.48,-.1]],.014,0x3f7d4a,10,6,'leaves'));
+    for(let i=0;i<6;i++){const a=i/6*Math.PI*2;g.add(ellipsoid(.055,.018,.08,0xe85d75,.2+Math.cos(a)*.055,.49,-.1+Math.sin(a)*.055,false,'fabric',12));}
+    g.add(sph(.035,0xf0c64a,.2,.51,-.1,false,'fabric'));
     return g;
   } },
   /* ---- Nuevas decoraciones de interior ---- */
-  piano: { name: 'Piano', ico: '🎹', cost: 950, w: 2, d: 1, build(c = 0x2b2f38) {
+  piano: { name: 'Piano', ico: '🎹', cost: 950, w: 2, d: 1, build(c = 0x20242b) {
     const g = grp(
-      box(1.5, 0.85, 0.5, c, 0, 0.43, 0, true),
-      box(1.55, 0.1, 0.55, c, 0, 0.93, -0.12),
-      box(1.4, 0.06, 0.4, WHITE, 0, 0.9, 0.08),
-      box(1.3, 0.02, 0.1, 0x14161c, 0, 0.935, 0.16)
+      rbox(1.54,.86,.5,c,0,.46,-.08,.055,true,'wood'),
+      rbox(1.64,.11,.6,shade(c,.08),0,.94,-.08,.035,true,'wood'),
+      rbox(1.5,.1,.42,c,0,.78,.2,.025,true,'wood'),
+      rbox(1.02,.06,.18,0x17191e,0,.37,.23,.018,false,'wood')
     );
-    for (const x of [-0.65, 0, 0.65]) g.add(box(0.08, 0.42, 0.06, c, x, 0.21, 0.26));
+    for (const x of [-.66,.66]) g.add(rbox(.085,.72,.09,c,x,.36,.12,.025,true,'wood'));
+    for (let i=0;i<22;i++) g.add(rbox(.058,.035,.31,0xf5f2e9,-.61+i*.058,.855,.25,.008));
+    for (let i=0;i<15;i++) {
+      const x=-.58+i*.083+(i%7===2||i%7===6?.035:0);
+      g.add(rbox(.035,.045,.19,0x15171b,x,.892,.2,.006));
+    }
+    g.add(rbox(.15,.025,.08,0xc19b45,-.09,.08,.2,.008),rbox(.15,.025,.08,0xc19b45,.09,.08,.2,.008));
     return g;
   } },
   peluche: { name: 'Peluche', ico: '🧸', cost: 95, w: 1, d: 1, decor: true, anim: 'bob', build(c = 0xb98850) {
@@ -755,15 +830,16 @@ const FURNITURE = {
     return grp(trunkMesh, fr);
   } },
   cactus: { name: 'Cactus', ico: '🌵', cost: 45, w: 1, d: 1, out: true, build() {
-    const arm = cyl(0.07, 0.07, 0.22, 0x3f8a4f, -0.18, 0.72, 0, 10);
-    arm.rotation.z = Math.PI / 2;
-    return grp(
-      cyl(0.12, 0.16, 0.16, 0xc96f4a, 0, 0.08, 0, 12),
-      cyl(0.13, 0.15, 0.7, 0x3f8a4f, 0, 0.5, 0, 12),
-      arm,
-      cyl(0.07, 0.07, 0.3, 0x3f8a4f, -0.28, 0.86, 0, 10),
-      sph(0.07, 0xe85d75, 0, 0.9, 0)
-    );
+    const cactusMat=mat(0x39894e,{surface:'leaves',roughness:.7});
+    const body=new THREE.Mesh(new THREE.CapsuleGeometry(.135,.72,8,16),cactusMat); body.position.y=.57; body.castShadow=true;
+    const g=grp(lathe([[.24,0],[.28,.08],[.24,.18]],0xb86745,0,0,0,false,'clay',28),body);
+    for(const side of [-1,1]){
+      const arm=new THREE.Mesh(new THREE.CapsuleGeometry(.072,.28,6,12),cactusMat); arm.position.set(side*.29,.65,0); arm.rotation.z=side*Math.PI/2; arm.castShadow=true; g.add(arm);
+      const tip=new THREE.Mesh(new THREE.CapsuleGeometry(.072,.23,6,12),cactusMat); tip.position.set(side*.42,.8,0); tip.castShadow=true; g.add(tip);
+    }
+    for(let ring=0;ring<5;ring++) for(let i=0;i<8;i++){const a=i/8*Math.PI*2; const thorn=ellipsoid(.008,.018,.008,0xf1e5bf,Math.cos(a)*.14,.28+ring*.15,Math.sin(a)*.14,false,'rough',8); g.add(thorn);}
+    const flower=grp(); flower.position.set(0,1.1,0); for(let i=0;i<7;i++){const a=i/7*Math.PI*2;flower.add(ellipsoid(.055,.025,.08,0xe85d75,Math.cos(a)*.045,0,Math.sin(a)*.045,false,'fabric',12));} flower.add(sph(.025,0xf2c94c,0,.02,0));g.add(flower);
+    return g;
   } },
   hoguera: { name: 'Hoguera', ico: '🔥', cost: 300, w: 1, d: 1, out: true, anim: 'hoguera', light: { y: 0.7, i: 9, color: 0xff7a2a }, build() {
     const g = grp();
@@ -783,7 +859,8 @@ const FURNITURE = {
       [0, 0.58, 0, 0.07, 0xffd36b]
     ];
     for (const [x, y, z, r, col] of flames) {
-      const f = sph(r, col, x, y, z);
+      const f = ellipsoid(r, r * 1.75, r * .75, col, x, y, z, false, 'fabric', 18);
+      f.material = new THREE.MeshStandardMaterial({color:col,emissive:col,emissiveIntensity:.72,roughness:.4});
       f.userData.anim = 'fire';
       g.add(f);
     }
@@ -792,38 +869,53 @@ const FURNITURE = {
   valla: { name: 'Valla', ico: '🚧', cost: 45, w: 1, d: 1, out: true, build(c = 0xd8b579) {
     const g = grp();
     for (const x of [-0.42, 0, 0.42]) {
-      g.add(box(0.08, 0.68, 0.08, c, x, 0.34, 0, true));
+      g.add(rbox(0.08, 0.68, 0.08, c, x, 0.34, 0, .018, true, 'wood'));
       g.add(cyl(0, 0.055, 0.14, c, x, 0.72, 0, 4));
     }
-    g.add(box(0.98, 0.07, 0.05, c, 0, 0.55, 0, true));
-    g.add(box(0.98, 0.07, 0.05, c, 0, 0.28, 0, true));
+    g.add(rbox(0.98, 0.07, 0.05, c, 0, 0.55, 0, .014, true, 'wood'));
+    g.add(rbox(0.98, 0.07, 0.05, c, 0, 0.28, 0, .014, true, 'wood'));
     return g;
   } },
   camino: { name: 'Camino de piedras', ico: '🪨', cost: 55, w: 1, d: 2, out: true, build(c = 0xb9bec7) {
     const g = grp();
-    const spots = [[-0.15, -0.62, 0.34], [0.18, -0.2, 0.3], [-0.12, 0.22, 0.32], [0.1, 0.62, 0.28]];
-    for (const [x, z, r] of spots) g.add(cyl(r, r * 1.08, 0.06, c, x, 0.03, z, 10, true));
+    const spots = [[-.13,-.72,.34,.24],[.16,-.28,.31,.25],[-.1,.17,.33,.23],[.12,.63,.29,.22]];
+    for (let i=0;i<spots.length;i++) { const [x,z,rx,rz]=spots[i]; const stone=roughRock(rx,.055+(i%2)*.012,rz,i%2?shade(c,-.08):shade(c,.04),x,.055,z,i*.67); stone.userData.paint=true; g.add(stone); }
+    for(const [x,z] of [[-.38,-.5],[.36,-.05],[-.34,.48]]) g.add(grassTuft(x,z,0x4f8e50,.55));
     return g;
   } },
   estatua: { name: 'Estatua', ico: '🗿', cost: 380, w: 1, d: 1, out: true, build(c = 0xcfd4da) {
-    return grp(
-      cyl(0.42, 0.5, 0.3, 0x9aa0a8, 0, 0.15, 0, 18),
-      box(0.34, 0.8, 0.26, c, 0, 0.7, 0, true),
-      sph(0.18, c, 0, 1.28, 0, true),
-      box(0.1, 0.5, 0.1, c, -0.26, 0.95, 0, true),
-      box(0.1, 0.5, 0.1, c, 0.26, 0.95, 0, true)
+    const stone=mat(c,{surface:'stone',roughness:.88});
+    const torso=new THREE.Mesh(new THREE.CapsuleGeometry(.2,.52,8,20),stone.clone()); torso.position.y=.93; torso.scale.set(.82,1,.6); torso.userData.paint=true;
+    const head=ellipsoid(.16,.21,.15,c,0,1.5,0,true,'stone',24);
+    const g=grp(
+      lathe([[.48,0],[.48,.08],[.39,.15],[.36,.27]],0x8f9499,0,0,0,false,'stone',32),
+      rbox(.56,.16,.5,c,0,.34,0,.035,true,'stone'),torso,head
     );
+    const neck=cyl(.1,.12,.14,c,0,1.31,0,18,true,'stone'); g.add(neck);
+    const left=tube([[-.17,1.15,0],[-.33,1.02,.02],[-.25,.77,.1]],.07,c,14,10,'stone'); left.userData.paint=true;
+    const right=tube([[.17,1.15,0],[.32,1.3,.02],[.2,1.48,.04]],.07,c,14,10,'stone'); right.userData.paint=true;
+    g.add(left,right,ellipsoid(.07,.09,.065,c,-.24,.72,.1,true,'stone',14),ellipsoid(.07,.09,.065,c,.19,1.54,.04,true,'stone',14));
+    // Pliegues de la túnica: finas crestas esculpidas, no bloques.
+    for(const x of [-.13,-.065,0,.065,.13]) g.add(tube([[x,.55,.11],[x*.85,.78,.14],[x*.65,1.05,.12]],.012,shade(c,-.11),10,6,'stone'));
+    return g;
   } },
   carpa: { name: 'Carpa', ico: '⛺', cost: 450, w: 2, d: 2, out: true, build(c = 0xb8443f) {
-    const py = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 1.05, 1.5, 4), mat(c));
-    py.position.set(0, 0.75, 0);
-    py.rotation.y = Math.PI / 4;
-    py.castShadow = true; py.receiveShadow = true;
-    py.userData.paint = true;
-    const door = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.26, 0.5, 4), mat(0x3a3f4a));
-    door.position.set(0, 0.25, 0.72);
-    door.rotation.y = Math.PI / 4;
-    return grp(py, door, cyl(0.012, 0.012, 0.2, DARK, 0, 1.55, 0, 6), sph(0.045, 0xf2c94c, 0, 1.65, 0));
+    const positions=[
+      -.95,0,-.85, 0,1.55,-.85, 0,1.55,.85,  -.95,0,-.85, 0,1.55,.85, -.95,0,.85,
+       .95,0,-.85, 0,1.55,.85, 0,1.55,-.85,   .95,0,-.85, .95,0,.85, 0,1.55,.85,
+      -.95,0,-.85,.95,0,-.85,0,1.55,-.85,
+      -.95,0,.85,-.2,0,.85,0,1.55,.85,  .95,0,.85,0,1.55,.85,.2,0,.85
+    ];
+    const geo=new THREE.BufferGeometry(); geo.setAttribute('position',new THREE.Float32BufferAttribute(positions,3)); geo.computeVertexNormals();
+    const shell=new THREE.Mesh(geo,mat(c,{surface:'fabric',side:THREE.DoubleSide,roughness:.9})); shell.castShadow=true; shell.receiveShadow=true; shell.userData.paint=true;
+    const g=grp(shell,box(1.78,.025,1.58,0x716553,0,.025,0,false,'fabric'));
+    for(const z of [-.9,.9]) g.add(cyl(.024,.024,1.62,DARK,0,.78,z,10,false,'metal'));
+    g.add(tube([[0,1.56,-1.05],[0,1.59,0],[0,1.56,1.05]],.014,DARK,18,6,'metal'));
+    for(const [x,z] of [[-1.18,-1.05],[1.18,-1.05],[-1.18,1.05],[1.18,1.05]]){
+      g.add(tube([[x*.78,.72,z*.82],[x,.03,z]],.008,0xd9c8a5,8,5,'fabric'));
+      g.add(cyl(.018,.018,.16,0x6d6458,x,.07,z,7,false,'metal'));
+    }
+    return g;
   } },
   arco_florido: { name: 'Arco de flores', ico: '🌸', cost: 280, w: 2, d: 1, out: true, build(c = 0xe8d9b5) {
     const g = grp(
@@ -844,13 +936,14 @@ const FURNITURE = {
     return g;
   } },
   hongo: { name: 'Hongo gigante', ico: '🍄', cost: 65, w: 1, d: 1, out: true, build(c = 0xe85d35) {
-    return grp(
-      cyl(0.14, 0.18, 0.5, 0xf5f0e8, 0, 0.25, 0, 12),
-      cyl(0.32, 0.1, 0.3, c, 0, 0.6, 0, 14, true),
-      sph(0.05, 0xf5f0e8, 0.12, 0.52, 0.2),
-      sph(0.045, 0xf5f0e8, -0.15, 0.5, 0.14),
-      sph(0.04, 0xf5f0e8, 0.05, 0.48, -0.2)
-    );
+    const stem=lathe([[.14,0],[.18,.05],[.16,.23],[.12,.46],[.16,.55]],0xeee5d3,0,0,0,false,'rough',28);
+    const cap=new THREE.Mesh(new THREE.SphereGeometry(.42,28,14,0,Math.PI*2,0,Math.PI/2),mat(c,{surface:'fabric',roughness:.75})); cap.scale.y=.55; cap.position.y=.54; cap.castShadow=true; cap.userData.paint=true;
+    const g=grp(stem,cap);
+    for(const [x,z,s] of [[.13,.18,.045],[-.17,.1,.05],[.04,-.22,.04],[-.24,-.08,.035],[.25,-.04,.032]]){
+      const spot=ellipsoid(s,.012,s*.8,0xf6f0df,x,.72-Math.hypot(x,z)*.25,z,false,'rough',12); g.add(spot);
+    }
+    for(let i=0;i<12;i++){const a=i/12*Math.PI*2; const rib=box(.3,.008,.012,0xd9cdb5,Math.cos(a)*.15,.535,Math.sin(a)*.15); rib.rotation.y=-a; g.add(rib);}
+    return g;
   } },
 };
 
@@ -1179,6 +1272,230 @@ makeSurface('rough', 19, (ctx, s, rnd, bump) => {
 }, { roughness: 0.72 });
 function hsl(v) { return v; }
 
+/* ---------------- Biblioteca de modelos pulidos ----------------
+   Los GLB de interior proceden del Furniture Kit de Kenney (CC0) y
+   la vegetación FBX del Ultimate Stylized Nature Pack de Quaternius
+   (CC0). Todo se sirve en local: el juego sigue funcionando en Pages
+   y no depende de una CDN ni de conexiones durante la partida.
+   -------------------------------------------------------------- */
+const MODEL_ROOT = 'assets/models/';
+const PREMIUM_ASSETS = {
+  // Interior: modelos con siluetas y proporciones completas.
+  cama:             { file: 'furniture/bedSingle.glb', format: 'gltf', fit: [.94, .78, 1.9], paint: /carpet(?!white)|cover/i },
+  sofa:             { file: 'furniture/loungeDesignSofa.glb', format: 'gltf', fit: [1.86, .92, .86], paint: /carpet|fabric/i },
+  mesa:             { file: 'furniture/table.glb', format: 'gltf', fit: [1.82, .79, .98], paint: /wood/i },
+  silla:            { file: 'furniture/chairModernFrameCushion.glb', format: 'gltf', fit: [.62, 1.0, .62], paint: /carpet|fabric/i },
+  lampara:          { file: 'furniture/lampRoundFloor.glb', format: 'gltf', fit: [.58, 1.62, .58], paint: /lamp/i },
+  tv:               { file: 'furniture/cabinetTelevision.glb', format: 'gltf', fit: [.96, .92, .48], paint: /wood/i, addScreen: true },
+  nevera:           { file: 'furniture/kitchenFridgeLarge.glb', format: 'gltf', fit: [1.0, 1.84, .82], paint: /metallight/i },
+  cocina:           { file: 'furniture/kitchenStove.glb', format: 'gltf', fit: [.94, .96, .86], paint: /wood|carpetwhite/i, addSteam: true },
+  inodoro:          { file: 'furniture/toilet.glb', format: 'gltf', fit: [.68, .82, .82], paint: /carpetwhite|metallight/i },
+  banera:           { file: 'furniture/bathtub.glb', format: 'gltf', fit: [1.82, .7, .86], paint: /carpetwhite/i },
+  estanteria:       { file: 'furniture/bookcaseOpen.glb', format: 'gltf', fit: [.9, 1.82, .52], paint: /wood/i, addBooks: true },
+  alfombra:         { file: 'furniture/rugRounded.glb', format: 'gltf', fit: [1.86, .025, 1.86], paint: /carpet/i, nonUniform: true },
+  planta_interior:  { file: 'furniture/pottedPlant.glb', format: 'gltf', fit: [.66, 1.18, .66], paint: /wood/i },
+  espejo:           { file: 'furniture/bathroomMirror.glb', format: 'gltf', fit: [.84, 1.62, .12], paint: /wood/i, nonUniform: true },
+  puff:             { file: 'furniture/loungeSofaOttoman.glb', format: 'gltf', fit: [.78, .5, .78], paint: /carpet/i },
+  mesa_centro:      { file: 'furniture/tableCoffeeGlass.glb', format: 'gltf', fit: [1.56, .52, .9], paint: /metal/i },
+  peluche:          { file: 'furniture/bear.glb', format: 'gltf', fit: [.5, .72, .44], paint: /fur/i },
+  lampara_mesa:     { file: 'furniture/lampRoundTable.glb', format: 'gltf', fit: [.48, .64, .48], paint: /lamp/i },
+  banco_jardin:     { file: 'furniture/bench.glb', format: 'gltf', fit: [1.82, .98, .72], paint: /wood/i, nonUniform: true },
+
+  // Exterior: cada especie usa una malla botánica distinta.
+  arbol:    { file: 'nature/NormalTree_1.fbx', format: 'fbx', fit: [2.4, 3.7, 2.4], nature: { leaf: 0x3d824c, bark: 0x604126 } },
+  cerezo:   { file: 'nature/NormalTree_2.fbx', format: 'fbx', fit: [2.35, 3.55, 2.35], nature: { leaf: 0xf39abe, leaf2: 0xffbad2, bark: 0x5b3b32 } },
+  arce:     { file: 'nature/MapleTree_2.fbx', format: 'fbx', fit: [3.5, 3.5, 3.5], nature: { leaf: 0xd85b32, leaf2: 0xf08a3f, bark: 0x5c4130 } },
+  abedul:   { file: 'nature/BirchTree_4.fbx', format: 'fbx', fit: [2.4, 3.85, 2.4], nature: { leaf: 0x64a85c, leaf2: 0x8cbe67, bark: 0xe5dfd2 } },
+  manzano:  { file: 'nature/NormalTree_3.fbx', format: 'fbx', fit: [3.2, 3.5, 2.5], nature: { leaf: 0x3c7c46, leaf2: 0x5e9b55, bark: 0x654329 }, addApples: true },
+  sauce:    { file: 'nature/NormalTree_4.fbx', format: 'fbx', fit: [3.6, 3.45, 2.5], nature: { leaf: 0x5c9550, leaf2: 0x7aae61, bark: 0x63472f } },
+  pino:     { file: 'nature/PineTree_2.fbx', format: 'fbx', fit: [2.15, 4.0, 2.15], nature: { leaf: 0x285e3e, leaf2: 0x397b4c, bark: 0x553923 } },
+  palmera:  { file: 'nature/PalmTree_2.fbx', format: 'fbx', fit: [3.9, 3.7, 3.9], nature: { leaf: 0x3e8a4e, leaf2: 0x64a95b, bark: 0x92704a }, addCoconuts: true },
+  seto:     { file: 'nature/Bush_Large.fbx', format: 'fbx', fit: [.94, .72, 1.0], nature: { leaf: 0x347742, leaf2: 0x519153, bark: 0x58412d } },
+  rosal:    { file: 'nature/Bush_Flowers.fbx', format: 'fbx', fit: [.9, .76, .9], nature: { leaf: 0x347742, flower: 0xe75572, bark: 0x58412d } },
+  hortensia:{ file: 'nature/Bush_Flowers.fbx', format: 'fbx', fit: [.9, .82, .9], nature: { leaf: 0x3d8049, flower: 0x91aee0, bark: 0x58412d } },
+  helecho:  { file: 'nature/Plant_1.fbx', format: 'fbx', fit: [.88, .72, .88], nature: { leaf: 0x3d824c, leaf2: 0x65a65a, bark: 0x58412d } },
+  flores:   { file: 'nature/Flower_1_Clump.fbx', format: 'fbx', fit: [.68, .78, .68], nature: { leaf: 0x43824b, flower: 0xe96783, bark: 0x58412d } },
+  margaritas:{ file: 'nature/Flower_1_Clump.fbx', format: 'fbx', fit: [.66, .72, .66], nature: { leaf: 0x43824b, flower: 0xf5f0e8, bark: 0x58412d }, addFlowerCenters: true },
+};
+
+const premiumTemplates = new Map();
+const missingTexturePixel = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIHWP4z8DwHwAFgAI/ScL+WQAAAABJRU5ErkJggg==';
+
+function setLoaderMessage(text) {
+  const el = document.getElementById('loader-status');
+  if (el) el.textContent = text;
+}
+
+async function preloadPremiumAssets() {
+  const specs = [...new Map(Object.values(PREMIUM_ASSETS).map(s => [s.file, s])).values()];
+  const manager = new THREE.LoadingManager();
+  // Los FBX conservan referencias a texturas fuente enormes. Aquí las sustituimos
+  // por un píxel y aplicamos nuestros materiales PBR ligeros después de cargar.
+  manager.setURLModifier(url => /\.(png|jpe?g|tga|bmp)$/i.test(url) ? missingTexturePixel : url);
+  const gltf = new GLTFLoader(manager);
+  const fbx = new FBXLoader(manager);
+  let done = 0;
+  await Promise.all(specs.map(spec => new Promise(resolve => {
+    const url = MODEL_ROOT + spec.file;
+    const loaded = value => {
+      premiumTemplates.set(spec.file, spec.format === 'gltf' ? value.scene : value);
+      done++;
+      setLoaderMessage(`Preparando modelos de alta calidad… ${done}/${specs.length}`);
+      resolve();
+    };
+    const failed = err => {
+      console.warn(`No se pudo cargar ${url}; se usará el modelo procedural.`, err);
+      done++;
+      resolve();
+    };
+    (spec.format === 'gltf' ? gltf : fbx).load(url, loaded, undefined, failed);
+  })));
+}
+
+function materialRole(source, spec) {
+  const name = (source?.name || '').toLowerCase();
+  if (/glass|mirror/.test(name)) return 'glass';
+  if (/lamp|light/.test(name)) return 'lamp';
+  if (/metal/.test(name)) return 'metal';
+  if (/carpet|fabric|fur|cloth|cover|pillow/.test(name)) return 'fabric';
+  if (/wood/.test(name)) return 'wood';
+  if (/flower|petal|blossom/.test(name)) return 'flower';
+  if (/leaf|leaves|plant|foliage|needle/.test(name)) return 'leaf';
+  if (/bark|trunk|branch|stem/.test(name)) return 'bark';
+  if (spec.nature && source?.color) {
+    const { r, g, b } = source.color;
+    if (g > r * 1.08 && g > b * 1.05) return 'leaf';
+    if (r > g * 1.2 && (b > g * .75 || r > .65)) return 'flower';
+    return 'bark';
+  }
+  return 'default';
+}
+
+function premiumMaterial(source, spec, customColor, index = 0) {
+  const role = materialRole(source, spec);
+  const sourceColor = source?.color?.getHex?.() ?? 0xd8d4cb;
+  let color = sourceColor;
+  if (spec.nature) {
+    if (role === 'leaf') color = index % 2 && spec.nature.leaf2 ? spec.nature.leaf2 : spec.nature.leaf;
+    else if (role === 'flower') color = spec.nature.flower ?? spec.nature.leaf2 ?? spec.nature.leaf;
+    else color = spec.nature.bark;
+  }
+  if (customColor != null && (spec.paint?.test(source?.name || '') || (spec.nature && role === 'leaf'))) color = customColor;
+
+  if (role === 'glass') {
+    return new THREE.MeshPhysicalMaterial({
+      name: source?.name || 'glass', color: 0xb9dce6, transparent: true, opacity: .38,
+      transmission: .12, thickness: .025, roughness: .06, metalness: 0,
+      envMapIntensity: 1.7, depthWrite: false, side: THREE.DoubleSide
+    });
+  }
+
+  const surface = role === 'wood' || role === 'bark' ? (role === 'bark' ? 'bark' : 'wood')
+    : role === 'leaf' ? 'leaves' : role === 'fabric' || role === 'flower' ? 'fabric'
+      : role === 'metal' ? 'metal' : 'rough';
+  const s = SURFACES[surface] || SURFACES.rough;
+  const isMetal = role === 'metal';
+  const isLamp = role === 'lamp';
+  return new THREE.MeshStandardMaterial({
+    name: source?.name || role,
+    color,
+    roughness: isMetal ? .24 : isLamp ? .36 : role === 'fabric' ? .82 : role === 'leaf' ? .78 : .6,
+    metalness: isMetal ? .78 : .02,
+    bumpMap: s.bump,
+    bumpScale: role === 'fabric' ? .018 : role === 'leaf' ? .025 : .035,
+    envMapIntensity: isMetal ? 1.35 : isLamp ? 1.15 : .72,
+    emissive: isLamp ? 0xffd58a : 0x000000,
+    emissiveIntensity: isLamp ? .28 : 0,
+    side: role === 'leaf' || role === 'flower' ? THREE.DoubleSide : THREE.FrontSide,
+  });
+}
+
+function addPremiumDetails(id, root) {
+  const spec = PREMIUM_ASSETS[id];
+  if (spec.addScreen) {
+    root.add(rbox(.78, .46, .045, 0x111820, 0, .78, .17, .018, false, 'rough'));
+    const screen = rbox(.7, .38, .012, 0x223d54, 0, .78, .197, .008);
+    screen.material = new THREE.MeshPhysicalMaterial({ color: 0x294d68, roughness: .08, metalness: .18, envMapIntensity: 1.6 });
+    root.add(screen);
+  }
+  if (spec.addBooks) {
+    const colors = [0x8f3f3c, 0x365f88, 0x4d7652, 0xc18a35, 0x6c4e87];
+    for (let shelf = 0; shelf < 4; shelf++) for (let i = 0; i < 5; i++) {
+      const h = .2 + ((i * 7 + shelf) % 3) * .035;
+      root.add(rbox(.075, h, .19, colors[(i + shelf * 2) % colors.length], -.31 + i * .15, .3 + shelf * .39, .1, .012));
+    }
+  }
+  if (spec.addSteam) {
+    for (let i = 0; i < 3; i++) {
+      const steam = new THREE.Mesh(new THREE.SphereGeometry(.052, 12, 9), new THREE.MeshStandardMaterial({ color: 0xf5f7fa, transparent: true, opacity: .38, depthWrite: false, roughness: .15 }));
+      steam.position.set(-.2, 1.07, -.06);
+      steam.userData.anim = 'steam';
+      steam.castShadow = false;
+      root.add(steam);
+    }
+  }
+  if (spec.addApples) {
+    for (const [x, y, z] of [[-.55,2.35,.35],[.48,2.55,-.22],[.7,2.1,.3],[-.3,2.8,-.35],[.12,2.15,-.55]]) {
+      root.add(sph(.105, 0xc9342f, x, y, z, false, 'fabric'));
+      root.add(cyl(.012,.016,.08,0x4a3522,x,y+.08,z,7));
+    }
+  }
+  if (spec.addCoconuts) {
+    for (const [x, z] of [[-.14,.08],[.12,.13],[.04,-.14]]) root.add(sph(.13, 0x715133, x, 3.45, z, false, 'clay'));
+  }
+  if (spec.addFlowerCenters) {
+    for (const [x,z] of [[-.22,-.18],[.18,-.14],[-.12,.2],[.25,.18]]) root.add(sph(.035,0xe9b526,x,.52,z,false,'fabric'));
+  }
+}
+
+function instantiatePremium(id, customColor) {
+  const spec = PREMIUM_ASSETS[id];
+  const source = spec && premiumTemplates.get(spec.file);
+  if (!source) return null;
+  const model = source.clone(true);
+  // Los FBX de Quaternius están modelados en Z-up. Three usa Y-up.
+  model.rotation.x = spec.format === 'fbx' ? -Math.PI / 2 : 0;
+  model.rotation.y = spec.yaw || 0;
+  let materialIndex = 0;
+  model.traverse(node => {
+    if (!node.isMesh) return;
+    node.geometry = node.geometry.clone();
+    if (!node.geometry.attributes.normal) node.geometry.computeVertexNormals();
+    const list = Array.isArray(node.material) ? node.material : [node.material];
+    const polished = list.map(m => premiumMaterial(m, spec, customColor, materialIndex++));
+    node.material = Array.isArray(node.material) ? polished : polished[0];
+    node.castShadow = true;
+    node.receiveShadow = true;
+    node.userData.paint = polished.some(m => customColor != null || spec.paint?.test(m.name || ''));
+  });
+
+  model.updateMatrixWorld(true);
+  let bounds = new THREE.Box3().setFromObject(model);
+  const size = bounds.getSize(new THREE.Vector3());
+  const ratios = spec.fit.map((n, i) => n / Math.max([size.x, size.y, size.z][i], .0001));
+  if (spec.nonUniform) model.scale.multiply(new THREE.Vector3(...ratios));
+  else model.scale.multiplyScalar(Math.min(...ratios));
+  model.updateMatrixWorld(true);
+  bounds = new THREE.Box3().setFromObject(model);
+  const center = bounds.getCenter(new THREE.Vector3());
+  model.position.x -= center.x;
+  model.position.z -= center.z;
+  model.position.y -= bounds.min.y;
+
+  const content = grp(model);
+  const root = grp(content);
+  addPremiumDetails(id, content);
+  const def = FURNITURE[id];
+  // La raíz recibe después los datos de picking. Un contenedor intermedio anima
+  // el conjunto sin sobrescribir la corrección Z-up propia de los FBX.
+  if (def?.anim === 'sway' || def?.anim === 'bob') content.userData.anim = def.anim;
+  return root;
+}
+
+function buildCatalogObject(id, customColor) {
+  return instantiatePremium(id, customColor) || FURNITURE[id].build(customColor);
+}
+
 const scene = new THREE.Scene();
 scene.fog = new THREE.Fog(0xbfd9ea, 60, 160);
 
@@ -1398,7 +1715,13 @@ function updateEnv(t, dt) {
 function buildWallMesh(type = 'pared', color) {
   const def = BUILD_ITEMS[type] || BUILD_ITEMS.pared;
   const c = color ?? def.color ?? 0xf5f0e8;
-  if (def.category === 'wall') return grp(box(1.02, WALL_H, 0.14, c, 0, WALL_H / 2, 0, true, 'brick'));
+  if (def.category === 'wall') {
+    return grp(
+      box(1.02, WALL_H, 0.14, c, 0, WALL_H / 2, 0, true, 'plaster'),
+      box(1.02, .1, .035, 0xe6e0d6, 0, .07, .085, false, 'wood'),
+      box(1.02, .055, .025, 0xf1ede6, 0, WALL_H - .035, .08, false, 'plaster')
+    );
+  }
 
   if (def.category === 'door') {
     const g = grp(
@@ -1462,7 +1785,7 @@ function buildWallMesh(type = 'pared', color) {
 function buildFloorMesh(type = 'suelo', color) {
   const def = BUILD_ITEMS[type] || BUILD_ITEMS.suelo;
   const c = color ?? def.color ?? 0xc9a06a;
-  const surfaceMap = { wood: 'wood', plans: 'planks', tiles: 'tiles', marble: 'marble', terracotta: 'terracotta', parquet: 'parquet', concrete: 'concrete' };
+  const surfaceMap = { wood: 'wood', planks: 'planks', tiles: 'tiles', marble: 'marble', terracotta: 'terracotta', parquet: 'parquet', concrete: 'concrete' };
   const surface = surfaceMap[def.style] || 'wood';
   const g = grp(box(0.99, 0.08, 0.99, c, 0, 0.04, 0, true, surface));
   const seam = def.style === 'tiles' || def.style === 'marble' ? 0xb4b1aa : shade(c, -.2);
@@ -1535,7 +1858,7 @@ function addWallMesh(key, data) {
 }
 function addObjectMesh(obj) {
   const def = FURNITURE[obj.t];
-  const m = def.build(obj.c);
+  const m = buildCatalogObject(obj.t, obj.c);
   const t = objTransform(obj);
   m.position.set(t.x, 0, t.z); m.rotation.y = t.ry;
   m.scale.setScalar(obj.s || 1);
@@ -1743,7 +2066,7 @@ function makeGhost() {
     else if (def.kind === 'roof') g = buildRoofMesh(tool.id);
     else g = buildWallMesh(tool.id);
   } else {
-    g = FURNITURE[tool.id].build();
+    g = buildCatalogObject(tool.id);
   }
   g.traverse(n => { if (n.isMesh) { n.material = ghostMatOk; n.castShadow = false; n.receiveShadow = false; } });
   g.visible = false;
@@ -2489,11 +2812,22 @@ document.getElementById('btn-rotate').addEventListener('click', rotateTool);
 document.getElementById('btn-cancel').addEventListener('click', () => selectTool(null));
 
 /* ---------------- Inicio ---------------- */
-buildUI();
-if (loadGame()) rebuildAll();
-updateMoney();
-renderMissions();
-if (!localStorage.getItem(HELP_KEY)) document.getElementById('help-modal').classList.remove('hidden');
+async function startGame() {
+  await preloadPremiumAssets();
+  buildUI();
+  if (loadGame()) rebuildAll();
+  updateMoney();
+  renderMissions();
+  if (!localStorage.getItem(HELP_KEY)) document.getElementById('help-modal').classList.remove('hidden');
+  setLoaderMessage('Tu parcela está lista');
+
+  const l = document.getElementById('loader');
+  window.setTimeout(() => {
+    if (!l) return;
+    l.classList.add('fade');
+    window.setTimeout(() => l.remove(), 700);
+  }, 220);
+}
 
 const clock = new THREE.Clock();
 let elapsed = 0;
@@ -2514,10 +2848,7 @@ function animate() {
   renderer.render(scene, camera);
 }
 animate();
-
-/* Ocultar loader */
-setTimeout(() => {
-  const l = document.getElementById('loader');
-  l.classList.add('fade');
-  setTimeout(() => l.remove(), 700);
-}, 400);
+startGame().catch(err => {
+  console.error('No se pudo iniciar Mi Hogar 3D', err);
+  setLoaderMessage('No se pudo preparar la parcela. Recarga la página.');
+});
