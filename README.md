@@ -16,9 +16,10 @@ python3 -m http.server 8000
 ## ✨ Características
 
 - 🧱 **Construcción sobre cuadrícula** con 7 suelos, 4 puertas, 4 ventanas, paredes y techos.
-- 🎨 **Texturas procedurales** con sombreado, bump y reflejos: madera, ladrillo, tejado, baldosa, mármol, hierba, corteza, metal y más. Iluminación con tono de videojuego (ACES + reflejos ambientales).
-- 🌳 **Gran variedad de exterior**: roble, pino, palmera, cerezo, arce, abedul, manzano, sauce, cactus, hongos y setos, más un jardín lleno de rosas, margaritas, girasoles, lavanda, hortensias, helechos y flores silvestres.
-- 🛋️ **30+ muebles y elementos** procedurales: mobiliario, decoración, cocina, baño y jardín.
+- 🎨 **Materiales PBR** con sombreado, bump y reflejos: madera, ladrillo, tejado, baldosa, mármol, hierba, corteza, metal y más. Iluminación ACES, reflejos ambientales y cantos suavizados.
+- 🌳 **Vegetación 3D detallada**: cada especie usa una malla botánica propia (roble, pino, palmera, cerezo, arce, abedul, manzano, sauce…), con materiales ligeros, sombras suaves y movimiento con el viento.
+- 🛋️ **Mobiliario pulido**: modelos 3D completos para dormitorio, salón, comedor, cocina, baño y jardín, combinados con elementos procedurales renovados.
+- 📦 **Biblioteca CC0 local**: modelos de Kenney y Quaternius incluidos en el proyecto; sin descargas externas durante la partida y con fallback procedural.
 - 🪴 **Catálogo de decoración** con plantas, cuadros, espejo, acuario, reloj, biombo, fuente y más.
 - 🧰 **Inventario plegable**: se oculta al elegir una pieza para dejar libre toda la vista 3D.
 - 🎨 **Paleta de colores** y herramienta de pintura para personalizar todo.
@@ -46,6 +47,7 @@ python3 -m http.server 8000
 ## 🛠️ Tecnología
 
 - [Three.js](https://threejs.org/) r160 (incluido en `vendor/`, sin dependencias de CDN).
+- Modelos CC0 de [Kenney](https://kenney.nl/assets/furniture-kit) y [Quaternius](https://quaternius.com/packs/ultimatestylizednature.html). Consulta [`assets/models/ATTRIBUTION.md`](assets/models/ATTRIBUTION.md).
 - JavaScript vanilla con módulos ES + import maps.
 - Sin build, sin bundler, sin backend: ideal para GitHub Pages.
 
