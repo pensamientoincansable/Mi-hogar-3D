@@ -16,7 +16,8 @@ python3 -m http.server 8000
 ## ✨ Características
 
 - 🧱 **Construcción sobre cuadrícula** con 7 suelos, 4 puertas, 4 ventanas, paredes y techos.
-- 🎨 **Materiales PBR** con sombreado, bump y reflejos: madera, ladrillo, tejado, baldosa, mármol, hierba, corteza, metal y más. Iluminación ACES, reflejos ambientales y cantos suavizados.
+- 🎨 **Materiales PBR** con sombreado, bump y reflejos: madera, ladrillo, tejado, baldosa, mármol, hierba, corteza, metal y más. Iluminación ACES, reflejos ambientales y cantos suavizados. Las superficies usan los albedos incluidos en `media/image/`.
+- 🌌 **Cielo en ciclo continuo**: recorre los 50 panoramas/cubemaps de `media/image/Sky` con transiciones suaves y se integra con el modo día/noche.
 - 🌳 **Vegetación 3D detallada**: cada especie usa una malla botánica propia (roble, pino, palmera, cerezo, arce, abedul, manzano, sauce…), con materiales ligeros, sombras suaves y movimiento con el viento.
 - 🛋️ **Mobiliario pulido**: modelos 3D completos para dormitorio, salón, comedor, cocina, baño y jardín, combinados con elementos procedurales renovados.
 - 📦 **Biblioteca CC0 local**: modelos de Kenney y Quaternius incluidos en el proyecto; sin descargas externas durante la partida y con fallback procedural.
