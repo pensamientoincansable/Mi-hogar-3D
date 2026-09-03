@@ -14,6 +14,8 @@ const WALL_H = 3;         // altura de pared
 const START_MONEY = 25000;
 const SAVE_KEY = 'mihogar3d-save-v1';
 const HELP_KEY = 'mihogar3d-help-v1';
+const TEXTURE_ROOT = 'media/image/';
+const SKY_ROOT = 'media/image/Sky/';
 
 const PALETTE = [0xf5f0e8, 0xe8d9b5, 0xc96f4a, 0xb8443f, 0x4a7fb5, 0x5d9b6c, 0x8a8f98, 0x8b5a2b];
 
@@ -1010,6 +1012,9 @@ renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.12;
 
 /* ---------------- Texturas procedurales ---------------- */
+// Las superficies PBR se construyen a partir de los albedos de /media/image.
+// Se mantienen los generadores procedurales como *fallback* cuando una textura
+// externa falla (p. ej. si alguien abre la página sin servidor HTTP).
 const SURFACES = {};
 function texRng(seed) { let s = (seed + 17) >>> 0; return () => { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296; }; }
 function texCanvas(size, fn) {
@@ -1036,6 +1041,75 @@ function bumpTexture(canvas, repeat = 1) {
   t.needsUpdate = true;
   return t;
 }
+
+/* ------- Texturas PBR desde /media/image (sustituyen a las procedurales) ------- */
+const IMAGE_SURFACES = [
+  // { nombre interno de superficie, fichero, y propiedades PBR }
+  { name: 'grass',      file: 'PTP-Foliage_07-512x512.png',  roughness: 0.94, metalness: 0.00, envMapIntensity: 0.55, bumpScale: 0.045 },
+  { name: 'wood',       file: 'PTP-Floor_06-512x512.png',    roughness: 0.72, metalness: 0.00, envMapIntensity: 0.70, bumpScale: 0.035 },
+  { name: 'planks',     file: 'PTP-Floor_08-512x512.png',    roughness: 0.74, metalness: 0.00, envMapIntensity: 0.65, bumpScale: 0.035 },
+  { name: 'tiles',      file: 'PTP-Tile_01-512x512.png',     roughness: 0.62, metalness: 0.00, envMapIntensity: 0.80, bumpScale: 0.030 },
+  { name: 'marble',     file: 'PTP-Floor_01-512x512.png',    roughness: 0.35, metalness: 0.00, envMapIntensity: 0.90, bumpScale: 0.018 },
+  { name: 'terracotta', file: 'PTP-Floor_04-512x512.png',    roughness: 0.78, metalness: 0.00, envMapIntensity: 0.60, bumpScale: 0.030 },
+  { name: 'parquet',    file: 'PTP-Tile_05-512x512.png',     roughness: 0.70, metalness: 0.00, envMapIntensity: 0.68, bumpScale: 0.035 },
+  { name: 'concrete',   file: 'PTP-Concrete_01-512x512.png', roughness: 0.90, metalness: 0.00, envMapIntensity: 0.60, bumpScale: 0.045 },
+  { name: 'brick',      file: 'PTP-Stone_03-512x512.png',    roughness: 0.86, metalness: 0.00, envMapIntensity: 0.60, bumpScale: 0.035 },
+  { name: 'plaster',    file: 'PTP-Concrete_05-512x512.png', roughness: 0.86, metalness: 0.00, envMapIntensity: 0.55, bumpScale: 0.020 },
+  { name: 'roofTile',   file: 'PTP-Tile_06-512x512.png',     roughness: 0.76, metalness: 0.00, envMapIntensity: 0.60, bumpScale: 0.028 },
+  { name: 'leaves',     file: 'PTP-Foliage_03-512x512.png',  roughness: 0.82, metalness: 0.00, envMapIntensity: 0.55, bumpScale: 0.032 },
+  { name: 'fabric',     file: 'PTP-Pattern_01-512x512.png',  roughness: 0.82, metalness: 0.00, envMapIntensity: 0.60, bumpScale: 0.020 },
+  { name: 'metal',      file: 'PTP-Metal_01-512x512.png',    roughness: 0.25, metalness: 0.82, envMapIntensity: 1.25, bumpScale: 0.025 },
+  { name: 'stone',      file: 'PTP-Stone_01-512x512.png',    roughness: 0.88, metalness: 0.00, envMapIntensity: 0.62, bumpScale: 0.040 },
+  { name: 'bark',       file: 'PTP-Ground_10-512x512.png',   roughness: 0.90, metalness: 0.00, envMapIntensity: 0.45, bumpScale: 0.040 },
+  { name: 'clay',       file: 'PTP-Ground_04-512x512.png',   roughness: 0.82, metalness: 0.00, envMapIntensity: 0.58, bumpScale: 0.035 },
+  { name: 'water',      file: 'PTP-Elements_01-512x512.png', roughness: 0.10, metalness: 0.00, envMapIntensity: 1.45, bumpScale: 0.020 },
+  { name: 'rough',      file: 'PTP-Ground_01-512x512.png',   roughness: 0.84, metalness: 0.00, envMapIntensity: 0.55, bumpScale: 0.045 },
+];
+
+function loadTexture(url, colorSpace = THREE.SRGBColorSpace) {
+  return new Promise((resolve, reject) => {
+    new THREE.TextureLoader().load(url, t => {
+      t.colorSpace = colorSpace;
+      t.wrapS = t.wrapT = THREE.RepeatWrapping;
+      t.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
+      resolve(t);
+    }, undefined, reject);
+  });
+}
+
+function luminanceCanvas(image, size = 512) {
+  const canvas = document.createElement('canvas');
+  canvas.width = canvas.height = size;
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(image, 0, 0, size, size);
+  const pixels = ctx.getImageData(0, 0, size, size);
+  const d = pixels.data;
+  for (let i = 0; i < d.length; i += 4) {
+    const l = Math.round(d[i] * 0.299 + d[i + 1] * 0.587 + d[i + 2] * 0.114);
+    d[i] = d[i + 1] = d[i + 2] = l;
+  }
+  ctx.putImageData(pixels, 0, 0);
+  return canvas;
+}
+
+async function loadImageSurface(spec) {
+  try {
+    const map = await loadTexture(TEXTURE_ROOT + spec.file);
+    const bump = bumpTexture(luminanceCanvas(map.image), 1);
+    const roughness = spec.roughness ?? 0.85;
+    const metalness = spec.metalness ?? 0.0;
+    const envMapIntensity = spec.envMapIntensity ?? 0.7;
+    const bumpScale = spec.bumpScale ?? 0.05;
+    defineSurface(spec.name, { map, bump, roughness, metalness, envMapIntensity, bumpScale });
+  } catch (err) {
+    console.warn(`No se pudo cargar la textura ${spec.file}; se mantiene la superficie procedural.`, err);
+  }
+}
+
+async function loadImageSurfaces() {
+  await Promise.all(IMAGE_SURFACES.map(loadImageSurface));
+}
+
 function defineSurface(name, cfg) { SURFACES[name] = cfg; }
 function makeSurface(name, seed, draw, opts = {}) {
   const color = texCanvas(256, (c, s) => draw(c, s, texRng(seed), false));
@@ -1401,6 +1475,7 @@ function premiumMaterial(source, spec, customColor, index = 0) {
     color,
     roughness: isMetal ? .24 : isLamp ? .36 : role === 'fabric' ? .82 : role === 'leaf' ? .78 : .6,
     metalness: isMetal ? .78 : .02,
+    map: s.map,
     bumpMap: s.bump,
     bumpScale: role === 'fabric' ? .018 : role === 'leaf' ? .025 : .035,
     envMapIntensity: isMetal ? 1.35 : isLamp ? 1.15 : .72,
@@ -1515,6 +1590,187 @@ const pmrem = new THREE.PMREMGenerator(renderer);
   pmrem.dispose();
 }
 
+/* ---------------- Cielo: ciclo panorámico/cubemap ---------------- */
+// Ciclo de cielos usando los ficheros de /media/image/Sky.
+// Alterna panoramas equirectangulares (2:1) y atlas cubemap (3x4) y hace
+// crossfade entre ellos para no interrumpir visualmente la escena.
+const SKY_SOURCES = [];
+for (let i = 1; i <= 25; i++) {
+  const n = String(i).padStart(2, '0');
+  SKY_SOURCES.push({ type: 'panorama', file: `Panorama_Sky_${n}-512x512.png` });
+  SKY_SOURCES.push({ type: 'cubemap', file: `Cubemap_Sky_${n}-512x512.png` });
+}
+const SKY_DURATION = 20;      // segundos visibles por cielo
+const SKY_FADE = 2.0;         // segundos de fundido
+const skyGroup = new THREE.Group();
+skyGroup.renderOrder = -1000;
+scene.add(skyGroup);
+const skyBase = new THREE.Mesh(
+  new THREE.SphereGeometry(380, 24, 12),
+  new THREE.MeshBasicMaterial({
+    color: 0x9db6c9,
+    side: THREE.BackSide,
+    depthWrite: false,
+    fog: false,
+    toneMapped: false,
+  })
+);
+skyBase.renderOrder = -1001;
+scene.add(skyBase);
+const skyState = {
+  currentIndex: 0,
+  currentMesh: null,
+  nextMesh: null,
+  timer: 0,
+  fade: 0,
+  loading: false,
+};
+
+function cubemapFaces(images, faceSize = 512) {
+  const positions = [
+    [2, 1], // +X (derecha)
+    [0, 1], // -X (izquierda)
+    [1, 0], // +Y (arriba)
+    [1, 2], // -Y (abajo)
+    [1, 1], // +Z (frente)
+    [3, 1], // -Z (espalda)
+  ];
+  return positions.map(([col, row]) => {
+    const canvas = document.createElement('canvas');
+    canvas.width = canvas.height = faceSize;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(images, col * faceSize, row * faceSize, faceSize, faceSize, 0, 0, faceSize, faceSize);
+    return canvas;
+  });
+}
+
+function cubeFromAtlas(url) {
+  return new Promise((resolve, reject) => {
+    new THREE.TextureLoader().load(url, texture => {
+      const image = texture.image;
+      const faceSize = Math.round((image.image ? image.image.width : image.width) / 4);
+      const faces = cubemapFaces(image, faceSize);
+      const cube = new THREE.CubeTexture(faces);
+      cube.colorSpace = THREE.SRGBColorSpace;
+      cube.needsUpdate = true;
+      resolve(cube);
+    }, undefined, reject);
+  });
+}
+
+function cubeFromEquirect(url, mesh) {
+  return new Promise((resolve, reject) => {
+    loadTexture(url).then(equirect => {
+      const rt = new THREE.WebGLCubeRenderTarget(512);
+      rt.fromEquirectangularTexture(renderer, equirect);
+      if (mesh) mesh.userData.cubeRT = rt;
+      resolve(rt.texture);
+    }).catch(reject);
+  });
+}
+
+function loadSkyTexture(source, mesh) {
+  return source.type === 'cubemap'
+    ? cubeFromAtlas(SKY_ROOT + source.file)
+    : cubeFromEquirect(SKY_ROOT + source.file, mesh);
+}
+
+function makeSkyMesh() {
+  const material = new THREE.MeshBasicMaterial({
+    side: THREE.BackSide,
+    transparent: true,
+    opacity: 1,
+    depthWrite: false,
+    depthTest: true,
+    fog: false,
+    toneMapped: false,
+  });
+  const mesh = new THREE.Mesh(new THREE.SphereGeometry(380, 32, 16), material);
+  mesh.renderOrder = -1000;
+  mesh.visible = false;
+  skyGroup.add(mesh);
+  return mesh;
+}
+
+function setSkyIntensity(mesh, intensity) {
+  if (!mesh) return;
+  mesh.material.color.setRGB(intensity, intensity, intensity);
+  mesh.material.needsUpdate = true;
+}
+
+async function swapSkyTo(index) {
+  if (skyState.loading) return;
+  const source = SKY_SOURCES[index % SKY_SOURCES.length];
+  const incoming = makeSkyMesh();
+  skyState.loading = true;
+  try {
+    const texture = await loadSkyTexture(source, incoming);
+    incoming.material.envMap = texture;
+    incoming.material.needsUpdate = true;
+    incoming.visible = true;
+    if (!skyState.currentMesh) {
+      skyState.currentMesh = incoming;
+      skyState.currentIndex = index;
+    } else {
+      skyState.nextMesh = incoming;
+      skyState.currentMesh.renderOrder = -1000;
+      skyState.nextMesh.renderOrder = -999;
+      skyState.fade = 0;
+    }
+  } catch (err) {
+    incoming.geometry.dispose();
+    incoming.material.dispose();
+    skyGroup.remove(incoming);
+    console.warn(`No se pudo cargar el cielo ${source.file}; se mantiene el fondo actual.`, err);
+  }
+  skyState.loading = false;
+}
+
+function updateSkyCycle(dt) {
+  if (!skyState.currentMesh) {
+    skyState.timer += dt;
+    if (skyState.timer > 0.2 && !skyState.loading) {
+      skyState.timer = 0;
+      swapSkyTo(skyState.currentIndex + 1);
+    }
+    return;
+  }
+
+  // Ajuste de luminancia con el ciclo día/noche existente.
+  const target = isNight ? 0.42 : 1.0;
+  const current = skyState.currentMesh.material.color.r;
+  const value = current + (target - current) * Math.min(1, dt * 2.2);
+  setSkyIntensity(skyState.currentMesh, value);
+
+  if (skyState.nextMesh && skyState.fade < 1) {
+    skyState.fade += dt / SKY_FADE;
+    const k = Math.min(1, skyState.fade);
+    skyState.nextMesh.material.opacity = k;
+    skyState.currentMesh.material.opacity = 1 - k;
+    skyState.nextMesh.material.color.copy(skyState.currentMesh.material.color);
+    if (k >= 1) {
+      const oldRT = skyState.currentMesh.userData.cubeRT;
+      if (oldRT) oldRT.dispose();
+      skyGroup.remove(skyState.currentMesh);
+      skyState.currentMesh.material.dispose();
+      skyState.currentMesh.geometry.dispose();
+      skyState.currentMesh = skyState.nextMesh;
+      skyState.nextMesh = null;
+      skyState.currentIndex = (skyState.currentIndex + 1) % SKY_SOURCES.length;
+    }
+  }
+
+  skyState.timer += dt;
+  if (!skyState.nextMesh && !skyState.loading && skyState.timer > SKY_DURATION) {
+    skyState.timer = 0;
+    swapSkyTo((skyState.currentIndex + 1) % SKY_SOURCES.length);
+  }
+}
+
+function initSkyCycle() {
+  swapSkyTo(0);
+}
+
 const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 400);
 camera.position.set(26, 22, 26);
 
@@ -1543,22 +1799,37 @@ moon.position.set(-25, 35, -20);
 scene.add(moon);
 
 /* Suelo del mundo */
-const ground = new THREE.Mesh(
-  new THREE.PlaneGeometry(400, 400),
-  tiledMaterial(0x6da35e, 'grass', 68, 68, { roughness: 0.94, envMapIntensity: 0.55 })
-);
-ground.rotation.x = -Math.PI / 2;
-ground.receiveShadow = true;
-scene.add(ground);
+let ground = null;
+let plot = null;
 
-const plot = new THREE.Mesh(
-  new THREE.PlaneGeometry(S, S),
-  tiledMaterial(0x79b169, 'grass', 9, 9, { roughness: 0.95, envMapIntensity: 0.5 })
-);
-plot.rotation.x = -Math.PI / 2;
-plot.position.y = 0.01;
-plot.receiveShadow = true;
-scene.add(plot);
+function createWorldGround() {
+  ground = new THREE.Mesh(
+    new THREE.PlaneGeometry(400, 400),
+    tiledMaterial(0xffffff, 'grass', 68, 68, { roughness: 0.94, envMapIntensity: 0.55 })
+  );
+  ground.rotation.x = -Math.PI / 2;
+  ground.receiveShadow = true;
+  scene.add(ground);
+
+  plot = new THREE.Mesh(
+    new THREE.PlaneGeometry(S, S),
+    tiledMaterial(0xffffff, 'grass', 9, 9, { roughness: 0.95, envMapIntensity: 0.5 })
+  );
+  plot.rotation.x = -Math.PI / 2;
+  plot.position.y = 0.01;
+  plot.receiveShadow = true;
+  scene.add(plot);
+}
+
+function refreshWorldGround() {
+  if (!ground || !plot) return;
+  ground.material.dispose();
+  plot.material.dispose();
+  ground.material = tiledMaterial(0xffffff, 'grass', 68, 68, { roughness: 0.94, envMapIntensity: 0.55 });
+  plot.material = tiledMaterial(0xffffff, 'grass', 9, 9, { roughness: 0.95, envMapIntensity: 0.5 });
+}
+
+createWorldGround();
 
 const gridHelper = new THREE.GridHelper(S, S, 0xffffff, 0xffffff);
 gridHelper.material.transparent = true;
@@ -1586,7 +1857,7 @@ const starGeo = new THREE.BufferGeometry();
   }
   starGeo.setAttribute('position', new THREE.Float32BufferAttribute(pts, 3));
 }
-const stars = new THREE.Points(starGeo, new THREE.PointsMaterial({ color: 0xffffff, size: 0.7, transparent: true, opacity: 0 }));
+let stars = new THREE.Points(starGeo, new THREE.PointsMaterial({ color: 0xffffff, size: 0.7, transparent: true, opacity: 0 }));
 scene.add(stars);
 
 /* Grupo de construcción */
@@ -1678,6 +1949,7 @@ const fireflies = [];
   }
 }
 function updateEnv(t, dt) {
+  updateSkyCycle(dt);
   for (const c of clouds) {
     c.g.position.x += c.v * dt;
     if (c.g.position.x > 95) c.g.position.x = -95;
@@ -2813,7 +3085,9 @@ document.getElementById('btn-cancel').addEventListener('click', () => selectTool
 
 /* ---------------- Inicio ---------------- */
 async function startGame() {
-  await preloadPremiumAssets();
+  await Promise.all([preloadPremiumAssets(), loadImageSurfaces()]);
+  refreshWorldGround();
+  initSkyCycle();
   buildUI();
   if (loadGame()) rebuildAll();
   updateMoney();
