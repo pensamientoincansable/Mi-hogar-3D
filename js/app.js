@@ -950,14 +950,33 @@ const FURNITURE = {
 };
 
 const BUILD_ITEMS = {
-  suelo:            { name: 'Madera', ico: '🟫', cost: 20, kind: 'floor', section: 'Suelos', style: 'wood', color: 0xc9a06a },
-  suelo_roble:      { name: 'Roble claro', ico: '🟨', cost: 28, kind: 'floor', section: 'Suelos', style: 'planks', color: 0xd8b579 },
-  suelo_baldosa:    { name: 'Baldosa', ico: '🔳', cost: 32, kind: 'floor', section: 'Suelos', style: 'tiles', color: 0xd9d5cc },
-  suelo_marmol:     { name: 'Mármol', ico: '⬜', cost: 55, kind: 'floor', section: 'Suelos', style: 'marble', color: 0xeeeae2 },
-  suelo_terracota:  { name: 'Terracota', ico: '🟧', cost: 30, kind: 'floor', section: 'Suelos', style: 'terracotta', color: 0xb96543 },
-  suelo_parquet:    { name: 'Parqué', ico: '🟫', cost: 42, kind: 'floor', section: 'Suelos', style: 'parquet', color: 0xa8753e },
-  suelo_hormigon:   { name: 'Hormigón', ico: '◻️', cost: 24, kind: 'floor', section: 'Suelos', style: 'concrete', color: 0x969a9e },
-  pared:             { name: 'Pared', ico: '🧱', cost: 60, kind: 'wall', category: 'wall', section: 'Muros', style: 'plain', color: 0xf5f0e8 },
+  // Suelos: todos son celdas independientes y usan un albedo de media/image.
+  suelo:             { name: 'Madera', ico: '🟫', cost: 20, kind: 'floor', section: 'Suelos', style: 'wood', color: 0xc9a06a },
+  suelo_roble:       { name: 'Roble claro', ico: '🟨', cost: 28, kind: 'floor', section: 'Suelos', style: 'planks', color: 0xd8b579 },
+  suelo_baldosa:     { name: 'Baldosa', ico: '🔳', cost: 32, kind: 'floor', section: 'Suelos', style: 'tiles', color: 0xd9d5cc },
+  suelo_marmol:      { name: 'Mármol', ico: '⬜', cost: 55, kind: 'floor', section: 'Suelos', style: 'marble', color: 0xeeeae2 },
+  suelo_terracota:   { name: 'Terracota', ico: '🟧', cost: 30, kind: 'floor', section: 'Suelos', style: 'terracotta', color: 0xb96543 },
+  suelo_parquet:     { name: 'Parqué', ico: '🟫', cost: 42, kind: 'floor', section: 'Suelos', style: 'parquet', color: 0xa8753e },
+  suelo_hormigon:    { name: 'Hormigón', ico: '◻️', cost: 24, kind: 'floor', section: 'Suelos', style: 'concrete', color: 0x969a9e },
+  suelo_piedra:      { name: 'Piedra natural', ico: '🪨', cost: 38, kind: 'floor', section: 'Suelos', style: 'stone', color: 0x8f969b },
+  suelo_grava:       { name: 'Grava', ico: '▫️', cost: 18, kind: 'floor', section: 'Suelos', style: 'gravel', color: 0xa49a8c },
+  suelo_pizarra:     { name: 'Pizarra', ico: '⬛', cost: 44, kind: 'floor', section: 'Suelos', style: 'slate', color: 0x626d78 },
+  suelo_mosaico:     { name: 'Mosaico hexagonal', ico: '🔶', cost: 48, kind: 'floor', section: 'Suelos', style: 'hex', color: 0xd3b6a0 },
+
+  // Muros y vallas ocupan un borde de la cuadrícula (h: horizontal, v: vertical).
+  pared:             { name: 'Pared enlucida', ico: '🧱', cost: 60, kind: 'wall', category: 'wall', section: 'Muros', style: 'plain', color: 0xf5f0e8 },
+  muro_piedra:       { name: 'Muro de piedra', ico: '🪨', cost: 95, kind: 'wall', category: 'wall', section: 'Muros', style: 'stone', color: 0x8e969d },
+  muro_ladrillo:     { name: 'Muro de ladrillo', ico: '🧱', cost: 85, kind: 'wall', category: 'wall', section: 'Muros', style: 'brick', color: 0xb85f4c },
+  muro_hormigon:     { name: 'Muro de hormigón', ico: '◼️', cost: 72, kind: 'wall', category: 'wall', section: 'Muros', style: 'concrete', color: 0x92979c },
+  muro_madera:       { name: 'Muro de madera', ico: '🪵', cost: 78, kind: 'wall', category: 'wall', section: 'Muros', style: 'wood', color: 0x9b693d },
+  minimuro:          { name: 'Minimuro', ico: '▰', cost: 48, kind: 'wall', category: 'wall', section: 'Muros', style: 'low', color: 0x969da0, height: 1.15 },
+  valla:             { name: 'Valla de madera', ico: '🚧', cost: 45, kind: 'wall', category: 'fence', section: 'Vallas', style: 'fence', color: 0xd8b579, height: 1.22 },
+  valla_metal:       { name: 'Valla metálica', ico: '⛓️', cost: 70, kind: 'wall', category: 'fence', section: 'Vallas', style: 'metalFence', color: 0x707983, height: 1.35 },
+
+  // Accesos: son piezas de suelo elevadas; R permite orientar la subida.
+  escalera:          { name: 'Escalera', ico: '🪜', cost: 90, kind: 'floor', section: 'Accesos', style: 'stairs', color: 0x9b693d, rotatable: true },
+  rampa:             { name: 'Rampa', ico: '📐', cost: 85, kind: 'floor', section: 'Accesos', style: 'ramp', color: 0x92979c, rotatable: true },
+
   puerta:            { name: 'Clásica', ico: '🚪', cost: 150, kind: 'wall', category: 'door', section: 'Puertas', style: 'classic', color: 0xf5f0e8 },
   puerta_moderna:    { name: 'Moderna', ico: '🚪', cost: 230, kind: 'wall', category: 'door', section: 'Puertas', style: 'modern', color: 0xe8e4dc },
   puerta_doble:      { name: 'Doble', ico: '🚪', cost: 290, kind: 'wall', category: 'door', section: 'Puertas', style: 'double', color: 0xf5f0e8 },
@@ -1064,6 +1083,18 @@ const IMAGE_SURFACES = [
   { name: 'clay',       file: 'PTP-Ground_04-512x512.png',   roughness: 0.82, metalness: 0.00, envMapIntensity: 0.58, bumpScale: 0.035 },
   { name: 'water',      file: 'PTP-Elements_01-512x512.png', roughness: 0.10, metalness: 0.00, envMapIntensity: 1.45, bumpScale: 0.020 },
   { name: 'rough',      file: 'PTP-Ground_01-512x512.png',   roughness: 0.84, metalness: 0.00, envMapIntensity: 0.55, bumpScale: 0.045 },
+  // Variantes para las nuevas piezas de construcción. Cada una apunta a un
+  // albedo distinto de media/image para que los acabados no sean clones.
+  { name: 'woodDark',    file: 'PTP-Floor_02-512x512.png',       roughness: 0.78, metalness: 0.00, envMapIntensity: 0.62, bumpScale: 0.040 },
+  { name: 'floorStone',  file: 'PTP-Stone_06-512x512.png',       roughness: 0.89, metalness: 0.00, envMapIntensity: 0.58, bumpScale: 0.048 },
+  { name: 'floorGravel', file: 'PTP-Ground_06-512x512.png',      roughness: 0.96, metalness: 0.00, envMapIntensity: 0.45, bumpScale: 0.060 },
+  { name: 'floorSlate',  file: 'PTP-Stone_09-512x512.png',       roughness: 0.82, metalness: 0.00, envMapIntensity: 0.65, bumpScale: 0.045 },
+  { name: 'floorHex',    file: 'PTP-Tile_07-512x512.png',        roughness: 0.60, metalness: 0.00, envMapIntensity: 0.78, bumpScale: 0.030 },
+  { name: 'wallStone',   file: 'PTP-Stone_07-512x512.png',       roughness: 0.91, metalness: 0.00, envMapIntensity: 0.55, bumpScale: 0.052 },
+  { name: 'wallBrick',   file: 'PTP-Stone_05-512x512.png',       roughness: 0.87, metalness: 0.00, envMapIntensity: 0.58, bumpScale: 0.042 },
+  { name: 'wallConcrete',file: 'PTP-Concrete_03-512x512.png',   roughness: 0.92, metalness: 0.00, envMapIntensity: 0.52, bumpScale: 0.050 },
+  { name: 'wallWood',    file: 'PTP-Floor_03-512x512.png',       roughness: 0.75, metalness: 0.00, envMapIntensity: 0.64, bumpScale: 0.038 },
+  { name: 'fenceWood',   file: 'PTP-Floor_05-512x512.png',       roughness: 0.79, metalness: 0.00, envMapIntensity: 0.60, bumpScale: 0.040 },
 ];
 
 function loadTexture(url, colorSpace = THREE.SRGBColorSpace) {
@@ -1346,6 +1377,18 @@ makeSurface('rough', 19, (ctx, s, rnd, bump) => {
 }, { roughness: 0.72 });
 function hsl(v) { return v; }
 
+// Si una textura nueva no está disponible (por ejemplo, en una copia parcial
+// del proyecto), la pieza conserva un PBR válido en lugar de quedarse negra.
+const SURFACE_FALLBACKS = {
+  woodDark: 'wood', floorStone: 'stone', floorGravel: 'rough',
+  floorSlate: 'stone', floorHex: 'tiles', wallStone: 'stone',
+  wallBrick: 'brick', wallConcrete: 'concrete', wallWood: 'wood',
+  fenceWood: 'wood',
+};
+for (const [name, fallback] of Object.entries(SURFACE_FALLBACKS)) {
+  defineSurface(name, { ...SURFACES[fallback] });
+}
+
 /* ---------------- Biblioteca de modelos pulidos ----------------
    Los GLB de interior proceden del Furniture Kit de Kenney (CC0) y
    la vegetación FBX del Ultimate Stylized Nature Pack de Quaternius
@@ -1605,18 +1648,9 @@ const SKY_FADE = 2.0;         // segundos de fundido
 const skyGroup = new THREE.Group();
 skyGroup.renderOrder = -1000;
 scene.add(skyGroup);
-const skyBase = new THREE.Mesh(
-  new THREE.SphereGeometry(380, 24, 12),
-  new THREE.MeshBasicMaterial({
-    color: 0x9db6c9,
-    side: THREE.BackSide,
-    depthWrite: false,
-    fog: false,
-    toneMapped: false,
-  })
-);
-skyBase.renderOrder = -1001;
-scene.add(skyBase);
+// No añadimos una esfera azul de respaldo: era la cúpula que quedaba visible
+// cuando el cielo real tardaba en cargar. El color de `scene.background` es un
+// fallback plano y no puede crear una geometría residual en la parcela.
 const skyState = {
   currentIndex: 0,
   currentMesh: null,
@@ -1650,6 +1684,9 @@ function cubeFromAtlas(url) {
       const image = texture.image;
       const faceSize = Math.round((image.image ? image.image.width : image.width) / 4);
       const faces = cubemapFaces(image, faceSize);
+      // El atlas solo sirve como fuente para los seis canvas; no lo dejamos
+      // ocupando otra textura GPU además del cubemap final.
+      texture.dispose();
       const cube = new THREE.CubeTexture(faces);
       cube.colorSpace = THREE.SRGBColorSpace;
       cube.needsUpdate = true;
@@ -1658,21 +1695,13 @@ function cubeFromAtlas(url) {
   });
 }
 
-function cubeFromEquirect(url, mesh) {
-  return new Promise((resolve, reject) => {
-    loadTexture(url).then(equirect => {
-      const rt = new THREE.WebGLCubeRenderTarget(512);
-      rt.fromEquirectangularTexture(renderer, equirect);
-      if (mesh) mesh.userData.cubeRT = rt;
-      resolve(rt.texture);
-    }).catch(reject);
-  });
-}
-
-function loadSkyTexture(source, mesh) {
+function loadSkyTexture(source) {
+  // Los panoramas son equirectangulares 2:1 y se muestran directamente en la
+  // esfera UV. Los atlas 4x3 necesitan convertirse en CubeTexture para que no
+  // aparezcan las juntas del atlas como otra cúpula azul.
   return source.type === 'cubemap'
     ? cubeFromAtlas(SKY_ROOT + source.file)
-    : cubeFromEquirect(SKY_ROOT + source.file, mesh);
+    : loadTexture(SKY_ROOT + source.file);
 }
 
 function makeSkyMesh() {
@@ -1704,8 +1733,10 @@ async function swapSkyTo(index) {
   const incoming = makeSkyMesh();
   skyState.loading = true;
   try {
-    const texture = await loadSkyTexture(source, incoming);
-    incoming.material.envMap = texture;
+    const texture = await loadSkyTexture(source);
+    if (source.type === 'cubemap') incoming.material.envMap = texture;
+    else incoming.material.map = texture;
+    incoming.userData.skyTexture = texture;
     incoming.material.needsUpdate = true;
     incoming.visible = true;
     if (!skyState.currentMesh) {
@@ -1749,8 +1780,8 @@ function updateSkyCycle(dt) {
     skyState.currentMesh.material.opacity = 1 - k;
     skyState.nextMesh.material.color.copy(skyState.currentMesh.material.color);
     if (k >= 1) {
-      const oldRT = skyState.currentMesh.userData.cubeRT;
-      if (oldRT) oldRT.dispose();
+      const oldTexture = skyState.currentMesh.userData.skyTexture;
+      if (oldTexture) oldTexture.dispose();
       skyGroup.remove(skyState.currentMesh);
       skyState.currentMesh.material.dispose();
       skyState.currentMesh.geometry.dispose();
@@ -1987,12 +2018,55 @@ function updateEnv(t, dt) {
 function buildWallMesh(type = 'pared', color) {
   const def = BUILD_ITEMS[type] || BUILD_ITEMS.pared;
   const c = color ?? def.color ?? 0xf5f0e8;
+  const wallSurfaces = {
+    plain: 'plaster', stone: 'wallStone', brick: 'wallBrick',
+    concrete: 'wallConcrete', wood: 'wallWood', low: 'wallStone',
+  };
+
   if (def.category === 'wall') {
-    return grp(
-      box(1.02, WALL_H, 0.14, c, 0, WALL_H / 2, 0, true, 'plaster'),
-      box(1.02, .1, .035, 0xe6e0d6, 0, .07, .085, false, 'wood'),
-      box(1.02, .055, .025, 0xf1ede6, 0, WALL_H - .035, .08, false, 'plaster')
-    );
+    const h = def.height ?? WALL_H;
+    const surface = wallSurfaces[def.style] || 'plaster';
+    const body = box(1.02, h, 0.16, c, 0, h / 2, 0, true, surface);
+    const details = [body];
+    if (def.style === 'low') {
+      // El remate ancho hace que el minimuro se lea como una pieza propia,
+      // incluso cuando se coloca junto a una pared alta.
+      details.push(
+        rbox(1.08, 0.09, 0.21, shade(c, .12), 0, h + .045, 0, .025, true, surface),
+        box(1.04, .08, .19, shade(c, -.12), 0, .04, 0, true, surface)
+      );
+    } else {
+      details.push(
+        box(1.04, .08, .19, shade(c, -.1), 0, .04, 0, true, surface),
+        rbox(1.06, .055, .19, shade(c, .1), 0, h + .028, 0, .014, true, surface)
+      );
+    }
+    return grp(...details);
+  }
+
+  if (def.category === 'fence') {
+    const h = def.height ?? 1.2;
+    const metalFence = def.style === 'metalFence';
+    const surface = metalFence ? 'metal' : 'fenceWood';
+    const postColor = metalFence ? shade(c, -.16) : shade(c, -.08);
+    const g = grp();
+    const postXs = [-.48, 0, .48];
+    for (const x of postXs) {
+      g.add(rbox(.095, h, .095, postColor, x, h / 2, 0, .018, true, surface));
+      g.add(cyl(.045, .062, .1, postColor, x, h + .05, 0, 8, true, surface));
+    }
+    if (metalFence) {
+      for (const y of [h * .25, h * .62, h * .9]) g.add(rbox(.98, .045, .045, c, 0, y, 0, .012, true, surface));
+      for (let i = -4; i <= 4; i++) g.add(rbox(.035, h * .88, .035, c, i * .12, h * .44, 0, .01, true, surface));
+    } else {
+      for (const y of [h * .3, h * .72]) g.add(rbox(.98, .07, .065, shade(c, -.04), 0, y, 0, .014, true, surface));
+      for (let i = -4; i <= 4; i++) {
+        const x = i * .12;
+        g.add(rbox(.075, h * .72, .075, c, x, h * .38, 0, .014, true, surface));
+        g.add(cyl(0, .052, .1, shade(c, .1), x, h * .76 + .05, 0, 4, true, surface));
+      }
+    }
+    return g;
   }
 
   if (def.category === 'door') {
@@ -2054,33 +2128,91 @@ function buildWallMesh(type = 'pared', color) {
   }
   return g;
 }
+function rampGeometry(width = .94, depth = .94, height = .82) {
+  // Cuña con la parte alta hacia +Z. Se rota la pieza completa al colocarla.
+  const w = width / 2, d = depth / 2;
+  const vertices = [
+    -w, 0, -d,   w, 0, -d,   -w, 0, d,   w, 0, d,
+    -w, height, d,   w, height, d,
+  ];
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+  geometry.setIndex([
+    0, 1, 3, 0, 3, 2, // base
+    0, 2, 4,           // lateral izquierdo
+    1, 5, 3,           // lateral derecho
+    2, 3, 5, 2, 5, 4,  // pendiente
+    0, 4, 5, 0, 5, 1,  // frente y remate
+  ]);
+  geometry.computeVertexNormals();
+  return geometry;
+}
+
 function buildFloorMesh(type = 'suelo', color) {
   const def = BUILD_ITEMS[type] || BUILD_ITEMS.suelo;
   const c = color ?? def.color ?? 0xc9a06a;
-  const surfaceMap = { wood: 'wood', planks: 'planks', tiles: 'tiles', marble: 'marble', terracotta: 'terracotta', parquet: 'parquet', concrete: 'concrete' };
+  const surfaceMap = {
+    wood: 'wood', planks: 'planks', woodDark: 'woodDark', tiles: 'tiles',
+    marble: 'marble', terracotta: 'terracotta', parquet: 'parquet',
+    concrete: 'concrete', stone: 'floorStone', gravel: 'floorGravel',
+    slate: 'floorSlate', hex: 'floorHex', stairs: 'woodDark', ramp: 'wallConcrete',
+  };
   const surface = surfaceMap[def.style] || 'wood';
-  const g = grp(box(0.99, 0.08, 0.99, c, 0, 0.04, 0, true, surface));
-  const seam = def.style === 'tiles' || def.style === 'marble' ? 0xb4b1aa : shade(c, -.2);
-  if (def.style === 'wood' || def.style === 'planks') {
-    for (const z of [-.25, .25]) g.add(box(.97, .006, .018, seam, 0, .083, z));
-    for (const [x, z] of [[-.24,-.37],[.25,-.12],[-.12,.13],[.32,.38]]) g.add(box(.016,.006,.23,seam,x,.083,z));
-  } else if (def.style === 'tiles' || def.style === 'terracotta') {
-    g.add(box(.97,.007,.018,seam,0,.084,0), box(.018,.007,.97,seam,0,.084,0));
+
+  if (def.style === 'stairs') {
+    const g = grp();
+    const steps = 5, depth = .96 / steps, rise = .16;
+    g.add(box(.96, .045, .98, shade(c, -.18), 0, .025, 0, true, surface));
+    for (let i = 0; i < steps; i++) {
+      const h = (i + 1) * rise;
+      const z = -.48 + depth * (i + .5);
+      g.add(rbox(.92, h, depth - .018, c, 0, h / 2 + .045, z, .018, true, surface));
+    }
+    // Largueros laterales: además de decorativos hacen legible la dirección.
+    for (const x of [-.48, .48]) {
+      const side = rbox(.055, rise * steps + .08, .92, shade(c, -.2), x, rise * steps / 2 + .06, 0, .012, true, surface);
+      side.rotation.x = -.16;
+      g.add(side);
+    }
+    return g;
+  }
+
+  if (def.style === 'ramp') {
+    const g = grp();
+    const ramp = new THREE.Mesh(rampGeometry(.96, .96, .82), mat(c, { surface }));
+    ramp.castShadow = true; ramp.receiveShadow = true; ramp.userData.paint = true;
+    g.add(ramp);
+    for (const x of [-.49, .49]) {
+      const edge = rbox(.045, .055, .98, shade(c, -.16), x, .045, 0, .012, true, surface);
+      edge.rotation.x = -.7;
+      g.add(edge);
+    }
+    return g;
+  }
+
+  const g = grp(box(.99, .08, .99, c, 0, .04, 0, true, surface));
+  const seam = ['tiles', 'marble', 'hex', 'slate'].includes(def.style) ? 0xb4b1aa : shade(c, -.2);
+  if (def.style === 'wood' || def.style === 'planks' || def.style === 'woodDark') {
+    for (const z of [-.25, .25]) g.add(box(.97, .006, .018, seam, 0, .083, z, false, surface));
+    for (const [x, z] of [[-.24, -.37], [.25, -.12], [-.12, .13], [.32, .38]]) g.add(box(.016, .006, .23, seam, x, .083, z, false, surface));
+  } else if (def.style === 'tiles' || def.style === 'terracotta' || def.style === 'hex') {
+    g.add(box(.97, .007, .018, seam, 0, .084, 0, false, surface), box(.018, .007, .97, seam, 0, .084, 0, false, surface));
     if (def.style === 'terracotta') {
-      g.add(box(.018,.007,.97,shade(c,.12),-.48,.084,0), box(.018,.007,.97,shade(c,.12),.48,.084,0));
+      g.add(box(.018, .007, .97, shade(c, .12), -.48, .084, 0, false, surface), box(.018, .007, .97, shade(c, .12), .48, .084, 0, false, surface));
     }
   } else if (def.style === 'marble') {
-    const v1 = box(1.05,.006,.018,0xa7abb1,0,.084,-.09); v1.rotation.y = .58;
-    const v2 = box(.72,.006,.012,0xc3b9ae,.15,.084,.22); v2.rotation.y = -.72;
+    const v1 = box(1.05, .006, .018, 0xa7abb1, 0, .084, -.09, false, surface); v1.rotation.y = .58;
+    const v2 = box(.72, .006, .012, 0xc3b9ae, .15, .084, .22, false, surface); v2.rotation.y = -.72;
     g.add(v1, v2);
   } else if (def.style === 'parquet') {
     for (let i = 0; i < 6; i++) {
-      const slat = box(.42,.009,.12,i % 2 ? shade(c,.12) : shade(c,-.08),-.27 + (i % 2) * .54,.086,-.32 + Math.floor(i / 2) * .32);
+      const slat = box(.42, .009, .12, i % 2 ? shade(c, .12) : shade(c, -.08), -.27 + (i % 2) * .54, .086, -.32 + Math.floor(i / 2) * .32, false, surface);
       slat.rotation.y = i % 2 ? Math.PI / 2 : 0;
       g.add(slat);
     }
-  } else if (def.style === 'concrete') {
-    for (const [x,z] of [[-.3,-.24],[.24,-.32],[-.1,.3],[.34,.18]]) g.add(cyl(.018,.018,.006,shade(c,-.22),x,.085,z,8));
+  } else if (['concrete', 'stone', 'gravel', 'slate'].includes(def.style)) {
+    for (const [x, z, r] of [[-.3, -.24, .018], [.24, -.32, .014], [-.1, .3, .016], [.34, .18, .012]])
+      g.add(cyl(r, r, .006, shade(c, -.22), x, .085, z, 8, false, surface));
   }
   return g;
 }
@@ -2102,15 +2234,18 @@ function wallTransform(key) {
   return { x: x - S / 2, z: z + 0.5 - S / 2, ry: Math.PI / 2 };
 }
 function objTransform(obj) {
-  const def = FURNITURE[obj.t];
-  const w = obj.r % 2 ? def.d : def.w, d = obj.r % 2 ? def.w : def.d;
-  return { x: obj.x + w / 2 - S / 2, z: obj.z + d / 2 - S / 2, ry: obj.r * Math.PI / 2, w, d };
+  const def = FURNITURE[obj.t] || FURNITURE.silla;
+  const rotation = Number.isFinite(+obj.r) ? ((+obj.r % 4) + 4) % 4 : 0;
+  const w = rotation % 2 ? def.d : def.w, d = rotation % 2 ? def.w : def.d;
+  return { x: obj.x + w / 2 - S / 2, z: obj.z + d / 2 - S / 2, ry: rotation * Math.PI / 2, w, d, rotation };
 }
 
 function addFloorMesh(key, data) {
   const [x, z] = key.split(',').map(Number);
   const m = buildFloorMesh(data.t || 'suelo', data.c);
   m.position.set(x + 0.5 - S / 2, 0, z + 0.5 - S / 2);
+  const def = BUILD_ITEMS[data.t] || BUILD_ITEMS.suelo;
+  m.rotation.y = def.rotatable ? normalizeRotation(data.r) * Math.PI / 2 : 0;
   m.userData = { kind: 'floor', key };
   buildGroup.add(m); meshes.floors[key] = m;
 }
@@ -2130,7 +2265,9 @@ function addWallMesh(key, data) {
 }
 function addObjectMesh(obj) {
   const def = FURNITURE[obj.t];
+  if (!def) return;
   const m = buildCatalogObject(obj.t, obj.c);
+  if (!m) return;
   const t = objTransform(obj);
   m.position.set(t.x, 0, t.z); m.rotation.y = t.ry;
   m.scale.setScalar(obj.s || 1);
@@ -2369,7 +2506,8 @@ function selectTool(t) {
   });
   const ctx = document.getElementById('context-controls');
   ctx.classList.toggle('hidden', !t);
-  document.getElementById('btn-rotate').style.display = (t && t.mode === 'furniture') ? '' : 'none';
+  const canRotateTool = t && (t.mode === 'furniture' || (t.mode === 'build' && BUILD_ITEMS[t.id]?.rotatable));
+  document.getElementById('btn-rotate').style.display = canRotateTool ? '' : 'none';
   const def = selectedToolDef(t);
   document.getElementById('selection-label').textContent = def ? `${def.ico} ${def.name}` : '';
   updateRotationUI();
@@ -2465,6 +2603,7 @@ function place() {
   if (tool.mode === 'build') {
     const def = BUILD_ITEMS[tool.id];
     const data = { t: tool.id, c: selectedColorCustom ? selectedColor : def.color };
+    if (def.rotatable) data.r = toolRot;
     if (def.kind === 'floor') {
       state.floors[hover.cellKey] = data;
       addFloorMesh(hover.cellKey, data);
@@ -2584,8 +2723,9 @@ function renderSelectPanel() {
   document.getElementById('sp-name').textContent = def ? `${def.ico} ${def.name}` : 'Pieza';
   document.getElementById('sp-sell').textContent = `♻️ Vender +${fmt(refund)}`;
   const isObj = selection.kind === 'object';
+  const isRotatableBuild = selection.kind === 'floor' && BUILD_ITEMS[tgt.t]?.rotatable;
   document.getElementById('sp-size-row').classList.toggle('hidden', !isObj);
-  document.getElementById('sp-rotate').classList.toggle('hidden', !isObj);
+  document.getElementById('sp-rotate').classList.toggle('hidden', !isObj && !isRotatableBuild);
   const s = isObj ? (tgt.s || 1) : 1;
   document.querySelectorAll('.size-btn').forEach(b => b.classList.toggle('active', Math.abs(+b.dataset.scale - s) < 0.01));
   selPanelEl.classList.remove('hidden');
@@ -2620,10 +2760,23 @@ function applySelScale(s) {
   scheduleSave();
 }
 function rotateSelected() {
-  if (!selection || selection.kind !== 'object') return;
+  if (!selection) return;
+  if (selection.kind === 'floor') {
+    const floor = state.floors[selection.key];
+    const def = floor && BUILD_ITEMS[floor.t];
+    if (!def?.rotatable) return;
+    floor.r = normalizeRotation((floor.r || 0) + 1);
+    removeMesh('floor', selection.key);
+    addFloorMesh(selection.key, floor);
+    refreshSelHelper();
+    snd.click();
+    scheduleSave();
+    return;
+  }
+  if (selection.kind !== 'object') return;
   const obj = state.objects[selection.key];
   const def = FURNITURE[obj.t];
-  const nr = (obj.r + 1) % 4;
+  const nr = normalizeRotation((obj.r || 0) + 1);
   const w = nr % 2 ? def.d : def.w, d = nr % 2 ? def.w : def.d;
   if (obj.x < 0 || obj.z < 0 || obj.x + w > S || obj.z + d > S) { toast('No cabe ahí 🚫', 'error'); snd.error(); return; }
   const occ = occupiedMap(obj.id);
@@ -2730,6 +2883,83 @@ function renderMissions() {
 }
 
 /* ---------------- Guardado ---------------- */
+function record(value) {
+  return value && typeof value === 'object' && !Array.isArray(value);
+}
+function validCellKey(key) {
+  const parts = String(key).split(',');
+  if (parts.length !== 2) return false;
+  const [x, z] = parts.map(Number);
+  return Number.isInteger(x) && Number.isInteger(z) && x >= 0 && x < S && z >= 0 && z < S;
+}
+function validEdgeKey(key) {
+  const parts = String(key).split(':');
+  if (parts.length !== 3) return false;
+  const [orientation, xs, zs] = parts;
+  const x = Number(xs), z = Number(zs);
+  if (!Number.isInteger(x) || !Number.isInteger(z)) return false;
+  return orientation === 'h'
+    ? x >= 0 && x < S && z >= 0 && z <= S
+    : orientation === 'v' && x >= 0 && x <= S && z >= 0 && z < S;
+}
+function safeColor(value, fallback) {
+  return Number.isInteger(value) && value >= 0 && value <= 0xffffff ? value : fallback;
+}
+function normalizeRotation(value) {
+  const n = Number.isFinite(+value) ? Math.round(+value) : 0;
+  return ((n % 4) + 4) % 4;
+}
+function normalizeState(data) {
+  const next = newState();
+  if (!record(data)) return next;
+  next.money = Number.isFinite(+data.money) ? Math.max(0, Math.floor(+data.money)) : START_MONEY;
+
+  for (const [key, item] of Object.entries(record(data.floors) ? data.floors : {})) {
+    const def = BUILD_ITEMS[item?.t];
+    if (!validCellKey(key) || !def || def.kind !== 'floor') continue;
+    next.floors[key] = { t: item.t, c: safeColor(item.c, def.color) };
+    if (def.rotatable) next.floors[key].r = normalizeRotation(item.r);
+  }
+  for (const [key, item] of Object.entries(record(data.roofs) ? data.roofs : {})) {
+    const def = BUILD_ITEMS[item?.t];
+    if (!validCellKey(key) || !def || def.kind !== 'roof') continue;
+    next.roofs[key] = { t: item.t, c: safeColor(item.c, def.color) };
+  }
+  for (const [key, item] of Object.entries(record(data.walls) ? data.walls : {})) {
+    const def = BUILD_ITEMS[item?.t];
+    if (!validEdgeKey(key) || !def || def.kind !== 'wall') continue;
+    next.walls[key] = { t: item.t, c: safeColor(item.c, def.color) };
+  }
+
+  let generatedId = 1;
+  const sourceObjects = record(data.objects) ? data.objects : {};
+  for (const item of Object.values(sourceObjects)) {
+    const def = FURNITURE[item?.t];
+    if (!def || !Number.isInteger(+item?.x) || !Number.isInteger(+item?.z)) continue;
+    const obj = {
+      id: typeof item.id === 'string' && item.id ? item.id : `o${generatedId}`,
+      t: item.t,
+      x: +item.x,
+      z: +item.z,
+      r: normalizeRotation(item.r),
+    };
+    const transform = objTransform(obj);
+    if (obj.x < 0 || obj.z < 0 || obj.x + transform.w > S || obj.z + transform.d > S) continue;
+    if (next.objects[obj.id]) obj.id = `o${generatedId}`;
+    obj.s = Number.isFinite(+item.s) ? Math.max(.5, Math.min(2, +item.s)) : 1;
+    if (item.c !== undefined) obj.c = safeColor(item.c, def.color ?? PALETTE[0]);
+    next.objects[obj.id] = obj;
+    const numericId = Number(obj.id.slice(1));
+    if (Number.isFinite(numericId)) generatedId = Math.max(generatedId, numericId + 1);
+  }
+  next.nextId = Math.max(1, Math.floor(Number(data.nextId) || generatedId), generatedId);
+  const validMissionIds = new Set(MISSIONS.map(m => m.id));
+  const completed = Array.isArray(data.missionsDone)
+    ? data.missionsDone.filter(id => typeof id === 'string' && validMissionIds.has(id))
+    : [];
+  next.missionsDone = [...new Set(completed)];
+  return next;
+}
 let saveTimer = null;
 function scheduleSave() {
   clearTimeout(saveTimer);
@@ -2746,8 +2976,8 @@ function loadGame() {
     const raw = localStorage.getItem(SAVE_KEY);
     if (!raw) return false;
     const data = JSON.parse(raw);
-    if (typeof data.money !== 'number') return false;
-    state = Object.assign(newState(), data);
+    if (!record(data) || typeof data.money !== 'number') return false;
+    state = normalizeState(data);
     return true;
   } catch (e) { return false; }
 }
@@ -2765,8 +2995,8 @@ function importGame(file) {
   fr.onload = () => {
     try {
       const data = JSON.parse(fr.result);
-      if (typeof data.money !== 'number' || typeof data.floors !== 'object') throw new Error('formato');
-      state = Object.assign(newState(), data);
+      if (!record(data) || typeof data.money !== 'number' || !record(data.floors)) throw new Error('formato');
+      state = normalizeState(data);
       rebuildAll();
       updateMoney();
       renderMissions();
@@ -2949,8 +3179,9 @@ function refreshGhost() {
     ghost.position.set(t.x, 0, t.z);
     ghost.rotation.y = t.ry;
   } else if (tool.mode === 'build') {
+    const def = BUILD_ITEMS[tool.id];
     ghost.position.set(hover.cx + 0.5 - S / 2, 0, hover.cz + 0.5 - S / 2);
-    ghost.rotation.y = 0;
+    ghost.rotation.y = def.rotatable ? toolRot * Math.PI / 2 : 0;
   } else {
     const def = FURNITURE[tool.id];
     const w = toolRot % 2 ? def.d : def.w, d = toolRot % 2 ? def.w : def.d;
@@ -2972,7 +3203,8 @@ function updatePlacementHover(e) {
   refreshGhost();
 }
 function rotateTool() {
-  if (!tool || tool.mode !== 'furniture') return;
+  const rotatableBuild = tool?.mode === 'build' && BUILD_ITEMS[tool.id]?.rotatable;
+  if (!tool || (tool.mode !== 'furniture' && !rotatableBuild)) return;
   toolRot = (toolRot + 1) % 4;
   updateRotationUI();
   refreshGhost(); // la previsualización se actualiza aunque el ratón esté quieto
