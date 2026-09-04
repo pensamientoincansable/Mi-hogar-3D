@@ -147,6 +147,25 @@ kbd {
 .item-btn .price.free { color: var(--text-dim); }
 .item-btn.tool-danger.active { background: rgba(255,107,107,0.22); border-color: var(--danger); box-shadow: 0 0 0 1px var(--danger) inset; }
 
+/* Fila de la función de cambio de textura (panel Herramientas) */
+.tex-row {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.tex-btn {
+  width: 100%;
+  padding: 8px 10px;
+  font-size: 12px;
+  border-radius: 10px;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+#btn-tex-cycle { border-color: rgba(255, 184, 77, 0.45); color: var(--accent); }
+
 /* Paleta */
 #palette { display: grid; grid-template-columns: repeat(8, 1fr); gap: 5px; padding-top: 4px; border-top: 1px solid var(--panel-border); }
 .swatch {
@@ -196,7 +215,7 @@ kbd {
 #sp-close { width: 30px; height: 30px; flex: 0 0 auto; font-size: 13px; display: flex; align-items: center; justify-content: center; padding: 0; }
 .sp-row { display: flex; align-items: center; gap: 8px; margin-bottom: 9px; }
 .sp-label { font-size: 10.5px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text-dim); width: 50px; flex: 0 0 auto; }
-#sp-colors { display: grid; grid-template-columns: repeat(8, 1fr); gap: 4px; flex: 1; }
+#sp-colors { display: grid; grid-template-columns: repeat(12, 1fr); gap: 4px; flex: 1; }
 #sp-colors .swatch { aspect-ratio: 1; border-width: 1.5px; }
 .sp-sizes { display: flex; gap: 6px; flex: 1; }
 .size-btn { flex: 1; padding: 6px 0; font-size: 12.5px; }
