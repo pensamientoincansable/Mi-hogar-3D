@@ -15,15 +15,17 @@ python3 -m http.server 8000
 
 ## ✨ Características
 
-- 🧱 **Construcción sobre cuadrícula** con 11 acabados de suelo más escaleras y rampas, muros de piedra, ladrillo, hormigón y madera, minimuros, vallas, 4 puertas, 4 ventanas y techos.
-- 🎨 **Materiales PBR** con sombreado, bump y reflejos: madera, ladrillo, piedra, hormigón, tejado, baldosa, mármol, grava, hierba, corteza, metal y más. Iluminación ACES, reflejos ambientales y cantos suavizados. Las superficies nuevas usan los albedos incluidos en `media/image/`.
+- 🧱 **Modo colocación estilo Heartopia**: al elegir cualquier material u objeto, la pieza queda «en la mano» y se sitúa con la **cuadrícula extendida por todo el territorio construible**; se suelta con un clic, arrastrando o con `Enter`, y `Esc` la devuelve. Con la **mano** 🖐️ puedes coger cualquier pieza ya colocada (suelos, muros, tejados o muebles), llevarla flotando por la parcela y soltarla en otro hueco válido.
+- 🧰 **Catálogo ampliado**: 16 acabados de suelo (incluidos terrazas, adoquín, granito, microcemento, hidráulico, praderas y musgo), 11 muros, minimuros, vallas, 4 puertas, 4 ventanas y 5 techos, con escaleras y rampas rotables.
+- 🎨 **Materiales PBR** con sombreado, bump y reflejos: las **80 texturas** de `media/image/` están incorporadas (Concreto, Elementos, Suelo, Follaje, Terreno, Metal, Patrón, Piedra y Baldosa). El nuevo **selector de texturas** —en el catálogo y en el panel de selección— permite cambiar la textura de cualquier material u objeto construible al colocarlo o al moverlo con la mano. Iluminación ACES, reflejos ambientales y cantos suavizados.
+- 🌱 **Suelo construible con PTP-Foliage**: la parcela usa una composición coherente de `PTP-Foliage_01`, `_02`, `_04` y `_07`, y el botón 🌱 (o la tecla `G`) cambia a las demás Foliage (`_05`·`_06`·`_08`·`_09`) para todo el terreno.
 - 🌌 **Cielo en ciclo continuo**: recorre los 50 panoramas/cubemaps de `media/image/Sky` con transiciones suaves y se integra con el modo día/noche.
 - 🌳 **Vegetación 3D detallada**: cada especie usa una malla botánica propia (roble, pino, palmera, cerezo, arce, abedul, manzano, sauce…), con materiales ligeros, sombras suaves y movimiento con el viento.
 - 🛋️ **Mobiliario pulido**: modelos 3D completos para dormitorio, salón, comedor, cocina, baño y jardín, combinados con elementos procedurales renovados.
 - 📦 **Biblioteca CC0 local**: modelos de Kenney y Quaternius incluidos en el proyecto; sin descargas externas durante la partida y con fallback procedural.
 - 🪴 **Catálogo de decoración** con plantas, cuadros, espejo, acuario, reloj, biombo, fuente y más.
 - 🧰 **Inventario plegable**: se oculta al elegir una pieza para dejar libre toda la vista 3D.
-- 🎨 **Paleta de colores** y herramienta de pintura para personalizar todo.
+- 🎨 **Paleta ampliada a 24 colores** y herramienta de pintura para personalizar todo.
 - 💰 **Economía**: cada pieza cuesta dinero; vende con la herramienta 🧹 y recupera el 50 %.
 - 🏆 **12 misiones** con recompensas para guiar la partida.
 - 🌙 **Ciclo día / noche** con estrellas y lámparas que se encienden de noche.
@@ -40,9 +42,12 @@ python3 -m http.server 8000
 | Zoom | Rueda del ratón |
 | Desplazar cámara | Botón derecho + arrastrar |
 | Abrir/cerrar catálogo | Botón `🧰` |
-| Colocar pieza sin mover la cámara | Clic izquierdo |
+| Colocar la pieza que llevas | Clic izquierdo o `Enter` (también arrastrar y soltar) |
 | Rotar mueble, escalera o rampa | `R` o botón `🔄` |
-| Cancelar herramienta | `Esc` |
+| Cancelar herramienta / devolver pieza llevada | `Esc` |
+| Coger y mover piezas colocadas | Herramienta mano `🖐️` (clic para llevar, clic para soltar) |
+| Cambiar textura de materiales y objetos | Selector 🖌️ bajo la paleta o fila «Textura» del panel de selección |
+| Cambiar el suelo construible (Foliage) | Botón `🌱` o tecla `G` |
 | Modo paseo | Botón 🚶 · `WASD` + ratón · `Esc` para salir |
 
 ## 🛠️ Tecnología
