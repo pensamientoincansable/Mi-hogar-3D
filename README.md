@@ -15,8 +15,9 @@ python3 -m http.server 8000
 
 ## ✨ Características
 
-- 🧱 **Construcción sobre cuadrícula** con 11 acabados de suelo más escaleras y rampas, muros de piedra, ladrillo, hormigón y madera, minimuros, vallas, 4 puertas, 4 ventanas y techos.
-- 🎨 **Materiales PBR** con sombreado, bump y reflejos: madera, ladrillo, piedra, hormigón, tejado, baldosa, mármol, grava, hierba, corteza, metal y más. Iluminación ACES, reflejos ambientales y cantos suavizados. Las superficies nuevas usan los albedos incluidos en `media/image/`.
+- 🧱 **Construcción sobre cuadrícula** con modo de colocación visible en toda la parcela, 16 acabados de suelo (incluidas pradera, musgo y flores azules, rojas y rosas), escaleras y rampas, muros de piedra, ladrillo, hormigón y madera, minimuros, vallas, 4 puertas, 4 ventanas y techos.
+- 🖐️ **Mover piezas como en un editor de decoración**: activa la mano, pulsa una pieza y vuelve a colocarla sobre la cuadrícula; `Esc` cancela el movimiento y `R` la gira cuando corresponde.
+- 🎨 **Materiales PBR** con sombreado, bump y reflejos: madera, ladrillo, piedra, hormigón, tejado, baldosa, mármol, grava, hierba, corteza, metal y más. Iluminación ACES, reflejos ambientales y cantos suavizados. La parcela construible y los nuevos suelos vegetales usan los albedos `PTP-Foliage_01`, `02`, `04`, `07` y `08` incluidos en `media/image/`. La función `applyBuildableTextures()` reaplica textura y relieve a todos los materiales de piezas al previsualizar, colocar o moverlas.
 - 🌌 **Cielo en ciclo continuo**: recorre los 50 panoramas/cubemaps de `media/image/Sky` con transiciones suaves y se integra con el modo día/noche.
 - 🌳 **Vegetación 3D detallada**: cada especie usa una malla botánica propia (roble, pino, palmera, cerezo, arce, abedul, manzano, sauce…), con materiales ligeros, sombras suaves y movimiento con el viento.
 - 🛋️ **Mobiliario pulido**: modelos 3D completos para dormitorio, salón, comedor, cocina, baño y jardín, combinados con elementos procedurales renovados.
@@ -40,9 +41,10 @@ python3 -m http.server 8000
 | Zoom | Rueda del ratón |
 | Desplazar cámara | Botón derecho + arrastrar |
 | Abrir/cerrar catálogo | Botón `🧰` |
-| Colocar pieza sin mover la cámara | Clic izquierdo |
+| Colocar pieza sin mover la cámara | Elige una pieza, mueve el ratón por la cuadrícula y haz clic izquierdo |
+| Mover una pieza existente | Herramienta `🖐️`, clic en la pieza, mueve y vuelve a hacer clic |
 | Rotar mueble, escalera o rampa | `R` o botón `🔄` |
-| Cancelar herramienta | `Esc` |
+| Cancelar herramienta o movimiento | `Esc` |
 | Modo paseo | Botón 🚶 · `WASD` + ratón · `Esc` para salir |
 
 ## 🛠️ Tecnología

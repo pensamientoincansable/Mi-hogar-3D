@@ -170,6 +170,18 @@ kbd {
   font-size: 13px; font-weight: 700; white-space: nowrap;
   box-shadow: var(--shadow);
 }
+.placement-status {
+  color: var(--text-dim);
+  background: rgba(24, 27, 40, 0.86);
+  border: 1px solid var(--panel-border);
+  border-radius: 999px;
+  padding: 8px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.placement-status.ready { color: var(--accent2); border-color: rgba(110,231,160,0.4); }
+.placement-status.invalid { color: var(--danger); border-color: rgba(255,107,107,0.5); }
 .pill-btn {
   background: var(--panel); backdrop-filter: blur(10px);
   color: var(--text); border: 1px solid var(--panel-border);
@@ -193,6 +205,7 @@ kbd {
 @keyframes panel-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 #select-panel .sp-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 10px; }
 #select-panel .sp-head span { font-weight: 700; color: var(--accent); font-size: 14.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#select-panel.moving { opacity: 0.68; pointer-events: none; }
 #sp-close { width: 30px; height: 30px; flex: 0 0 auto; font-size: 13px; display: flex; align-items: center; justify-content: center; padding: 0; }
 .sp-row { display: flex; align-items: center; gap: 8px; margin-bottom: 9px; }
 .sp-label { font-size: 10.5px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text-dim); width: 50px; flex: 0 0 auto; }

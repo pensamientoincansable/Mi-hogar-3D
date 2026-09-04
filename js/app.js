@@ -17,7 +17,19 @@ const HELP_KEY = 'mihogar3d-help-v1';
 const TEXTURE_ROOT = 'media/image/';
 const SKY_ROOT = 'media/image/Sky/';
 
-const PALETTE = [0xf5f0e8, 0xe8d9b5, 0xc96f4a, 0xb8443f, 0x4a7fb5, 0x5d9b6c, 0x8a8f98, 0x8b5a2b];
+// Colores rápidos para que los nuevos acabados vegetales también puedan
+// teñirse sin perder el relieve de su textura.
+const PALETTE = [
+  0xf5f0e8, 0xe8d9b5, 0xc96f4a, 0xb8443f,
+  0x4a7fb5, 0x5d9b6c, 0x8a8f98, 0x8b5a2b,
+  0xffc4d6, 0xff8a9e, 0xf2c94c, 0x8bcf6a,
+  0x2f8f66, 0x7d6bd6, 0x6cc7d9, 0x4a5366,
+];
+const PALETTE_NAMES = [
+  'Marfil', 'Arena', 'Terracota', 'Rojo', 'Azul', 'Verde', 'Gris', 'Madera',
+  'Rosa claro', 'Coral', 'Amarillo', 'Verde lima', 'Esmeralda', 'Lavanda',
+  'Turquesa', 'Pizarra',
+];
 
 /* ---------------- Utilidades de malla ---------------- */
 const materials = new Map();
@@ -36,8 +48,9 @@ function inferSurface(color) {
   return 'rough';
 }
 function makeMat(color, surface = null, opts = {}) {
-  const s = SURFACES[surface || inferSurface(color)] || SURFACES.rough;
-  const key = color + '|' + (surface || '') + '|' + JSON.stringify(opts);
+  const surfaceName = surface || inferSurface(color);
+  const s = SURFACES[surfaceName] || SURFACES.rough;
+  const key = color + '|' + surfaceName + '|' + JSON.stringify(opts);
   if (materials.has(key)) return materials.get(key);
   const m = new THREE.MeshStandardMaterial({
     color,
@@ -56,6 +69,7 @@ function makeMat(color, surface = null, opts = {}) {
     flatShading: opts.flatShading ?? false,
     wireframe: opts.wireframe ?? false,
   });
+  m.userData.buildSurface = surfaceName;
   materials.set(key, m);
   return m;
 }
@@ -69,7 +83,7 @@ function tiledMaterial(color, surface, rx = 1, ry = 1, opts = {}) {
   if (map) { map.repeat.set(rx, ry); map.needsUpdate = true; }
   const bump = s.bump ? s.bump.clone() : null;
   if (bump) { bump.repeat.set(rx, ry); bump.needsUpdate = true; }
-  return new THREE.MeshStandardMaterial({
+  const material = new THREE.MeshStandardMaterial({
     color,
     roughness: opts.roughness ?? s.roughness,
     metalness: opts.metalness ?? s.metalness,
@@ -84,6 +98,8 @@ function tiledMaterial(color, surface, rx = 1, ry = 1, opts = {}) {
     side: opts.side ?? THREE.FrontSide,
     depthWrite: opts.depthWrite ?? true,
   });
+  material.userData.buildSurface = surface || inferSurface(color);
+  return material;
 }
 function box(w, h, d, color, x = 0, y = 0, z = 0, paint = false, surface = null) {
   const base = mat(color, surface ? { surface } : {});
@@ -962,6 +978,11 @@ const BUILD_ITEMS = {
   suelo_grava:       { name: 'Grava', ico: '▫️', cost: 18, kind: 'floor', section: 'Suelos', style: 'gravel', color: 0xa49a8c },
   suelo_pizarra:     { name: 'Pizarra', ico: '⬛', cost: 44, kind: 'floor', section: 'Suelos', style: 'slate', color: 0x626d78 },
   suelo_mosaico:     { name: 'Mosaico hexagonal', ico: '🔶', cost: 48, kind: 'floor', section: 'Suelos', style: 'hex', color: 0xd3b6a0 },
+  suelo_musgo:       { name: 'Musgo', ico: '🌿', cost: 22, kind: 'floor', section: 'Suelos', style: 'foliageMoss', color: 0x78913e },
+  suelo_flores_azules:{ name: 'Flores azules', ico: '💠', cost: 35, kind: 'floor', section: 'Suelos', style: 'foliageBlue', color: 0x6d93b9 },
+  suelo_pradera:      { name: 'Pradera', ico: '🌱', cost: 20, kind: 'floor', section: 'Suelos', style: 'foliageLawn', color: 0x6fa854 },
+  suelo_flores_rojas: { name: 'Flores rojas', ico: '🌺', cost: 38, kind: 'floor', section: 'Suelos', style: 'foliageRed', color: 0xc45755 },
+  suelo_flores_rosas: { name: 'Flores rosas', ico: '🌸', cost: 38, kind: 'floor', section: 'Suelos', style: 'foliagePink', color: 0xd98293 },
 
   // Muros y vallas ocupan un borde de la cuadrícula (h: horizontal, v: vertical).
   pared:             { name: 'Pared enlucida', ico: '🧱', cost: 60, kind: 'wall', category: 'wall', section: 'Muros', style: 'plain', color: 0xf5f0e8 },
@@ -1064,7 +1085,14 @@ function bumpTexture(canvas, repeat = 1) {
 /* ------- Texturas PBR desde /media/image (sustituyen a las procedurales) ------- */
 const IMAGE_SURFACES = [
   // { nombre interno de superficie, fichero, y propiedades PBR }
-  { name: 'grass',      file: 'PTP-Foliage_07-512x512.png',  roughness: 0.94, metalness: 0.00, envMapIntensity: 0.55, bumpScale: 0.045 },
+  // El territorio construible usa vegetación real; las cinco variantes se
+  // ofrecen también como acabados de suelo para que el jardín tenga color.
+  { name: 'grass',          file: 'PTP-Foliage_04-512x512.png',  roughness: 0.94, metalness: 0.00, envMapIntensity: 0.55, bumpScale: 0.045 },
+  { name: 'foliageMoss',    file: 'PTP-Foliage_01-512x512.png',  roughness: 0.96, metalness: 0.00, envMapIntensity: 0.48, bumpScale: 0.060 },
+  { name: 'foliageBlue',    file: 'PTP-Foliage_02-512x512.png',  roughness: 0.92, metalness: 0.00, envMapIntensity: 0.52, bumpScale: 0.050 },
+  { name: 'foliageLawn',    file: 'PTP-Foliage_04-512x512.png',  roughness: 0.94, metalness: 0.00, envMapIntensity: 0.55, bumpScale: 0.045 },
+  { name: 'foliageRed',     file: 'PTP-Foliage_07-512x512.png',  roughness: 0.88, metalness: 0.00, envMapIntensity: 0.58, bumpScale: 0.042 },
+  { name: 'foliagePink',    file: 'PTP-Foliage_08-512x512.png',  roughness: 0.88, metalness: 0.00, envMapIntensity: 0.58, bumpScale: 0.042 },
   { name: 'wood',       file: 'PTP-Floor_06-512x512.png',    roughness: 0.72, metalness: 0.00, envMapIntensity: 0.70, bumpScale: 0.035 },
   { name: 'planks',     file: 'PTP-Floor_08-512x512.png',    roughness: 0.74, metalness: 0.00, envMapIntensity: 0.65, bumpScale: 0.035 },
   { name: 'tiles',      file: 'PTP-Tile_01-512x512.png',     roughness: 0.62, metalness: 0.00, envMapIntensity: 0.80, bumpScale: 0.030 },
@@ -1384,9 +1412,46 @@ const SURFACE_FALLBACKS = {
   floorSlate: 'stone', floorHex: 'tiles', wallStone: 'stone',
   wallBrick: 'brick', wallConcrete: 'concrete', wallWood: 'wood',
   fenceWood: 'wood',
+  foliageMoss: 'grass', foliageBlue: 'grass', foliageLawn: 'grass',
+  foliageRed: 'grass', foliagePink: 'grass',
 };
 for (const [name, fallback] of Object.entries(SURFACE_FALLBACKS)) {
   defineSurface(name, { ...SURFACES[fallback] });
+}
+
+/**
+ * Reaplica los albedos y relieves locales a una pieza construible.
+ *
+ * Los modelos se crean varias veces: al previsualizar, al colocar y al mover.
+ * Centralizar esta operación evita que un clon vuelva al material procedural
+ * después de una operación de construcción y permite cambiar una textura sin
+ * tocar cada malla de muebles, suelo, muros o techos.
+ */
+function applyBuildableTextures(root, textureOverrides = {}) {
+  if (!root?.traverse) return root;
+  root.traverse(node => {
+    if (!node.isMesh || !node.material) return;
+    const sourceMaterials = Array.isArray(node.material) ? node.material : [node.material];
+    const updated = sourceMaterials.map(source => {
+      if (!source) return source;
+      const sourceName = source.userData?.buildSurface;
+      const surfaceName = textureOverrides[sourceName] || sourceName;
+      const surface = SURFACES[surfaceName];
+      if (!surface) return source;
+      const material = source.clone();
+      material.userData = { ...source.userData, buildSurface: surfaceName };
+      material.map = surface.map || null;
+      material.bumpMap = surface.bump || null;
+      material.bumpScale = surface.bumpScale ?? material.bumpScale;
+      material.roughness = surface.roughness ?? material.roughness;
+      material.metalness = surface.metalness ?? material.metalness;
+      material.envMapIntensity = surface.envMapIntensity ?? material.envMapIntensity;
+      material.needsUpdate = true;
+      return material;
+    });
+    node.material = Array.isArray(node.material) ? updated : updated[0];
+  });
+  return root;
 }
 
 /* ---------------- Biblioteca de modelos pulidos ----------------
@@ -1513,7 +1578,7 @@ function premiumMaterial(source, spec, customColor, index = 0) {
   const s = SURFACES[surface] || SURFACES.rough;
   const isMetal = role === 'metal';
   const isLamp = role === 'lamp';
-  return new THREE.MeshStandardMaterial({
+  const material = new THREE.MeshStandardMaterial({
     name: source?.name || role,
     color,
     roughness: isMetal ? .24 : isLamp ? .36 : role === 'fabric' ? .82 : role === 'leaf' ? .78 : .6,
@@ -1526,6 +1591,8 @@ function premiumMaterial(source, spec, customColor, index = 0) {
     emissiveIntensity: isLamp ? .28 : 0,
     side: role === 'leaf' || role === 'flower' ? THREE.DoubleSide : THREE.FrontSide,
   });
+  material.userData.buildSurface = surface;
+  return material;
 }
 
 function addPremiumDetails(id, root) {
@@ -1611,7 +1678,8 @@ function instantiatePremium(id, customColor) {
 }
 
 function buildCatalogObject(id, customColor) {
-  return instantiatePremium(id, customColor) || FURNITURE[id].build(customColor);
+  const root = instantiatePremium(id, customColor) || FURNITURE[id].build(customColor);
+  return applyBuildableTextures(root);
 }
 
 const scene = new THREE.Scene();
@@ -1842,9 +1910,12 @@ function createWorldGround() {
   ground.receiveShadow = true;
   scene.add(ground);
 
+  // La parcela donde se puede construir usa hierba de hoja real, no el
+  // patrón abstracto anterior. Los acabados florales se reservan para las
+  // celdas de suelo del catálogo para mantener la parcela base coherente.
   plot = new THREE.Mesh(
     new THREE.PlaneGeometry(S, S),
-    tiledMaterial(0xffffff, 'grass', 9, 9, { roughness: 0.95, envMapIntensity: 0.5 })
+    tiledMaterial(0xffffff, 'foliageLawn', 9, 9, { roughness: 0.95, envMapIntensity: 0.5 })
   );
   plot.rotation.x = -Math.PI / 2;
   plot.position.y = 0.01;
@@ -1857,7 +1928,7 @@ function refreshWorldGround() {
   ground.material.dispose();
   plot.material.dispose();
   ground.material = tiledMaterial(0xffffff, 'grass', 68, 68, { roughness: 0.94, envMapIntensity: 0.55 });
-  plot.material = tiledMaterial(0xffffff, 'grass', 9, 9, { roughness: 0.95, envMapIntensity: 0.5 });
+  plot.material = tiledMaterial(0xffffff, 'foliageLawn', 9, 9, { roughness: 0.95, envMapIntensity: 0.5 });
 }
 
 createWorldGround();
@@ -1867,6 +1938,28 @@ gridHelper.material.transparent = true;
 gridHelper.material.opacity = 0.06;
 gridHelper.position.y = 0.02;
 scene.add(gridHelper);
+
+// Cuadrícula de colocación: solo aparece al elegir una pieza o al cogerla con
+// la mano. Es la misma extensión que la parcela, así nunca se puede colocar
+// fuera del territorio construible.
+const placementGrid = new THREE.GridHelper(S, S, 0xffd36b, 0xb7d5c4);
+placementGrid.material.transparent = true;
+placementGrid.material.opacity = 0.22;
+placementGrid.position.y = 0.035;
+placementGrid.renderOrder = 20;
+placementGrid.visible = false;
+scene.add(placementGrid);
+const placementMarker = new THREE.LineLoop(
+  new THREE.BufferGeometry().setFromPoints([
+    new THREE.Vector3(-0.5, 0, -0.5), new THREE.Vector3(0.5, 0, -0.5),
+    new THREE.Vector3(0.5, 0, 0.5), new THREE.Vector3(-0.5, 0, 0.5),
+  ]),
+  new THREE.LineBasicMaterial({ color: 0x6ee7a0, transparent: true, opacity: 0.95, depthTest: false })
+);
+placementMarker.position.y = 0.075;
+placementMarker.renderOrder = 21;
+placementMarker.visible = false;
+scene.add(placementMarker);
 
 const border = new THREE.LineLoop(
   new THREE.BufferGeometry().setFromPoints([
@@ -2155,7 +2248,10 @@ function buildFloorMesh(type = 'suelo', color) {
     wood: 'wood', planks: 'planks', woodDark: 'woodDark', tiles: 'tiles',
     marble: 'marble', terracotta: 'terracotta', parquet: 'parquet',
     concrete: 'concrete', stone: 'floorStone', gravel: 'floorGravel',
-    slate: 'floorSlate', hex: 'floorHex', stairs: 'woodDark', ramp: 'wallConcrete',
+    slate: 'floorSlate', hex: 'floorHex',
+    foliageMoss: 'foliageMoss', foliageBlue: 'foliageBlue',
+    foliageLawn: 'foliageLawn', foliageRed: 'foliageRed', foliagePink: 'foliagePink',
+    stairs: 'woodDark', ramp: 'wallConcrete',
   };
   const surface = surfaceMap[def.style] || 'wood';
 
@@ -2242,7 +2338,7 @@ function objTransform(obj) {
 
 function addFloorMesh(key, data) {
   const [x, z] = key.split(',').map(Number);
-  const m = buildFloorMesh(data.t || 'suelo', data.c);
+  const m = applyBuildableTextures(buildFloorMesh(data.t || 'suelo', data.c));
   m.position.set(x + 0.5 - S / 2, 0, z + 0.5 - S / 2);
   const def = BUILD_ITEMS[data.t] || BUILD_ITEMS.suelo;
   m.rotation.y = def.rotatable ? normalizeRotation(data.r) * Math.PI / 2 : 0;
@@ -2251,13 +2347,13 @@ function addFloorMesh(key, data) {
 }
 function addRoofMesh(key, data) {
   const [x, z] = key.split(',').map(Number);
-  const m = buildRoofMesh(data.t || 'techo', data.c);
+  const m = applyBuildableTextures(buildRoofMesh(data.t || 'techo', data.c));
   m.position.set(x + 0.5 - S / 2, 0, z + 0.5 - S / 2);
   m.userData = { kind: 'roof', key };
   buildGroup.add(m); meshes.roofs[key] = m;
 }
 function addWallMesh(key, data) {
-  const m = buildWallMesh(data.t, data.c);
+  const m = applyBuildableTextures(buildWallMesh(data.t, data.c));
   const t = wallTransform(key);
   m.position.set(t.x, 0, t.z); m.rotation.y = t.ry;
   m.userData = { kind: 'wall', key };
@@ -2296,6 +2392,7 @@ function removeMesh(kind, key) {
   }
 }
 function rebuildAll() {
+  if (moving) cancelMovePlacement();
   for (const k of Object.keys(meshes.floors)) removeMesh('floor', k);
   for (const k of Object.keys(meshes.walls)) removeMesh('wall', k);
   for (const k of Object.keys(meshes.roofs)) removeMesh('roof', k);
@@ -2450,20 +2547,44 @@ function occupiedMap(exceptId = null) {
 }
 
 /* ---------------- Herramienta actual ---------------- */
-let tool = null;        // {mode:'build'|'furniture'|'paint'|'delete', id}
+let tool = null;        // build/furniture = colocar; move = recolocar con la mano
 let toolRot = 0;
+let moving = null;      // {kind, key, data, originKey, originRotation}
 let selectedColor = PALETTE[0];
 let selectedColorCustom = false;
 let ghost = null;
 const ghostMatOk = new THREE.MeshLambertMaterial({ color: 0x6ee7a0, transparent: true, opacity: 0.55, depthWrite: false });
 const ghostMatBad = new THREE.MeshLambertMaterial({ color: 0xff6b6b, transparent: true, opacity: 0.55, depthWrite: false });
 
+function isPlacementMode(t = tool) {
+  return Boolean(t && ['build', 'furniture', 'move'].includes(t.mode));
+}
+function setPlacementGridVisible(visible) {
+  placementGrid.visible = visible;
+  if (!visible) placementMarker.visible = false;
+}
+function setPlacementStatus(text, status = '') {
+  const el = document.getElementById('placement-status');
+  if (!el) return;
+  el.textContent = text;
+  el.className = `placement-status${status ? ` ${status}` : ''}`;
+}
 function setGhostValid(ok) {
   if (!ghost) return;
   ghost.traverse(n => { if (n.isMesh) n.material = ok ? ghostMatOk : ghostMatBad; });
+  placementMarker.material.color.set(ok ? 0x6ee7a0 : 0xff6b6b);
+  placementMarker.material.needsUpdate = true;
+  setPlacementStatus(ok ? 'Casilla libre · haz clic para colocar' : 'No se puede colocar aquí', ok ? 'ready' : 'invalid');
 }
 function clearGhost() {
   if (ghost) { scene.remove(ghost); ghost = null; }
+  placementMarker.visible = false;
+}
+function movingBuild(rootData) {
+  const def = BUILD_ITEMS[rootData.t];
+  if (def.kind === 'floor') return buildFloorMesh(rootData.t, rootData.c);
+  if (def.kind === 'roof') return buildRoofMesh(rootData.t, rootData.c);
+  return buildWallMesh(rootData.t, rootData.c);
 }
 function makeGhost() {
   clearGhost();
@@ -2471,12 +2592,20 @@ function makeGhost() {
   let g = null;
   if (tool.mode === 'build') {
     const def = BUILD_ITEMS[tool.id];
-    if (def.kind === 'floor') g = buildFloorMesh(tool.id);
-    else if (def.kind === 'roof') g = buildRoofMesh(tool.id);
-    else g = buildWallMesh(tool.id);
-  } else {
-    g = buildCatalogObject(tool.id);
+    const previewColor = selectedColorCustom ? selectedColor : undefined;
+    if (def.kind === 'floor') g = buildFloorMesh(tool.id, previewColor);
+    else if (def.kind === 'roof') g = buildRoofMesh(tool.id, previewColor);
+    else g = buildWallMesh(tool.id, previewColor);
+  } else if (tool.mode === 'furniture') {
+    g = buildCatalogObject(tool.id, selectedColorCustom ? selectedColor : undefined);
+  } else if (tool.mode === 'move' && moving) {
+    g = moving.kind === 'object'
+      ? buildCatalogObject(moving.data.t, moving.data.c)
+      : movingBuild(moving.data);
+    if (moving.kind === 'object') g.scale.setScalar(moving.data.s || 1);
   }
+  if (!g) return;
+  applyBuildableTextures(g);
   g.traverse(n => { if (n.isMesh) { n.material = ghostMatOk; n.castShadow = false; n.receiveShadow = false; } });
   g.visible = false;
   scene.add(g);
@@ -2489,6 +2618,7 @@ function selectedToolDef(t = tool) {
   if (t.mode === 'furniture') return FURNITURE[t.id];
   if (t.mode === 'paint') return { name: 'Pintar', ico: '🎨' };
   if (t.mode === 'select') return { name: 'Seleccionar', ico: '🖐️' };
+  if (t.mode === 'move') return { name: 'Mover pieza', ico: '🖐️' };
   if (t.mode === 'hammer') return { name: 'Mazo', ico: '🔨' };
   return { name: 'Vender', ico: '🧹' };
 }
@@ -2497,19 +2627,30 @@ function updateRotationUI() {
   if (btn) btn.innerHTML = `🔄 Rotar ${toolRot * 90}° <kbd>R</kbd>`;
 }
 function selectTool(t) {
+  if (moving && (!t || t.mode !== 'move')) cancelMovePlacement();
   tool = t;
-  toolRot = 0;
+  toolRot = t?.mode === 'move' && moving ? (moving.data.r || 0) : 0;
+  if (!t) hover = null;
   makeGhost();
+  setPlacementGridVisible(isPlacementMode(t));
   document.querySelectorAll('.item-btn').forEach(b => {
     const on = t && b.dataset.mode === t.mode && b.dataset.id === t.id;
     b.classList.toggle('active', on);
   });
   const ctx = document.getElementById('context-controls');
   ctx.classList.toggle('hidden', !t);
-  const canRotateTool = t && (t.mode === 'furniture' || (t.mode === 'build' && BUILD_ITEMS[t.id]?.rotatable));
+  const canRotateTool = t && (
+    t.mode === 'furniture' ||
+    (t.mode === 'build' && BUILD_ITEMS[t.id]?.rotatable) ||
+    (t.mode === 'move' && (moving?.kind === 'object' || BUILD_ITEMS[moving?.data?.t]?.rotatable))
+  );
   document.getElementById('btn-rotate').style.display = canRotateTool ? '' : 'none';
   const def = selectedToolDef(t);
   document.getElementById('selection-label').textContent = def ? `${def.ico} ${def.name}` : '';
+  setPlacementStatus(
+    t?.mode === 'move' ? 'Mueve la pieza y haz clic para soltarla' :
+      isPlacementMode(t) ? 'Mueve el ratón y haz clic para colocar' : '',
+  );
   updateRotationUI();
   if (t) snd.click();
 }
@@ -2562,12 +2703,12 @@ function nearestEdge(p) {
 
 /* ---------------- Validación y colocación ---------------- */
 function canPlace() {
-  if (!hover) return false;
+  if (!hover || !tool) return false;
   if (tool.mode === 'build') {
     const kind = BUILD_ITEMS[tool.id].kind;
     if (kind === 'floor') return hover.cellOk && !state.floors[hover.cellKey];
     if (kind === 'roof') return hover.cellOk && !state.roofs[hover.cellKey];
-    return hover.edgeKey && !state.walls[hover.edgeKey];
+    return Boolean(hover.edgeKey && !state.walls[hover.edgeKey]);
   }
   if (tool.mode === 'furniture') {
     const def = FURNITURE[tool.id];
@@ -2578,6 +2719,28 @@ function canPlace() {
     for (let dx = 0; dx < w; dx++) for (let dz = 0; dz < d; dz++)
       if (occ.has((cx + dx) + ',' + (cz + dz))) return false;
     return true;
+  }
+  if (tool.mode === 'move' && moving) {
+    const data = moving.data;
+    const def = BUILD_ITEMS[data.t];
+    if (moving.kind === 'floor') {
+      return hover.cellOk && (!state.floors[hover.cellKey] || hover.cellKey === moving.originKey);
+    }
+    if (moving.kind === 'roof') {
+      return hover.cellOk && (!state.roofs[hover.cellKey] || hover.cellKey === moving.originKey);
+    }
+    if (moving.kind === 'wall') {
+      return Boolean(hover.edgeKey && (!state.walls[hover.edgeKey] || hover.edgeKey === moving.originKey));
+    }
+    const furniture = FURNITURE[data.t];
+    const w = toolRot % 2 ? furniture.d : furniture.w;
+    const d = toolRot % 2 ? furniture.w : furniture.d;
+    const { cx, cz } = hover;
+    if (cx < 0 || cz < 0 || cx + w > S || cz + d > S) return false;
+    const occ = occupiedMap(moving.key);
+    for (let dx = 0; dx < w; dx++) for (let dz = 0; dz < d; dz++)
+      if (occ.has((cx + dx) + ',' + (cz + dz))) return false;
+    return Boolean(def || furniture);
   }
   return false;
 }
@@ -2596,7 +2759,61 @@ function spend(amount) {
   return true;
 }
 
+function restoreMovingMesh() {
+  if (!moving) return;
+  if (moving.kind === 'object') addObjectMesh(moving.data);
+  else if (moving.kind === 'floor') addFloorMesh(moving.originKey, moving.data);
+  else if (moving.kind === 'roof') addRoofMesh(moving.originKey, moving.data);
+  else if (moving.kind === 'wall') addWallMesh(moving.originKey, moving.data);
+}
+function cancelMovePlacement() {
+  if (!moving) return;
+  restoreMovingMesh();
+  moving = null;
+  clearGhost();
+  hover = null;
+  if (selection) {
+    refreshSelHelper();
+    renderSelectPanel();
+  }
+}
+function commitMovePlacement() {
+  if (!moving || !canPlace()) { if (moving && hover) snd.error(); return; }
+  const session = moving;
+  const data = { ...session.data };
+  data.r = normalizeRotation(toolRot);
+
+  if (session.kind === 'object') {
+    data.x = hover.cx;
+    data.z = hover.cz;
+    state.objects[session.key] = data;
+  } else if (session.kind === 'floor') {
+    delete state.floors[session.originKey];
+    state.floors[hover.cellKey] = data;
+  } else if (session.kind === 'roof') {
+    delete state.roofs[session.originKey];
+    state.roofs[hover.cellKey] = data;
+  } else {
+    delete state.walls[session.originKey];
+    state.walls[hover.edgeKey] = data;
+  }
+
+  moving = null;
+  clearGhost();
+  if (session.kind === 'object') addObjectMesh(data);
+  else if (session.kind === 'floor') addFloorMesh(hover.cellKey, data);
+  else if (session.kind === 'roof') addRoofMesh(hover.cellKey, data);
+  else addWallMesh(hover.edgeKey, data);
+  selection = { kind: session.kind, key: session.kind === 'object' ? session.key : (session.kind === 'wall' ? hover.edgeKey : hover.cellKey) };
+  refreshSelHelper();
+  renderSelectPanel();
+  selectTool({ mode: 'select', id: 'select' });
+  snd.place();
+  scheduleSave();
+}
+
 function place() {
+  if (tool?.mode === 'move') { commitMovePlacement(); return; }
   if (!tool || !canPlace()) { if (tool && hover) snd.error(); return; }
   const cost = toolCost();
   if (!spend(cost)) return;
@@ -2689,9 +2906,13 @@ let selHelper = null;
 const selPanelEl = document.getElementById('select-panel');
 
 function clearSelection() {
+  if (moving) cancelMovePlacement();
   selection = null;
   if (selHelper) { scene.remove(selHelper); selHelper = null; }
-  if (selPanelEl) selPanelEl.classList.add('hidden');
+  if (selPanelEl) {
+    selPanelEl.classList.remove('moving');
+    selPanelEl.classList.add('hidden');
+  }
 }
 function refreshSelHelper() {
   if (!selection) return;
@@ -2702,14 +2923,32 @@ function refreshSelHelper() {
   selHelper.material.transparent = true;
   scene.add(selHelper);
 }
+function beginMoveSelection(kind, key) {
+  const store = state[kind + 's'];
+  const target = store?.[key];
+  if (!target) return;
+  if (moving) cancelMovePlacement();
+  if (selHelper) { scene.remove(selHelper); selHelper = null; }
+  selection = { kind, key };
+  moving = {
+    kind,
+    key,
+    originKey: key,
+    data: { ...target },
+  };
+  removeMesh(kind, key);
+  selectTool({ mode: 'move', id: key });
+  renderSelectPanel();
+  setPlacementStatus('Mueve la pieza y haz clic para soltarla');
+  snd.select();
+}
 function selectAt(ev) {
   const hit = pickBuild(ev);
   if (!hit) { clearSelection(); return; }
   const { kind, key } = hit.node.userData;
-  selection = { kind, key };
-  refreshSelHelper();
-  renderSelectPanel();
-  snd.select();
+  // La mano no solo inspecciona: toma la pieza y activa la misma cuadrícula
+  // de colocación que el catálogo, al estilo de un editor de decoración.
+  beginMoveSelection(kind, key);
 }
 function selTarget() {
   if (!selection) return null;
@@ -2728,6 +2967,7 @@ function renderSelectPanel() {
   document.getElementById('sp-rotate').classList.toggle('hidden', !isObj && !isRotatableBuild);
   const s = isObj ? (tgt.s || 1) : 1;
   document.querySelectorAll('.size-btn').forEach(b => b.classList.toggle('active', Math.abs(+b.dataset.scale - s) < 0.01));
+  selPanelEl.classList.toggle('moving', Boolean(moving));
   selPanelEl.classList.remove('hidden');
 }
 function applySelColor(c) {
@@ -2799,7 +3039,7 @@ function initSelectPanel() {
   PALETTE.forEach(c => {
     const s = document.createElement('div');
     s.className = 'swatch';
-    s.title = 'Pintar de este color';
+    s.title = `Pintar de ${PALETTE_NAMES[PALETTE.indexOf(c)] || 'este color'}`;
     s.style.background = '#' + c.toString(16).padStart(6, '0');
     s.addEventListener('click', () => applySelColor(c));
     pal.appendChild(s);
@@ -3095,7 +3335,7 @@ function buildUI() {
   PALETTE.forEach((c, i) => {
     const s = document.createElement('div');
     s.className = 'swatch';
-    s.title = i === 0 ? 'Blanco' : 'Usar este color';
+    s.title = PALETTE_NAMES[i] || 'Usar este color';
     s.style.background = '#' + c.toString(16).padStart(6, '0');
     s.addEventListener('click', () => {
       selectedColor = c;
@@ -3168,26 +3408,49 @@ function updateWalk(dt) {
 
 /* ---------------- Eventos ---------------- */
 function refreshGhost() {
-  if (!ghost || !tool || !hover || tool.mode === 'paint' || tool.mode === 'delete') {
+  if (!ghost || !isPlacementMode() || !hover) {
     if (ghost) ghost.visible = false;
+    placementMarker.visible = false;
     return;
   }
   ghost.visible = true;
-  if (tool.mode === 'build' && BUILD_ITEMS[tool.id].kind === 'wall') {
-    if (!hover.edgeKey) { ghost.visible = false; return; }
+  let w = 1, d = 1;
+  let markerRotation = 0;
+
+  const placementKind = tool.mode === 'move' ? moving?.kind : null;
+  const placementData = tool.mode === 'move' ? moving?.data : null;
+  const buildId = tool.mode === 'build' ? tool.id : placementData?.t;
+  const buildDef = buildId ? BUILD_ITEMS[buildId] : null;
+  const isWall = (tool.mode === 'build' && buildDef?.kind === 'wall') || placementKind === 'wall';
+
+  if (isWall) {
+    if (!hover.edgeKey) { ghost.visible = false; placementMarker.visible = false; return; }
     const t = wallTransform(hover.edgeKey);
     ghost.position.set(t.x, 0, t.z);
     ghost.rotation.y = t.ry;
-  } else if (tool.mode === 'build') {
-    const def = BUILD_ITEMS[tool.id];
-    ghost.position.set(hover.cx + 0.5 - S / 2, 0, hover.cz + 0.5 - S / 2);
-    ghost.rotation.y = def.rotatable ? toolRot * Math.PI / 2 : 0;
+    markerRotation = t.ry;
+    // El marco de selección marca el borde ocupado por un muro.
+    placementMarker.position.set(t.x, 0.075, t.z);
+    placementMarker.rotation.y = t.ry;
+    placementMarker.scale.set(1, 1, 0.18);
   } else {
-    const def = FURNITURE[tool.id];
-    const w = toolRot % 2 ? def.d : def.w, d = toolRot % 2 ? def.w : def.d;
-    ghost.position.set(hover.cx + w / 2 - S / 2, 0, hover.cz + d / 2 - S / 2);
-    ghost.rotation.y = toolRot * Math.PI / 2;
+    if (tool.mode === 'furniture' || placementKind === 'object') {
+      const def = FURNITURE[tool.mode === 'furniture' ? tool.id : placementData.t];
+      w = toolRot % 2 ? def.d : def.w;
+      d = toolRot % 2 ? def.w : def.d;
+      ghost.position.set(hover.cx + w / 2 - S / 2, 0, hover.cz + d / 2 - S / 2);
+      ghost.rotation.y = toolRot * Math.PI / 2;
+      markerRotation = ghost.rotation.y;
+    } else {
+      ghost.position.set(hover.cx + 0.5 - S / 2, 0, hover.cz + 0.5 - S / 2);
+      ghost.rotation.y = buildDef?.rotatable ? toolRot * Math.PI / 2 : 0;
+      markerRotation = ghost.rotation.y;
+    }
+    placementMarker.position.set(hover.cx + w / 2 - S / 2, 0.075, hover.cz + d / 2 - S / 2);
+    placementMarker.rotation.y = markerRotation;
+    placementMarker.scale.set(w, 1, d);
   }
+  placementMarker.visible = true;
   setGhostValid(canPlace());
 }
 function updatePlacementHover(e) {
@@ -3204,7 +3467,8 @@ function updatePlacementHover(e) {
 }
 function rotateTool() {
   const rotatableBuild = tool?.mode === 'build' && BUILD_ITEMS[tool.id]?.rotatable;
-  if (!tool || (tool.mode !== 'furniture' && !rotatableBuild)) return;
+  const rotatableMove = tool?.mode === 'move' && (moving?.kind === 'object' || BUILD_ITEMS[moving?.data?.t]?.rotatable);
+  if (!tool || (tool.mode !== 'furniture' && !rotatableBuild && !rotatableMove)) return;
   toolRot = (toolRot + 1) % 4;
   updateRotationUI();
   refreshGhost(); // la previsualización se actualiza aunque el ratón esté quieto
@@ -3251,11 +3515,14 @@ canvas.addEventListener('pointermove', updatePlacementHover);
 window.addEventListener('keydown', e => {
   keys[e.code] = true;
   if (e.code === 'KeyR') {
-    if (selection && selection.kind === 'object') { e.preventDefault(); rotateSelected(); }
-    else if (tool && tool.mode === 'furniture') { e.preventDefault(); rotateTool(); }
+    if (tool?.mode === 'move' || tool?.mode === 'furniture' || tool?.mode === 'build') { e.preventDefault(); rotateTool(); }
+    else if (selection && selection.kind === 'object') { e.preventDefault(); rotateSelected(); }
   }
   if (e.code === 'Escape' && !walkMode) {
-    if (selection) clearSelection();
+    if (moving) {
+      cancelMovePlacement();
+      selectTool({ mode: 'select', id: 'select' });
+    } else if (selection) clearSelection();
     else selectTool(null);
   }
 });
