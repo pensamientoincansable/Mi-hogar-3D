@@ -40,9 +40,11 @@ python3 -m http.server 8000
 | Zoom | Rueda del ratón |
 | Desplazar cámara | Botón derecho + arrastrar |
 | Abrir/cerrar catálogo | Botón `🧰` |
-| Colocar pieza sin mover la cámara | Clic izquierdo |
+| Entrar en modo de colocación | Elegir pieza (o `🖐️` sobre un objeto para moverlo) |
+| Confirmar colocación / soltar objeto | Clic izquierdo sobre la cuadrícula |
 | Rotar mueble, escalera o rampa | `R` o botón `🔄` |
-| Cancelar herramienta | `Esc` |
+| Mover objeto seleccionado | Botón `🖐️ Mover` o tecla `M` |
+| Cancelar herramienta / colocación | `Esc` |
 | Modo paseo | Botón 🚶 · `WASD` + ratón · `Esc` para salir |
 
 ## 🛠️ Tecnología

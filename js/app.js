@@ -17,7 +17,11 @@ const HELP_KEY = 'mihogar3d-help-v1';
 const TEXTURE_ROOT = 'media/image/';
 const SKY_ROOT = 'media/image/Sky/';
 
-const PALETTE = [0xf5f0e8, 0xe8d9b5, 0xc96f4a, 0xb8443f, 0x4a7fb5, 0x5d9b6c, 0x8a8f98, 0x8b5a2b];
+const PALETTE = [
+  0xf5f0e8, 0xe8d9b5, 0xc96f4a, 0xb8443f, 0x4a7fb5, 0x5d9b6c, 0x8a8f98, 0x8b5a2b,
+  0x1f2937, 0x333c4a, 0x6b7a8f, 0x9d7bd8, 0x2f8f8f, 0xd8a048, 0x7a5c3e, 0xe85d75,
+  0xf2c94c, 0x6ee7a0, 0x38bdf8, 0x0f172a,
+];
 
 /* ---------------- Utilidades de malla ---------------- */
 const materials = new Map();
@@ -962,6 +966,11 @@ const BUILD_ITEMS = {
   suelo_grava:       { name: 'Grava', ico: '▫️', cost: 18, kind: 'floor', section: 'Suelos', style: 'gravel', color: 0xa49a8c },
   suelo_pizarra:     { name: 'Pizarra', ico: '⬛', cost: 44, kind: 'floor', section: 'Suelos', style: 'slate', color: 0x626d78 },
   suelo_mosaico:     { name: 'Mosaico hexagonal', ico: '🔶', cost: 48, kind: 'floor', section: 'Suelos', style: 'hex', color: 0xd3b6a0 },
+  suelo_cesped:      { name: 'Césped', ico: '🌿', cost: 14, kind: 'floor', section: 'Suelos', style: 'grass', color: 0x5f9b4e },
+  suelo_cesped_claro:{ name: 'Césped claro', ico: '🌱', cost: 16, kind: 'floor', section: 'Suelos', style: 'grassLight', color: 0x79a85a },
+  suelo_cesped_borde:{ name: 'Césped recortado', ico: '🍀', cost: 18, kind: 'floor', section: 'Suelos', style: 'grassTrim', color: 0x4f8c43 },
+  suelo_cesped_oscuro:{ name: 'Césped oscuro', ico: '🟢', cost: 17, kind: 'floor', section: 'Suelos', style: 'grassDark', color: 0x3c6e3a },
+  suelo_musgo:       { name: 'Musgo', ico: '🌾', cost: 15, kind: 'floor', section: 'Suelos', style: 'moss', color: 0x6a9a55 },
 
   // Muros y vallas ocupan un borde de la cuadrícula (h: horizontal, v: vertical).
   pared:             { name: 'Pared enlucida', ico: '🧱', cost: 60, kind: 'wall', category: 'wall', section: 'Muros', style: 'plain', color: 0xf5f0e8 },
@@ -1095,6 +1104,21 @@ const IMAGE_SURFACES = [
   { name: 'wallConcrete',file: 'PTP-Concrete_03-512x512.png',   roughness: 0.92, metalness: 0.00, envMapIntensity: 0.52, bumpScale: 0.050 },
   { name: 'wallWood',    file: 'PTP-Floor_03-512x512.png',       roughness: 0.75, metalness: 0.00, envMapIntensity: 0.64, bumpScale: 0.038 },
   { name: 'fenceWood',   file: 'PTP-Floor_05-512x512.png',       roughness: 0.79, metalness: 0.00, envMapIntensity: 0.60, bumpScale: 0.040 },
+  // Acabados de suelo coherentes con la vegetación: todas las parcelas
+  // construibles usan ahora los albedos "Foliage" de media/image.
+  { name: 'grassLight',  file: 'PTP-Foliage_08-512x512.png',     roughness: 0.92, metalness: 0.00, envMapIntensity: 0.58, bumpScale: 0.042 },
+  { name: 'grassTrim',   file: 'PTP-Foliage_02-512x512.png',     roughness: 0.95, metalness: 0.00, envMapIntensity: 0.50, bumpScale: 0.050 },
+  { name: 'grassDark',   file: 'PTP-Foliage_01-512x512.png',     roughness: 0.95, metalness: 0.00, envMapIntensity: 0.48, bumpScale: 0.052 },
+  { name: 'moss',        file: 'PTP-Foliage_04-512x512.png',     roughness: 0.90, metalness: 0.00, envMapIntensity: 0.60, bumpScale: 0.048 },
+  // Variantes empleadas por la herramienta de cambio de textura (revestir).
+  { name: 'resurfaceConcrete', file: 'PTP-Concrete_02-512x512.png', roughness: 0.90, metalness: 0.00, envMapIntensity: 0.58, bumpScale: 0.046 },
+  { name: 'resurfaceTile',     file: 'PTP-Tile_03-512x512.png',      roughness: 0.62, metalness: 0.00, envMapIntensity: 0.80, bumpScale: 0.030 },
+  { name: 'resurfaceMarble',   file: 'PTP-Floor_07-512x512.png',     roughness: 0.38, metalness: 0.00, envMapIntensity: 0.88, bumpScale: 0.018 },
+  { name: 'resurfaceStone',    file: 'PTP-Stone_02-512x512.png',     roughness: 0.87, metalness: 0.00, envMapIntensity: 0.62, bumpScale: 0.042 },
+  { name: 'resurfaceWood',     file: 'PTP-Floor_02-512x512.png',     roughness: 0.78, metalness: 0.00, envMapIntensity: 0.62, bumpScale: 0.040 },
+  { name: 'resurfaceBrick',    file: 'PTP-Stone_03-512x512.png',     roughness: 0.86, metalness: 0.00, envMapIntensity: 0.60, bumpScale: 0.036 },
+  { name: 'resurfacePattern',  file: 'PTP-Pattern_02-512x512.png',   roughness: 0.82, metalness: 0.00, envMapIntensity: 0.58, bumpScale: 0.022 },
+  { name: 'resurfaceHex',      file: 'PTP-Tile_07-512x512.png',      roughness: 0.60, metalness: 0.00, envMapIntensity: 0.78, bumpScale: 0.030 },
 ];
 
 function loadTexture(url, colorSpace = THREE.SRGBColorSpace) {
@@ -1384,6 +1408,11 @@ const SURFACE_FALLBACKS = {
   floorSlate: 'stone', floorHex: 'tiles', wallStone: 'stone',
   wallBrick: 'brick', wallConcrete: 'concrete', wallWood: 'wood',
   fenceWood: 'wood',
+  grassLight: 'grass', grassTrim: 'grass', grassDark: 'grass', moss: 'grass',
+  resurfaceConcrete: 'concrete', resurfaceTile: 'tiles',
+  resurfaceMarble: 'marble', resurfaceStone: 'stone',
+  resurfaceWood: 'wood', resurfaceBrick: 'brick',
+  resurfacePattern: 'fabric', resurfaceHex: 'tiles',
 };
 for (const [name, fallback] of Object.entries(SURFACE_FALLBACKS)) {
   defineSurface(name, { ...SURFACES[fallback] });
@@ -1475,6 +1504,7 @@ function materialRole(source, spec) {
   if (/lamp|light/.test(name)) return 'lamp';
   if (/metal/.test(name)) return 'metal';
   if (/carpet|fabric|fur|cloth|cover|pillow/.test(name)) return 'fabric';
+  if (/paint/.test(name)) return 'paint';
   if (/wood/.test(name)) return 'wood';
   if (/flower|petal|blossom/.test(name)) return 'flower';
   if (/leaf|leaves|plant|foliage|needle/.test(name)) return 'leaf';
@@ -1834,9 +1864,12 @@ let ground = null;
 let plot = null;
 
 function createWorldGround() {
+  // El suelo de todo el territorio construible usa los albedos "Foliage" de
+  // media/image: una variante para la parcela y otra para el exterior, de modo
+  // que el área de construcción se distingue sutilmente del terreno que la rodea.
   ground = new THREE.Mesh(
     new THREE.PlaneGeometry(400, 400),
-    tiledMaterial(0xffffff, 'grass', 68, 68, { roughness: 0.94, envMapIntensity: 0.55 })
+    tiledMaterial(0xffffff, 'grassDark', 68, 68, { roughness: 0.95, envMapIntensity: 0.48 })
   );
   ground.rotation.x = -Math.PI / 2;
   ground.receiveShadow = true;
@@ -1856,7 +1889,7 @@ function refreshWorldGround() {
   if (!ground || !plot) return;
   ground.material.dispose();
   plot.material.dispose();
-  ground.material = tiledMaterial(0xffffff, 'grass', 68, 68, { roughness: 0.94, envMapIntensity: 0.55 });
+  ground.material = tiledMaterial(0xffffff, 'grassDark', 68, 68, { roughness: 0.95, envMapIntensity: 0.48 });
   plot.material = tiledMaterial(0xffffff, 'grass', 9, 9, { roughness: 0.95, envMapIntensity: 0.5 });
 }
 
@@ -2015,7 +2048,7 @@ function updateEnv(t, dt) {
 }
 
 /* ---------------- Construcción de mallas ---------------- */
-function buildWallMesh(type = 'pared', color) {
+function buildWallMesh(type = 'pared', color, surfaceOverride = null) {
   const def = BUILD_ITEMS[type] || BUILD_ITEMS.pared;
   const c = color ?? def.color ?? 0xf5f0e8;
   const wallSurfaces = {
@@ -2025,7 +2058,7 @@ function buildWallMesh(type = 'pared', color) {
 
   if (def.category === 'wall') {
     const h = def.height ?? WALL_H;
-    const surface = wallSurfaces[def.style] || 'plaster';
+    const surface = surfaceOverride || wallSurfaces[def.style] || 'plaster';
     const body = box(1.02, h, 0.16, c, 0, h / 2, 0, true, surface);
     const details = [body];
     if (def.style === 'low') {
@@ -2047,7 +2080,7 @@ function buildWallMesh(type = 'pared', color) {
   if (def.category === 'fence') {
     const h = def.height ?? 1.2;
     const metalFence = def.style === 'metalFence';
-    const surface = metalFence ? 'metal' : 'fenceWood';
+    const surface = surfaceOverride || (metalFence ? 'metal' : 'fenceWood');
     const postColor = metalFence ? shade(c, -.16) : shade(c, -.08);
     const g = grp();
     const postXs = [-.48, 0, .48];
@@ -2148,7 +2181,7 @@ function rampGeometry(width = .94, depth = .94, height = .82) {
   return geometry;
 }
 
-function buildFloorMesh(type = 'suelo', color) {
+function buildFloorMesh(type = 'suelo', color, surfaceOverride = null) {
   const def = BUILD_ITEMS[type] || BUILD_ITEMS.suelo;
   const c = color ?? def.color ?? 0xc9a06a;
   const surfaceMap = {
@@ -2156,8 +2189,10 @@ function buildFloorMesh(type = 'suelo', color) {
     marble: 'marble', terracotta: 'terracotta', parquet: 'parquet',
     concrete: 'concrete', stone: 'floorStone', gravel: 'floorGravel',
     slate: 'floorSlate', hex: 'floorHex', stairs: 'woodDark', ramp: 'wallConcrete',
+    grass: 'grass', grassLight: 'grassLight', grassTrim: 'grassTrim',
+    grassDark: 'grassDark', moss: 'moss',
   };
-  const surface = surfaceMap[def.style] || 'wood';
+  const surface = surfaceOverride || surfaceMap[def.style] || 'wood';
 
   if (def.style === 'stairs') {
     const g = grp();
@@ -2216,10 +2251,10 @@ function buildFloorMesh(type = 'suelo', color) {
   }
   return g;
 }
-function buildRoofMesh(type = 'techo', color) {
+function buildRoofMesh(type = 'techo', color, surfaceOverride = null) {
   const def = BUILD_ITEMS[type] || BUILD_ITEMS.techo;
   const c = color ?? def.color ?? 0xa8524a;
-  const surface = def.style === 'flat' ? 'concrete' : 'roofTile';
+  const surface = surfaceOverride || (def.style === 'flat' ? 'concrete' : 'roofTile');
   const g = grp(box(1.0, 0.14, 1.0, c, 0, WALL_H + 0.07, 0, true, surface));
   if (def.style === 'tile') {
     for (const z of [-.32, 0, .32]) g.add(box(.98,.025,.035,shade(c,-.18),0,WALL_H+.15,z));
@@ -2242,7 +2277,7 @@ function objTransform(obj) {
 
 function addFloorMesh(key, data) {
   const [x, z] = key.split(',').map(Number);
-  const m = buildFloorMesh(data.t || 'suelo', data.c);
+  const m = buildFloorMesh(data.t || 'suelo', data.c, data.tex);
   m.position.set(x + 0.5 - S / 2, 0, z + 0.5 - S / 2);
   const def = BUILD_ITEMS[data.t] || BUILD_ITEMS.suelo;
   m.rotation.y = def.rotatable ? normalizeRotation(data.r) * Math.PI / 2 : 0;
@@ -2251,13 +2286,13 @@ function addFloorMesh(key, data) {
 }
 function addRoofMesh(key, data) {
   const [x, z] = key.split(',').map(Number);
-  const m = buildRoofMesh(data.t || 'techo', data.c);
+  const m = buildRoofMesh(data.t || 'techo', data.c, data.tex);
   m.position.set(x + 0.5 - S / 2, 0, z + 0.5 - S / 2);
   m.userData = { kind: 'roof', key };
   buildGroup.add(m); meshes.roofs[key] = m;
 }
 function addWallMesh(key, data) {
-  const m = buildWallMesh(data.t, data.c);
+  const m = buildWallMesh(data.t, data.c, data.tex);
   const t = wallTransform(key);
   m.position.set(t.x, 0, t.z); m.rotation.y = t.ry;
   m.userData = { kind: 'wall', key };
@@ -2272,6 +2307,7 @@ function addObjectMesh(obj) {
   m.position.set(t.x, 0, t.z); m.rotation.y = t.ry;
   m.scale.setScalar(obj.s || 1);
   m.userData = { kind: 'object', key: obj.id };
+  if (obj.tex) applyTextureToObject(m, obj.tex);
   buildGroup.add(m); meshes.objects[obj.id] = m;
   attachAnims(obj);
   if (def.light) {
@@ -2294,6 +2330,31 @@ function removeMesh(kind, key) {
       lampLights.delete(key);
     }
   }
+}
+
+/* Aplica una textura/revestimiento a los materiales "pintables" de un objeto.
+   Respeta el resto de acabados (cristal, agua, emisivos…) para no estropear
+   los modelos GLB/FBX. */
+function applySurfaceToMaterial(m, surf) {
+  if (!m || !surf) return;
+  if (Array.isArray(m)) { m.forEach(mm => applySurfaceToMaterial(mm, surf)); return; }
+  m.map = surf.map || null;
+  m.bumpMap = surf.bump || null;
+  m.bumpScale = surf.bumpScale ?? 0.03;
+  if (surf.metalness != null && m.metalness !== undefined) m.metalness = surf.metalness;
+  if (surf.roughness != null && m.roughness !== undefined) m.roughness = surf.roughness;
+  if (surf.envMapIntensity != null && m.envMapIntensity !== undefined) m.envMapIntensity = surf.envMapIntensity;
+  m.needsUpdate = true;
+}
+function applyTextureToObject(root, surfaceName) {
+  if (!root || !surfaceName) return;
+  const surf = SURFACES[surfaceName];
+  if (!surf) return;
+  root.traverse(n => {
+    if (n.isMesh && n.material && n.userData.paint) {
+      applySurfaceToMaterial(n.material, surf);
+    }
+  });
 }
 function rebuildAll() {
   for (const k of Object.keys(meshes.floors)) removeMesh('floor', k);
@@ -2454,6 +2515,17 @@ let tool = null;        // {mode:'build'|'furniture'|'paint'|'delete', id}
 let toolRot = 0;
 let selectedColor = PALETTE[0];
 let selectedColorCustom = false;
+let selectedSurface = 'resurfaceConcrete';
+const SURFACE_CHOICES = [
+  { name: 'resurfaceConcrete', label: 'Hormigón', color: 0x969a9e },
+  { name: 'resurfaceTile', label: 'Baldosa', color: 0xb8b3a9 },
+  { name: 'resurfaceMarble', label: 'Mármol', color: 0xeeeae2 },
+  { name: 'resurfaceStone', label: 'Piedra', color: 0x8a8f98 },
+  { name: 'resurfaceWood', label: 'Madera', color: 0x8b5a2b },
+  { name: 'resurfaceBrick', label: 'Ladrillo', color: 0xb85f4c },
+  { name: 'resurfacePattern', label: 'Estampado', color: 0xc8a27a },
+  { name: 'resurfaceHex', label: 'Hexágonos', color: 0xd3b6a0 },
+];
 let ghost = null;
 const ghostMatOk = new THREE.MeshLambertMaterial({ color: 0x6ee7a0, transparent: true, opacity: 0.55, depthWrite: false });
 const ghostMatBad = new THREE.MeshLambertMaterial({ color: 0xff6b6b, transparent: true, opacity: 0.55, depthWrite: false });
@@ -2465,17 +2537,18 @@ function setGhostValid(ok) {
 function clearGhost() {
   if (ghost) { scene.remove(ghost); ghost = null; }
 }
-function makeGhost() {
+function makeGhost(colorOverride = null) {
   clearGhost();
-  if (!tool || ['paint', 'delete', 'select', 'hammer'].includes(tool.mode)) return;
+  if (!tool || ['paint', 'delete', 'select', 'hammer', 'resurface'].includes(tool.mode)) return;
   let g = null;
+  const col = colorOverride ?? undefined;
   if (tool.mode === 'build') {
     const def = BUILD_ITEMS[tool.id];
-    if (def.kind === 'floor') g = buildFloorMesh(tool.id);
-    else if (def.kind === 'roof') g = buildRoofMesh(tool.id);
-    else g = buildWallMesh(tool.id);
+    if (def.kind === 'floor') g = buildFloorMesh(tool.id, col);
+    else if (def.kind === 'roof') g = buildRoofMesh(tool.id, col);
+    else g = buildWallMesh(tool.id, col);
   } else {
-    g = buildCatalogObject(tool.id);
+    g = buildCatalogObject(tool.id, col);
   }
   g.traverse(n => { if (n.isMesh) { n.material = ghostMatOk; n.castShadow = false; n.receiveShadow = false; } });
   g.visible = false;
@@ -2489,6 +2562,7 @@ function selectedToolDef(t = tool) {
   if (t.mode === 'furniture') return FURNITURE[t.id];
   if (t.mode === 'paint') return { name: 'Pintar', ico: '🎨' };
   if (t.mode === 'select') return { name: 'Seleccionar', ico: '🖐️' };
+  if (t.mode === 'resurface') return { name: 'Texturas', ico: '🧩' };
   if (t.mode === 'hammer') return { name: 'Mazo', ico: '🔨' };
   return { name: 'Vender', ico: '🧹' };
 }
@@ -2510,6 +2584,7 @@ function selectTool(t) {
   document.getElementById('btn-rotate').style.display = canRotateTool ? '' : 'none';
   const def = selectedToolDef(t);
   document.getElementById('selection-label').textContent = def ? `${def.ico} ${def.name}` : '';
+  renderPalette();
   updateRotationUI();
   if (t) snd.click();
 }
@@ -2627,6 +2702,240 @@ function place() {
   checkMissions();
 }
 
+/* ---------------- Modo de colocación (cuadrícula extendida) ----------------
+   Al elegir un material o un mueble la pieza no se instala directamente: entra
+   en un modo de colocación donde el fantasma se ancla a la cuadrícula de todo
+   el territorio construible y se confirma con un clic. La mano también puede
+   recoger un objeto ya colocado y llevarlo a ese mismo modo para moverlo. */
+let placement = null;      // { source:'tool'|'object', mode, type, color, id, rot, saved }
+let placementCell = null;  // { cx, cz, cellOk } o null
+let placementEdge = null;  // clave de borde o null
+let placementOk = false;
+let lastPlaceMove = null;  // último evento de ratón para refrescar el fantasma
+
+// Al entrar en modo de colocación la cuadrícula se extiende y se realza por
+// todo el territorio construible para facilitar el anclaje de la pieza.
+function setPlacementGrid(active) {
+  gridHelper.material.opacity = active ? 0.32 : 0.06;
+  border.material.opacity = active ? 0.95 : 0.7;
+}
+
+function movingTarget() {
+  return placement && placement.source === 'object' ? placement : null;
+}
+
+function placementModeFor(type) {
+  return BUILD_ITEMS[type] ? 'build' : 'furniture';
+}
+function updatePlacementControls() {
+  const ctx = document.getElementById('context-controls');
+  const active = !!placement;
+  ctx.classList.toggle('hidden', !active);
+  const def = placement ? (placement.mode === 'build' ? BUILD_ITEMS[placement.type] : FURNITURE[placement.type]) : null;
+  document.getElementById('selection-label').textContent = def ? `${def.ico} ${def.name}` : '';
+  const canRotate = !!placement && (placement.mode === 'furniture' || (placement.mode === 'build' && BUILD_ITEMS[placement.type]?.rotatable));
+  document.getElementById('btn-rotate').style.display = canRotate ? '' : 'none';
+  updateRotationUI();
+}
+function updatePlacementGhost() {
+  if (!ghost || !placement) { if (ghost) ghost.visible = false; return; }
+  if (placement.mode === 'build' && BUILD_ITEMS[placement.type].kind === 'wall') {
+    if (!placementEdge) { ghost.visible = false; return; }
+    const t = wallTransform(placementEdge);
+    ghost.position.set(t.x, 0, t.z);
+    ghost.rotation.y = t.ry;
+  } else if (placement.mode === 'build') {
+    const def = BUILD_ITEMS[placement.type];
+    if (!placementCell || !placementCell.cellOk) { ghost.visible = false; return; }
+    ghost.position.set(placementCell.cx + 0.5 - S / 2, 0, placementCell.cz + 0.5 - S / 2);
+    ghost.rotation.y = def.rotatable ? placement.rot * Math.PI / 2 : 0;
+  } else {
+    const def = FURNITURE[placement.type];
+    const w = placement.rot % 2 ? def.d : def.w, d = placement.rot % 2 ? def.w : def.d;
+    if (!placementCell || !placementCell.cellOk) { ghost.visible = false; return; }
+    ghost.position.set(placementCell.cx + w / 2 - S / 2, 0, placementCell.cz + d / 2 - S / 2);
+    ghost.rotation.y = placement.rot * Math.PI / 2;
+  }
+  ghost.visible = true;
+  setGhostValid(placementOk);
+}
+function canPlacement() {
+  const p = placement;
+  if (!p) return false;
+  if (p.mode === 'build') {
+    const def = BUILD_ITEMS[p.type];
+    if (def.kind === 'wall') return !!placementEdge && !state.walls[placementEdge];
+    if (!placementCell || !placementCell.cellOk) return false;
+    const key = placementCell.cx + ',' + placementCell.cz;
+    if (def.kind === 'floor') return !state.floors[key];
+    if (def.kind === 'roof') return !state.roofs[key];
+    return false;
+  }
+  const def = FURNITURE[p.type];
+  if (!def) return false;
+  const w = p.rot % 2 ? def.d : def.w, d = p.rot % 2 ? def.w : def.d;
+  const { cx, cz } = placementCell || {};
+  if (cx == null || cz == null || cx < 0 || cz < 0 || cx + w > S || cz + d > S) return false;
+  const occ = occupiedMap();
+  for (let dx = 0; dx < w; dx++) for (let dz = 0; dz < d; dz++)
+    if (occ.has((cx + dx) + ',' + (cz + dz))) return false;
+  return true;
+}
+function updatePlacementFromEvent(e) {
+  if (!placement) return;
+  lastPlaceMove = e;
+  const p = pickGround(e);
+  if (!p) {
+    placementCell = null; placementEdge = null; placementOk = false;
+    updatePlacementGhost();
+    return;
+  }
+  const cellOk = p.cx >= 0 && p.cx < S && p.cz >= 0 && p.cz < S;
+  placementCell = { cx: p.cx, cz: p.cz, cellOk };
+  placementEdge = placement.mode === 'build' && BUILD_ITEMS[placement.type].kind === 'wall' ? nearestEdge(p) : null;
+  placementOk = canPlacement();
+  updatePlacementGhost();
+}
+function refreshPlacement(e) {
+  if (!placement) { if (ghost) ghost.visible = false; return; }
+  if (e) updatePlacementFromEvent(e);
+  else updatePlacementGhost();
+}
+function startPlacement(type, color, rot = 0) {
+  endPlacement(false);
+  tool = { mode: placementModeFor(type), id: type };
+  selectTool(tool);
+  toolRot = normalizeRotation(rot);
+  placement = { source: 'tool', mode: tool.mode, type, color, id: null, rot: toolRot, saved: null };
+  setPlacementGrid(true);
+  makeGhost(color ?? undefined);
+  refreshPlacement(lastPlaceMove);
+  updateRotationUI();
+  const def = tool.mode === 'build' ? BUILD_ITEMS[type] : FURNITURE[type];
+  if (def) toast(`${def.ico} ${def.name}: colócalo en la cuadrícula y haz clic para confirmar`, '');
+}
+function startObjectMove(id) {
+  const obj = state.objects[id];
+  if (!obj) return;
+  endPlacement(false);
+  const def = FURNITURE[obj.t];
+  tool = { mode: 'furniture', id: obj.t };
+  selectTool(tool);
+  toolRot = normalizeRotation(obj.r);
+  placement = { source: 'object', mode: 'furniture', type: obj.t, color: obj.c, id, rot: toolRot, saved: { ...obj } };
+  delete state.objects[id];
+  removeMesh('object', id);
+  setPlacementGrid(true);
+  makeGhost(obj.c ?? undefined);
+  // Mantenemos el panel de selección abierto sobre el objeto "en la mano" para
+  // poder cambiar color, tamaño, rotar, vender o eliminar mientras se mueve.
+  selection = { kind: 'object', key: id };
+  refreshSelHelper();
+  renderSelectPanel();
+  refreshPlacement(lastPlaceMove);
+  updateRotationUI();
+  toast(`🖐️ Moviendo ${def ? def.name : 'objeto'} — haz clic para soltarlo en su nueva posición`, '');
+}
+function endPlacement(commit, restore = true) {
+  if (!placement) return;
+  const p = placement;
+  placement = null;
+  placementCell = null;
+  placementEdge = null;
+  placementOk = false;
+  if (!commit && restore && p.source === 'object' && p.saved) {
+    state.objects[p.id] = p.saved;
+    addObjectMesh(p.saved);
+  }
+  setPlacementGrid(false);
+  selectTool(null);
+  if (p.source === 'object') {
+    if (commit || restore) {
+      refreshSelHelper();
+      renderSelectPanel();
+    } else {
+      clearSelection();
+    }
+  }
+}
+function commitPlacement() {
+  const p = placement;
+  if (!p) return false;
+  if (!canPlacement()) { snd.error(); return false; }
+  if (p.mode === 'build') {
+    const def = BUILD_ITEMS[p.type];
+    if (!spend(def.cost)) return false;
+    const data = { t: p.type, c: p.color ?? def.color };
+    if (def.rotatable) data.r = p.rot;
+    if (def.kind === 'wall') {
+      state.walls[placementEdge] = data;
+      addWallMesh(placementEdge, data);
+    } else {
+      const key = placementCell.cx + ',' + placementCell.cz;
+      if (def.kind === 'floor') { state.floors[key] = data; addFloorMesh(key, data); }
+      else { state.roofs[key] = data; addRoofMesh(key, data); }
+    }
+  } else {
+    const def = FURNITURE[p.type];
+    if (p.source === 'object') {
+      const obj = { ...p.saved, x: placementCell.cx, z: placementCell.cz, r: p.rot };
+      state.objects[obj.id] = obj;
+      addObjectMesh(obj);
+    } else {
+      if (!spend(def.cost)) return false;
+      const obj = { id: 'o' + (state.nextId++), t: p.type, x: placementCell.cx, z: placementCell.cz, r: p.rot };
+      if (p.color != null) obj.c = p.color;
+      state.objects[obj.id] = obj;
+      addObjectMesh(obj);
+    }
+  }
+  snd.place();
+  scheduleSave();
+  checkMissions();
+  return true;
+}
+function rotatePlacement() {
+  if (!placement) return false;
+  const rotatableBuild = placement.mode === 'build' && BUILD_ITEMS[placement.type]?.rotatable;
+  if (placement.mode !== 'furniture' && !rotatableBuild) return false;
+  placement.rot = (placement.rot + 1) % 4;
+  toolRot = placement.rot;
+  updateRotationUI();
+  placementOk = canPlacement();
+  updatePlacementGhost();
+  snd.click();
+  return true;
+}
+
+/* ---------------- Revestir (cambiar textura de una pieza) ---------------- */
+function changeTextureFor(kind, key) {
+  if (kind === 'floor') {
+    const d = state.floors[key]; if (!d) return;
+    d.tex = selectedSurface; removeMesh('floor', key); addFloorMesh(key, d);
+  } else if (kind === 'roof') {
+    const d = state.roofs[key]; if (!d) return;
+    d.tex = selectedSurface; removeMesh('roof', key); addRoofMesh(key, d);
+  } else if (kind === 'wall') {
+    const d = state.walls[key]; if (!d) return;
+    d.tex = selectedSurface; removeMesh('wall', key); addWallMesh(key, d);
+  } else if (kind === 'object') {
+    const o = state.objects[key]; if (!o) return;
+    o.tex = selectedSurface; removeMesh('object', key); addObjectMesh(o);
+  } else return;
+  snd.click();
+  scheduleSave();
+}
+function changeTextureAt(ev) {
+  const hit = pickBuild(ev);
+  if (hit) { changeTextureFor(hit.node.userData.kind, hit.node.userData.key); return; }
+  const p = pickGround(ev);
+  if (!p) { snd.error(); return; }
+  const key = p.cx + ',' + p.cz;
+  if (state.floors[key]) { changeTextureFor('floor', key); return; }
+  toast('No hay nada que revestir aquí', 'error');
+  snd.error();
+}
+
 function paintAt(ev) {
   const hit = pickBuild(ev);
   if (!hit) return;
@@ -2690,28 +2999,48 @@ const selPanelEl = document.getElementById('select-panel');
 
 function clearSelection() {
   selection = null;
-  if (selHelper) { scene.remove(selHelper); selHelper = null; }
+  clearSelHelper();
   if (selPanelEl) selPanelEl.classList.add('hidden');
 }
 function refreshSelHelper() {
+  if (movingTarget()) { clearSelHelper(); return; } // el fantasma ya muestra la posición
   if (!selection) return;
   const node = selection.kind === 'object' ? meshes.objects[selection.key] : meshes[selection.kind + 's'][selection.key];
   if (!node) { clearSelection(); return; }
-  if (selHelper) scene.remove(selHelper);
+  clearSelHelper();
   selHelper = new THREE.BoxHelper(node, 0xffd36b);
   selHelper.material.transparent = true;
   scene.add(selHelper);
 }
+function clearSelHelper() {
+  if (selHelper) { scene.remove(selHelper); selHelper = null; }
+}
 function selectAt(ev) {
   const hit = pickBuild(ev);
-  if (!hit) { clearSelection(); return; }
+  if (!hit) {
+    // Clic en el suelo: si hay un objeto en esa celda lo recogemos para moverlo.
+    const p = pickGround(ev);
+    if (p && p.cx >= 0 && p.cx < S && p.cz >= 0 && p.cz < S) {
+      const cell = p.cx + ',' + p.cz;
+      const obj = Object.values(state.objects).find(o => objCells(o).includes(cell));
+      if (obj) { startObjectMove(obj.id); return; }
+    }
+    clearSelection();
+    return;
+  }
   const { kind, key } = hit.node.userData;
+  if (kind === 'object') {
+    startObjectMove(key);
+    return;
+  }
   selection = { kind, key };
   refreshSelHelper();
   renderSelectPanel();
   snd.select();
 }
 function selTarget() {
+  const mv = movingTarget();
+  if (mv) return mv.saved;
   if (!selection) return null;
   return state[selection.kind + 's'][selection.key] || null;
 }
@@ -2720,17 +3049,30 @@ function renderSelectPanel() {
   if (!tgt || !selPanelEl) { clearSelection(); return; }
   const def = selection.kind === 'object' ? FURNITURE[tgt.t] : BUILD_ITEMS[tgt.t];
   const refund = Math.floor((def ? def.cost : 0) / 2);
-  document.getElementById('sp-name').textContent = def ? `${def.ico} ${def.name}` : 'Pieza';
   document.getElementById('sp-sell').textContent = `♻️ Vender +${fmt(refund)}`;
   const isObj = selection.kind === 'object';
   const isRotatableBuild = selection.kind === 'floor' && BUILD_ITEMS[tgt.t]?.rotatable;
+  const moving = !!movingTarget();
   document.getElementById('sp-size-row').classList.toggle('hidden', !isObj);
   document.getElementById('sp-rotate').classList.toggle('hidden', !isObj && !isRotatableBuild);
+  document.getElementById('sp-move').classList.toggle('hidden', !isObj || moving);
+  document.getElementById('sp-name').textContent = moving
+    ? `${def ? def.ico : '🖐️'} ${def ? def.name : 'Objeto'} · moviendo`
+    : (def ? `${def.ico} ${def.name}` : 'Pieza');
   const s = isObj ? (tgt.s || 1) : 1;
   document.querySelectorAll('.size-btn').forEach(b => b.classList.toggle('active', Math.abs(+b.dataset.scale - s) < 0.01));
   selPanelEl.classList.remove('hidden');
 }
 function applySelColor(c) {
+  const mv = movingTarget();
+  if (mv) {
+    mv.saved.c = c;
+    mv.color = c;
+    makeGhost(c);
+    refreshPlacement(lastPlaceMove);
+    snd.click();
+    return;
+  }
   if (!selection) return;
   if (selection.kind === 'object') {
     const obj = state.objects[selection.key];
@@ -2749,6 +3091,14 @@ function applySelColor(c) {
   scheduleSave();
 }
 function applySelScale(s) {
+  const mv = movingTarget();
+  if (mv) {
+    mv.saved.s = s;
+    if (ghost) ghost.scale.setScalar(s);
+    renderSelectPanel();
+    snd.click();
+    return;
+  }
   if (!selection || selection.kind !== 'object') return;
   const obj = state.objects[selection.key];
   obj.s = s;
@@ -2760,6 +3110,7 @@ function applySelScale(s) {
   scheduleSave();
 }
 function rotateSelected() {
+  if (movingTarget()) { rotatePlacement(); return; }
   if (!selection) return;
   if (selection.kind === 'floor') {
     const floor = state.floors[selection.key];
@@ -2806,8 +3157,33 @@ function initSelectPanel() {
   });
   document.querySelectorAll('.size-btn').forEach(b => b.addEventListener('click', () => applySelScale(+b.dataset.scale)));
   document.getElementById('sp-rotate').addEventListener('click', rotateSelected);
-  document.getElementById('sp-sell').addEventListener('click', () => { if (selection) removeBuildItem(selection.kind, selection.key, true); });
-  document.getElementById('sp-delete').addEventListener('click', () => { if (selection) { const { kind, key } = selection; const node = state[kind + 's'][key] && (kind === 'object' ? meshes.objects[key] : meshes[kind + 's'][key]); if (node) spawnDust(new THREE.Box3().setFromObject(node).getCenter(new THREE.Vector3()), 8); removeBuildItem(kind, key, false); } });
+  document.getElementById('sp-move').addEventListener('click', () => {
+    if (selection && selection.kind === 'object') startObjectMove(selection.key);
+  });
+  document.getElementById('sp-sell').addEventListener('click', () => {
+    const mv = movingTarget();
+    if (mv) {
+      const cost = (FURNITURE[mv.type] || { cost: 0 }).cost;
+      const refund = Math.floor(cost / 2);
+      state.money += refund;
+      updateMoney(true);
+      toast(`Vendido por ${fmt(refund)} ♻️`, 'success');
+      scheduleSave();
+      endPlacement(false, false);
+      return;
+    }
+    if (selection) removeBuildItem(selection.kind, selection.key, true);
+  });
+  document.getElementById('sp-delete').addEventListener('click', () => {
+    const mv = movingTarget();
+    if (mv) {
+      spawnDust(new THREE.Vector3(0, 0.4, 0), 8);
+      snd.remove();
+      endPlacement(false, false);
+      return;
+    }
+    if (selection) { const { kind, key } = selection; const node = state[kind + 's'][key] && (kind === 'object' ? meshes.objects[key] : meshes[kind + 's'][key]); if (node) spawnDust(new THREE.Box3().setFromObject(node).getCenter(new THREE.Vector3()), 8); removeBuildItem(kind, key, false); }
+  });
   document.getElementById('sp-close').addEventListener('click', clearSelection);
 }
 
@@ -2919,16 +3295,19 @@ function normalizeState(data) {
     if (!validCellKey(key) || !def || def.kind !== 'floor') continue;
     next.floors[key] = { t: item.t, c: safeColor(item.c, def.color) };
     if (def.rotatable) next.floors[key].r = normalizeRotation(item.r);
+    if (typeof item.tex === 'string' && SURFACES[item.tex]) next.floors[key].tex = item.tex;
   }
   for (const [key, item] of Object.entries(record(data.roofs) ? data.roofs : {})) {
     const def = BUILD_ITEMS[item?.t];
     if (!validCellKey(key) || !def || def.kind !== 'roof') continue;
     next.roofs[key] = { t: item.t, c: safeColor(item.c, def.color) };
+    if (typeof item.tex === 'string' && SURFACES[item.tex]) next.roofs[key].tex = item.tex;
   }
   for (const [key, item] of Object.entries(record(data.walls) ? data.walls : {})) {
     const def = BUILD_ITEMS[item?.t];
     if (!validEdgeKey(key) || !def || def.kind !== 'wall') continue;
     next.walls[key] = { t: item.t, c: safeColor(item.c, def.color) };
+    if (typeof item.tex === 'string' && SURFACES[item.tex]) next.walls[key].tex = item.tex;
   }
 
   let generatedId = 1;
@@ -2948,6 +3327,7 @@ function normalizeState(data) {
     if (next.objects[obj.id]) obj.id = `o${generatedId}`;
     obj.s = Number.isFinite(+item.s) ? Math.max(.5, Math.min(2, +item.s)) : 1;
     if (item.c !== undefined) obj.c = safeColor(item.c, def.color ?? PALETTE[0]);
+    if (typeof item.tex === 'string' && SURFACES[item.tex]) obj.tex = item.tex;
     next.objects[obj.id] = obj;
     const numericId = Number(obj.id.slice(1));
     if (Number.isFinite(numericId)) generatedId = Math.max(generatedId, numericId + 1);
@@ -2996,6 +3376,7 @@ function importGame(file) {
     try {
       const data = JSON.parse(fr.result);
       if (!record(data) || typeof data.money !== 'number' || !record(data.floors)) throw new Error('formato');
+      endPlacement(false);
       state = normalizeState(data);
       rebuildAll();
       updateMoney();
@@ -3049,11 +3430,83 @@ function itemButton(mode, id, def) {
   const price = def.cost != null ? `<span class="price">${fmt(def.cost)}</span>` : `<span class="price free">gratis</span>`;
   b.innerHTML = `<span class="ico">${def.ico}</span><span class="name">${def.name}</span>${price}`;
   b.addEventListener('click', () => {
-    if (tool && tool.mode === mode && tool.id === id) selectTool(null);
-    else selectTool({ mode, id });
+    if (placement) {
+      // Cambiar de pieza (o de herramienta) mientras algo está \"en la mano\"
+      // cancela el modo de colocación y restaura el objeto en movimiento.
+      if (placement.mode === mode && placement.type === id) {
+        endPlacement(false);
+      } else if (mode === 'build' || mode === 'furniture') {
+        endPlacement(false);
+        startPlacement(id, selectedColorCustom ? selectedColor : def.color);
+      } else {
+        endPlacement(false);
+        selectTool({ mode, id });
+      }
+    } else if (mode === 'build' || mode === 'furniture') {
+      startPlacement(id, selectedColorCustom ? selectedColor : def.color);
+    } else {
+      if (tool && tool.mode === mode && tool.id === id) selectTool(null);
+      else selectTool({ mode, id });
+    }
     setInventoryOpen(false);
   });
   return b;
+}
+
+/* La paleta del lateral cambia de colores a texturas cuando se usa la
+   herramienta de revestir. */
+function renderPalette() {
+  const pal = document.getElementById('palette');
+  if (!pal) return;
+  pal.innerHTML = '';
+  if (tool && tool.mode === 'resurface') {
+    SURFACE_CHOICES.forEach(c => {
+      const s = document.createElement('div');
+      s.className = 'swatch texture';
+      s.title = c.label;
+      const surf = SURFACES[c.name] || SURFACES.rough;
+      if (surf.map && surf.map.image && surf.map.image.src) {
+        s.style.backgroundImage = `url(${surf.map.image.src})`;
+        s.style.backgroundSize = 'cover';
+        s.style.backgroundPosition = 'center';
+      } else {
+        s.style.background = '#' + c.color.toString(16).padStart(6, '0');
+      }
+      s.classList.toggle('active', selectedSurface === c.name);
+      s.addEventListener('click', () => {
+        selectedSurface = c.name;
+        selectedColorCustom = false;
+        document.querySelectorAll('#palette .swatch').forEach(x => x.classList.remove('active'));
+        s.classList.add('active');
+        toast(`Textura: ${c.label} 🧩`, '');
+        snd.click();
+      });
+      pal.appendChild(s);
+    });
+    return;
+  }
+  PALETTE.forEach((c, i) => {
+    const s = document.createElement('div');
+    s.className = 'swatch';
+    s.title = i === 0 ? 'Blanco' : 'Usar este color';
+    s.style.background = '#' + c.toString(16).padStart(6, '0');
+    s.classList.toggle('active', selectedColorCustom && selectedColor === c);
+    s.addEventListener('click', () => {
+      selectedColor = c;
+      selectedColorCustom = true;
+      document.querySelectorAll('#palette .swatch').forEach(x => x.classList.remove('active'));
+      s.classList.add('active');
+      // Si ya estamos colocando una pieza nueva, el fantasma adopta el color al
+      // instante (para los objetos en movimiento se usa applySelColor).
+      if (placement && placement.source === 'tool') {
+        placement.color = c;
+        makeGhost(c);
+        refreshPlacement(lastPlaceMove);
+      }
+      snd.click();
+    });
+    pal.appendChild(s);
+  });
 }
 
 function buildUI() {
@@ -3075,6 +3528,7 @@ function buildUI() {
   const pH = document.querySelector('[data-panel="herramientas"]');
   pH.appendChild(itemButton('select', 'select', { name: 'Seleccionar', ico: '🖐️' }));
   pH.appendChild(itemButton('paint', 'paint', { name: 'Pintar', ico: '🎨' }));
+  pH.appendChild(itemButton('resurface', 'resurface', { name: 'Texturas', ico: '🧩' }));
   pH.appendChild(itemButton('delete', 'delete', { name: 'Vender', ico: '🧹' }));
   pH.appendChild(itemButton('hammer', 'hammer', { name: 'Mazo', ico: '🔨' }));
   initSelectPanel();
@@ -3090,22 +3544,8 @@ function buildUI() {
     });
   });
 
-  // Paleta
-  const pal = document.getElementById('palette');
-  PALETTE.forEach((c, i) => {
-    const s = document.createElement('div');
-    s.className = 'swatch';
-    s.title = i === 0 ? 'Blanco' : 'Usar este color';
-    s.style.background = '#' + c.toString(16).padStart(6, '0');
-    s.addEventListener('click', () => {
-      selectedColor = c;
-      selectedColorCustom = true;
-      document.querySelectorAll('.swatch').forEach(x => x.classList.remove('active'));
-      s.classList.add('active');
-      snd.click();
-    });
-    pal.appendChild(s);
-  });
+  // Paleta (colores o texturas según la herramienta activa).
+  renderPalette();
 }
 
 /* ---------------- Modo paseo ---------------- */
@@ -3123,6 +3563,7 @@ function enterWalk() {
   walkYaw = Math.PI; walkPitch = 0;
   document.getElementById('walk-hint').classList.remove('hidden');
   document.getElementById('btn-walk').classList.add('active');
+  endPlacement(false);
   selectTool(null);
   clearSelection();
   setInventoryOpen(false);
@@ -3191,7 +3632,7 @@ function refreshGhost() {
   setGhostValid(canPlace());
 }
 function updatePlacementHover(e) {
-  if (walkMode || !tool || ['paint', 'delete', 'select', 'hammer'].includes(tool.mode)) {
+  if (walkMode || !tool || ['paint', 'delete', 'select', 'hammer', 'resurface'].includes(tool.mode)) {
     if (ghost) ghost.visible = false;
     hover = null;
     return;
@@ -3232,12 +3673,47 @@ canvas.addEventListener('pointerup', e => {
   const moved = Math.hypot(e.clientX - downPos.x, e.clientY - downPos.y);
   downPos = null;
   if (moved > 6 || e.button !== 0) return;
+
+  // En modo de colocación el clic confirma la pieza (o cancela si es inválido).
+  if (placement) {
+    if (placementOk) { commitPlacement(); endPlacement(true); }
+    else if (placementCell || placementEdge) snd.error();
+    return;
+  }
+
   if (!tool) return;
   if (tool.mode === 'paint') paintAt(e);
   else if (tool.mode === 'delete') deleteAt(e);
   else if (tool.mode === 'hammer') hammerAt(e);
   else if (tool.mode === 'select') selectAt(e);
-  else { updatePlacementHover(e); place(); }
+  else if (tool.mode === 'resurface') changeTextureAt(e);
+  else {
+    // El primer clic entra en modo de colocación sobre la celda señalada.
+    updatePlacementHover(e);
+    if (!hover) { snd.error(); return; }
+    const isBuild = tool.mode === 'build';
+    const def = isBuild ? BUILD_ITEMS[tool.id] : FURNITURE[tool.id];
+    const color = selectedColorCustom ? selectedColor : (def ? def.color : null);
+    if (isBuild && def && def.kind === 'wall') {
+      if (!hover.edgeKey) { snd.error(); return; }
+      setPlacementGrid(true);
+      placement = { source: 'tool', mode: 'build', type: tool.id, color, id: null, rot: toolRot, saved: null };
+      placementEdge = hover.edgeKey;
+      placementCell = null;
+      placementOk = canPlacement();
+      updatePlacementGhost();
+    } else {
+      if (!hover.cellOk) { snd.error(); return; }
+      setPlacementGrid(true);
+      placement = { source: 'tool', mode: isBuild ? 'build' : 'furniture', type: tool.id, color, id: null, rot: toolRot, saved: null };
+      placementCell = { cx: hover.cx, cz: hover.cz, cellOk: hover.cellOk };
+      placementEdge = null;
+      placementOk = canPlacement();
+      updatePlacementGhost();
+    }
+    updatePlacementControls();
+    snd.select();
+  }
 });
 canvas.addEventListener('pointercancel', e => {
   if (placementPointer === e.pointerId) {
@@ -3246,16 +3722,24 @@ canvas.addEventListener('pointercancel', e => {
   }
   downPos = null;
 });
-canvas.addEventListener('pointermove', updatePlacementHover);
+canvas.addEventListener('pointermove', e => {
+  if (placement) updatePlacementFromEvent(e);
+  else updatePlacementHover(e);
+});
 
 window.addEventListener('keydown', e => {
   keys[e.code] = true;
   if (e.code === 'KeyR') {
-    if (selection && selection.kind === 'object') { e.preventDefault(); rotateSelected(); }
+    if (placement) { e.preventDefault(); rotatePlacement(); }
+    else if (selection && selection.kind === 'object') { e.preventDefault(); rotateSelected(); }
     else if (tool && tool.mode === 'furniture') { e.preventDefault(); rotateTool(); }
   }
+  if (e.code === 'KeyM') {
+    if (selection && selection.kind === 'object') { e.preventDefault(); startObjectMove(selection.key); }
+  }
   if (e.code === 'Escape' && !walkMode) {
-    if (selection) clearSelection();
+    if (placement) endPlacement(false);
+    else if (selection) clearSelection();
     else selectTool(null);
   }
 });
@@ -3299,6 +3783,7 @@ document.getElementById('import-file').addEventListener('change', e => {
 });
 document.getElementById('btn-reset').addEventListener('click', () => {
   if (!confirm('¿Seguro que quieres empezar de cero? Se borrará tu casa actual.')) return;
+  endPlacement(false);
   state = newState();
   rebuildAll();
   updateMoney();
@@ -3312,8 +3797,14 @@ document.getElementById('btn-close-help').addEventListener('click', () => {
   localStorage.setItem(HELP_KEY, '1');
   snd.click();
 });
-document.getElementById('btn-rotate').addEventListener('click', rotateTool);
-document.getElementById('btn-cancel').addEventListener('click', () => selectTool(null));
+document.getElementById('btn-rotate').addEventListener('click', () => {
+  if (placement) rotatePlacement();
+  else rotateTool();
+});
+document.getElementById('btn-cancel').addEventListener('click', () => {
+  if (placement) endPlacement(false);
+  else selectTool(null);
+});
 
 /* ---------------- Inicio ---------------- */
 async function startGame() {
