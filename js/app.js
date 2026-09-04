@@ -17,7 +17,12 @@ const HELP_KEY = 'mihogar3d-help-v1';
 const TEXTURE_ROOT = 'media/image/';
 const SKY_ROOT = 'media/image/Sky/';
 
-const PALETTE = [0xf5f0e8, 0xe8d9b5, 0xc96f4a, 0xb8443f, 0x4a7fb5, 0x5d9b6c, 0x8a8f98, 0x8b5a2b];
+// Paleta ampliada: 24 colores para pintar suelos, muros, tejados y muebles.
+const PALETTE = [
+  0xf5f0e8, 0xe8d9b5, 0xc96f4a, 0xb8443f, 0x4a7fb5, 0x5d9b6c, 0x8a8f98, 0x8b5a2b,
+  0xffffff, 0x1c2431, 0xd8b579, 0xa06fc9, 0xe85d75, 0x78b4ff, 0x35668e, 0x2f6b3a,
+  0xf2c94c, 0xff8a5c, 0x9ad1a0, 0xcfd8e3, 0x6f4a2f, 0x495464, 0xb0653f, 0xe0f2ea,
+];
 
 /* ---------------- Utilidades de malla ---------------- */
 const materials = new Map();
@@ -962,6 +967,19 @@ const BUILD_ITEMS = {
   suelo_grava:       { name: 'Grava', ico: '▫️', cost: 18, kind: 'floor', section: 'Suelos', style: 'gravel', color: 0xa49a8c },
   suelo_pizarra:     { name: 'Pizarra', ico: '⬛', cost: 44, kind: 'floor', section: 'Suelos', style: 'slate', color: 0x626d78 },
   suelo_mosaico:     { name: 'Mosaico hexagonal', ico: '🔶', cost: 48, kind: 'floor', section: 'Suelos', style: 'hex', color: 0xd3b6a0 },
+  suelo_terrazo:     { name: 'Terrazo', ico: '🔹', cost: 52, kind: 'floor', section: 'Suelos', style: 'terrazzo', color: 0xdad5cb },
+  suelo_deck:        { name: 'Deck de terraza', ico: '🟫', cost: 36, kind: 'floor', section: 'Suelos', style: 'deck', color: 0xb98a5e },
+  suelo_adoquin:     { name: 'Adoquín gris', ico: '🪨', cost: 34, kind: 'floor', section: 'Suelos', style: 'cobble', color: 0x9aa0a6 },
+  suelo_reciclado:   { name: 'Madera recuperada', ico: '🟧', cost: 30, kind: 'floor', section: 'Suelos', style: 'reclaimed', color: 0xa97b4f },
+  suelo_granito:     { name: 'Granito pulido', ico: '⬜', cost: 58, kind: 'floor', section: 'Suelos', style: 'granite', color: 0xc9cdd2 },
+  suelo_microcemento:{ name: 'Microcemento', ico: '🔲', cost: 50, kind: 'floor', section: 'Suelos', style: 'microcement', color: 0xb5b2ac },
+  suelo_hidraulico:  { name: 'Baldosa hidráulica', ico: '🟪', cost: 46, kind: 'floor', section: 'Suelos', style: 'hydraulic', color: 0xd8cfc0 },
+  suelo_pradera:     { name: 'Pradera natural', ico: '🌾', cost: 15, kind: 'floor', section: 'Suelos', style: 'meadow', color: 0x74a25f },
+  suelo_musgo:       { name: 'Tapiz de musgo', ico: '🍀', cost: 17, kind: 'floor', section: 'Suelos', style: 'moss', color: 0x4e7a45 },
+  suelo_trébol:      { name: 'Campo de trébol', ico: '☘️', cost: 16, kind: 'floor', section: 'Suelos', style: 'clover', color: 0x5d9457 },
+  suelo_arena:       { name: 'Arena de playa', ico: '🏖️', cost: 22, kind: 'floor', section: 'Suelos', style: 'beach', color: 0xe4d3ae },
+  suelo_grava_clara: { name: 'Grava clara', ico: '⚪', cost: 20, kind: 'floor', section: 'Suelos', style: 'gravelLight', color: 0xc7c1b4 },
+  suelo_tierra:      { name: 'Tierra de huerto', ico: '🟤', cost: 14, kind: 'floor', section: 'Suelos', style: 'soil', color: 0x5c4633 },
 
   // Muros y vallas ocupan un borde de la cuadrícula (h: horizontal, v: vertical).
   pared:             { name: 'Pared enlucida', ico: '🧱', cost: 60, kind: 'wall', category: 'wall', section: 'Muros', style: 'plain', color: 0xf5f0e8 },
@@ -970,6 +988,12 @@ const BUILD_ITEMS = {
   muro_hormigon:     { name: 'Muro de hormigón', ico: '◼️', cost: 72, kind: 'wall', category: 'wall', section: 'Muros', style: 'concrete', color: 0x92979c },
   muro_madera:       { name: 'Muro de madera', ico: '🪵', cost: 78, kind: 'wall', category: 'wall', section: 'Muros', style: 'wood', color: 0x9b693d },
   minimuro:          { name: 'Minimuro', ico: '▰', cost: 48, kind: 'wall', category: 'wall', section: 'Muros', style: 'low', color: 0x969da0, height: 1.15 },
+  muro_estuco:       { name: 'Estuco cálido', ico: '🟨', cost: 64, kind: 'wall', category: 'wall', section: 'Muros', style: 'stucco', color: 0xe6d9c2 },
+  muro_losas:        { name: 'Losas de hormigón', ico: '⬜', cost: 80, kind: 'wall', category: 'wall', section: 'Muros', style: 'slabs', color: 0xa8adb3 },
+  muro_listones:     { name: 'Listones de madera', ico: '🪵', cost: 84, kind: 'wall', category: 'wall', section: 'Muros', style: 'slats', color: 0xc9a37a },
+  muro_floral:       { name: 'Papel botánico', ico: '🌿', cost: 76, kind: 'wall', category: 'wall', section: 'Muros', style: 'floral', color: 0xd9c9b6 },
+  muro_gris:         { name: 'Piedra gris', ico: '🪨', cost: 88, kind: 'wall', category: 'wall', section: 'Muros', style: 'greyStone', color: 0x8f959c },
+  muro_rustico:      { name: 'Muro rústico', ico: '🧱', cost: 92, kind: 'wall', category: 'wall', section: 'Muros', style: 'rusticStone', color: 0x9b8c76 },
   valla:             { name: 'Valla de madera', ico: '🚧', cost: 45, kind: 'wall', category: 'fence', section: 'Vallas', style: 'fence', color: 0xd8b579, height: 1.22 },
   valla_metal:       { name: 'Valla metálica', ico: '⛓️', cost: 70, kind: 'wall', category: 'fence', section: 'Vallas', style: 'metalFence', color: 0x707983, height: 1.35 },
 
@@ -987,6 +1011,9 @@ const BUILD_ITEMS = {
   ventana_industrial:{ name: 'Industrial', ico: '🏭', cost: 195, kind: 'wall', category: 'window', section: 'Ventanas', style: 'industrial', color: 0xe6e0d4 },
   techo:             { name: 'Teja', ico: '🏠', cost: 40, kind: 'roof', section: 'Techos', style: 'tile', color: 0xa8524a },
   techo_moderno:     { name: 'Plano', ico: '⬜', cost: 48, kind: 'roof', section: 'Techos', style: 'flat', color: 0x777d86 },
+  techo_azul:        { name: 'Teja azul', ico: '🔷', cost: 44, kind: 'roof', section: 'Techos', style: 'tileBlue', color: 0x4f6f9a },
+  techo_pizarra:     { name: 'Pizarra tosca', ico: '⬛', cost: 52, kind: 'roof', section: 'Techos', style: 'slateTop', color: 0x5b6670 },
+  techo_metal:       { name: 'Panel metálico', ico: '🔩', cost: 58, kind: 'roof', section: 'Techos', style: 'metalPanel', color: 0x9aa3ad },
 };
 
 /* ---------------- Sonido (WebAudio) ---------------- */
@@ -1016,7 +1043,7 @@ const snd = {
 /* ---------------- Estado ---------------- */
 let state = newState();
 function newState() {
-  return { money: START_MONEY, floors: {}, walls: {}, roofs: {}, objects: {}, nextId: 1, missionsDone: [] };
+  return { money: START_MONEY, floors: {}, walls: {}, roofs: {}, objects: {}, nextId: 1, missionsDone: [], groundTex: 0 };
 }
 
 /* ---------------- Escena ---------------- */
@@ -1062,40 +1089,110 @@ function bumpTexture(canvas, repeat = 1) {
 }
 
 /* ------- Texturas PBR desde /media/image (sustituyen a las procedurales) ------- */
+// Cada superficie define su fichero en media/image, etiqueta en español y
+// categoría para el selector de texturas. `core: true` = se carga al arrancar;
+// el resto se carga bajo demanda cuando el jugador la elige.
 const IMAGE_SURFACES = [
-  // { nombre interno de superficie, fichero, y propiedades PBR }
-  { name: 'grass',      file: 'PTP-Foliage_07-512x512.png',  roughness: 0.94, metalness: 0.00, envMapIntensity: 0.55, bumpScale: 0.045 },
-  { name: 'wood',       file: 'PTP-Floor_06-512x512.png',    roughness: 0.72, metalness: 0.00, envMapIntensity: 0.70, bumpScale: 0.035 },
-  { name: 'planks',     file: 'PTP-Floor_08-512x512.png',    roughness: 0.74, metalness: 0.00, envMapIntensity: 0.65, bumpScale: 0.035 },
-  { name: 'tiles',      file: 'PTP-Tile_01-512x512.png',     roughness: 0.62, metalness: 0.00, envMapIntensity: 0.80, bumpScale: 0.030 },
-  { name: 'marble',     file: 'PTP-Floor_01-512x512.png',    roughness: 0.35, metalness: 0.00, envMapIntensity: 0.90, bumpScale: 0.018 },
-  { name: 'terracotta', file: 'PTP-Floor_04-512x512.png',    roughness: 0.78, metalness: 0.00, envMapIntensity: 0.60, bumpScale: 0.030 },
-  { name: 'parquet',    file: 'PTP-Tile_05-512x512.png',     roughness: 0.70, metalness: 0.00, envMapIntensity: 0.68, bumpScale: 0.035 },
-  { name: 'concrete',   file: 'PTP-Concrete_01-512x512.png', roughness: 0.90, metalness: 0.00, envMapIntensity: 0.60, bumpScale: 0.045 },
-  { name: 'brick',      file: 'PTP-Stone_03-512x512.png',    roughness: 0.86, metalness: 0.00, envMapIntensity: 0.60, bumpScale: 0.035 },
-  { name: 'plaster',    file: 'PTP-Concrete_05-512x512.png', roughness: 0.86, metalness: 0.00, envMapIntensity: 0.55, bumpScale: 0.020 },
-  { name: 'roofTile',   file: 'PTP-Tile_06-512x512.png',     roughness: 0.76, metalness: 0.00, envMapIntensity: 0.60, bumpScale: 0.028 },
-  { name: 'leaves',     file: 'PTP-Foliage_03-512x512.png',  roughness: 0.82, metalness: 0.00, envMapIntensity: 0.55, bumpScale: 0.032 },
-  { name: 'fabric',     file: 'PTP-Pattern_01-512x512.png',  roughness: 0.82, metalness: 0.00, envMapIntensity: 0.60, bumpScale: 0.020 },
-  { name: 'metal',      file: 'PTP-Metal_01-512x512.png',    roughness: 0.25, metalness: 0.82, envMapIntensity: 1.25, bumpScale: 0.025 },
-  { name: 'stone',      file: 'PTP-Stone_01-512x512.png',    roughness: 0.88, metalness: 0.00, envMapIntensity: 0.62, bumpScale: 0.040 },
-  { name: 'bark',       file: 'PTP-Ground_10-512x512.png',   roughness: 0.90, metalness: 0.00, envMapIntensity: 0.45, bumpScale: 0.040 },
-  { name: 'clay',       file: 'PTP-Ground_04-512x512.png',   roughness: 0.82, metalness: 0.00, envMapIntensity: 0.58, bumpScale: 0.035 },
-  { name: 'water',      file: 'PTP-Elements_01-512x512.png', roughness: 0.10, metalness: 0.00, envMapIntensity: 1.45, bumpScale: 0.020 },
-  { name: 'rough',      file: 'PTP-Ground_01-512x512.png',   roughness: 0.84, metalness: 0.00, envMapIntensity: 0.55, bumpScale: 0.045 },
-  // Variantes para las nuevas piezas de construcción. Cada una apunta a un
-  // albedo distinto de media/image para que los acabados no sean clones.
-  { name: 'woodDark',    file: 'PTP-Floor_02-512x512.png',       roughness: 0.78, metalness: 0.00, envMapIntensity: 0.62, bumpScale: 0.040 },
-  { name: 'floorStone',  file: 'PTP-Stone_06-512x512.png',       roughness: 0.89, metalness: 0.00, envMapIntensity: 0.58, bumpScale: 0.048 },
-  { name: 'floorGravel', file: 'PTP-Ground_06-512x512.png',      roughness: 0.96, metalness: 0.00, envMapIntensity: 0.45, bumpScale: 0.060 },
-  { name: 'floorSlate',  file: 'PTP-Stone_09-512x512.png',       roughness: 0.82, metalness: 0.00, envMapIntensity: 0.65, bumpScale: 0.045 },
-  { name: 'floorHex',    file: 'PTP-Tile_07-512x512.png',        roughness: 0.60, metalness: 0.00, envMapIntensity: 0.78, bumpScale: 0.030 },
-  { name: 'wallStone',   file: 'PTP-Stone_07-512x512.png',       roughness: 0.91, metalness: 0.00, envMapIntensity: 0.55, bumpScale: 0.052 },
-  { name: 'wallBrick',   file: 'PTP-Stone_05-512x512.png',       roughness: 0.87, metalness: 0.00, envMapIntensity: 0.58, bumpScale: 0.042 },
-  { name: 'wallConcrete',file: 'PTP-Concrete_03-512x512.png',   roughness: 0.92, metalness: 0.00, envMapIntensity: 0.52, bumpScale: 0.050 },
-  { name: 'wallWood',    file: 'PTP-Floor_03-512x512.png',       roughness: 0.75, metalness: 0.00, envMapIntensity: 0.64, bumpScale: 0.038 },
-  { name: 'fenceWood',   file: 'PTP-Floor_05-512x512.png',       roughness: 0.79, metalness: 0.00, envMapIntensity: 0.60, bumpScale: 0.040 },
+  // Superficies base usadas por el catálogo existente.
+  { core: true, name: 'grass',       file: 'PTP-Foliage_07-512x512.png',  label: 'Pradera salvaje',    cat: 'Terreno',   roughness: 0.94, metalness: 0.00, envMapIntensity: 0.55, bumpScale: 0.045 },
+  { core: true, name: 'wood',        file: 'PTP-Floor_06-512x512.png',    label: 'Madera roble',       cat: 'Pavimento', roughness: 0.72, metalness: 0.00, envMapIntensity: 0.70, bumpScale: 0.035 },
+  { core: true, name: 'planks',      file: 'PTP-Floor_08-512x512.png',    label: 'Tablón rústico',     cat: 'Pavimento', roughness: 0.74, metalness: 0.00, envMapIntensity: 0.65, bumpScale: 0.035 },
+  { core: true, name: 'tiles',       file: 'PTP-Tile_01-512x512.png',     label: 'Baldosa clara',      cat: 'Pavimento', roughness: 0.62, metalness: 0.00, envMapIntensity: 0.80, bumpScale: 0.030 },
+  { core: true, name: 'marble',      file: 'PTP-Floor_01-512x512.png',     label: 'Mármol',             cat: 'Pavimento', roughness: 0.35, metalness: 0.00, envMapIntensity: 0.90, bumpScale: 0.018 },
+  { core: true, name: 'terracotta',  file: 'PTP-Floor_04-512x512.png',    label: 'Terracota',          cat: 'Pavimento', roughness: 0.78, metalness: 0.00, envMapIntensity: 0.60, bumpScale: 0.030 },
+  { core: true, name: 'parquet',     file: 'PTP-Tile_05-512x512.png',     label: 'Parqué espiga',      cat: 'Pavimento', roughness: 0.70, metalness: 0.00, envMapIntensity: 0.68, bumpScale: 0.035 },
+  { core: true, name: 'concrete',    file: 'PTP-Concrete_01-512x512.png', label: 'Hormigón',           cat: 'Pavimento', roughness: 0.90, metalness: 0.00, envMapIntensity: 0.60, bumpScale: 0.045 },
+  { core: true, name: 'brick',       file: 'PTP-Stone_03-512x512.png',    label: 'Ladrillo',           cat: 'Muro',      roughness: 0.86, metalness: 0.00, envMapIntensity: 0.60, bumpScale: 0.035 },
+  { core: true, name: 'plaster',     file: 'PTP-Concrete_05-512x512.png', label: 'Yeso',               cat: 'Muro',      roughness: 0.86, metalness: 0.00, envMapIntensity: 0.55, bumpScale: 0.020 },
+  { core: true, name: 'roofTile',    file: 'PTP-Tile_06-512x512.png',     label: 'Teja árabe',         cat: 'Tejado',    roughness: 0.76, metalness: 0.00, envMapIntensity: 0.60, bumpScale: 0.028 },
+  { core: true, name: 'leaves',      file: 'PTP-Foliage_03-512x512.png',  label: 'Follaje',            cat: 'Terreno',   roughness: 0.82, metalness: 0.00, envMapIntensity: 0.55, bumpScale: 0.032 },
+  { core: true, name: 'fabric',      file: 'PTP-Pattern_01-512x512.png',  label: 'Tela lisa',          cat: 'Tela',      roughness: 0.82, metalness: 0.00, envMapIntensity: 0.60, bumpScale: 0.020 },
+  { core: true, name: 'metal',       file: 'PTP-Metal_01-512x512.png',    label: 'Metal pintado',      cat: 'Metal',     roughness: 0.25, metalness: 0.82, envMapIntensity: 1.25, bumpScale: 0.025 },
+  { core: true, name: 'stone',       file: 'PTP-Stone_01-512x512.png',    label: 'Piedra',             cat: 'Muro',      roughness: 0.88, metalness: 0.00, envMapIntensity: 0.62, bumpScale: 0.040 },
+  { core: true, name: 'bark',        file: 'PTP-Ground_10-512x512.png',   label: 'Corteza',            cat: 'Terreno',   roughness: 0.90, metalness: 0.00, envMapIntensity: 0.45, bumpScale: 0.040 },
+  { core: true, name: 'clay',        file: 'PTP-Ground_04-512x512.png',   label: 'Barro cocido',       cat: 'Terreno',   roughness: 0.82, metalness: 0.00, envMapIntensity: 0.58, bumpScale: 0.035 },
+  { core: true, name: 'water',       file: 'PTP-Elements_01-512x512.png', label: 'Agua',               cat: 'Terreno',   roughness: 0.10, metalness: 0.00, envMapIntensity: 1.45, bumpScale: 0.020 },
+  { core: true, name: 'rough',       file: 'PTP-Ground_01-512x512.png',   label: 'Terreno áspero',     cat: 'Terreno',   roughness: 0.84, metalness: 0.00, envMapIntensity: 0.55, bumpScale: 0.045 },
+  // Acabados del catálogo de construcción.
+  { core: true, name: 'woodDark',    file: 'PTP-Floor_02-512x512.png',     label: 'Madera oscura',      cat: 'Pavimento', roughness: 0.78, metalness: 0.00, envMapIntensity: 0.62, bumpScale: 0.040 },
+  { core: true, name: 'floorStone',  file: 'PTP-Stone_06-512x512.png',    label: 'Loseta de piedra',   cat: 'Pavimento', roughness: 0.89, metalness: 0.00, envMapIntensity: 0.58, bumpScale: 0.048 },
+  { core: true, name: 'floorGravel', file: 'PTP-Ground_06-512x512.png',   label: 'Grava fina',         cat: 'Pavimento', roughness: 0.96, metalness: 0.00, envMapIntensity: 0.45, bumpScale: 0.060 },
+  { core: true, name: 'floorSlate',  file: 'PTP-Stone_09-512x512.png',    label: 'Pizarra',            cat: 'Pavimento', roughness: 0.82, metalness: 0.00, envMapIntensity: 0.65, bumpScale: 0.045 },
+  { core: true, name: 'floorHex',    file: 'PTP-Tile_07-512x512.png',     label: 'Mosaico hexagonal',  cat: 'Pavimento', roughness: 0.60, metalness: 0.00, envMapIntensity: 0.78, bumpScale: 0.030 },
+  { core: true, name: 'wallStone',   file: 'PTP-Stone_07-512x512.png',    label: 'Muro de piedra',     cat: 'Muro',      roughness: 0.91, metalness: 0.00, envMapIntensity: 0.55, bumpScale: 0.052 },
+  { core: true, name: 'wallBrick',   file: 'PTP-Stone_05-512x512.png',    label: 'Ladrillo visto',     cat: 'Muro',      roughness: 0.87, metalness: 0.00, envMapIntensity: 0.58, bumpScale: 0.042 },
+  { core: true, name: 'wallConcrete',file: 'PTP-Concrete_03-512x512.png', label: 'Hormigón de muro',   cat: 'Muro',      roughness: 0.92, metalness: 0.00, envMapIntensity: 0.52, bumpScale: 0.050 },
+  { core: true, name: 'wallWood',    file: 'PTP-Floor_03-512x512.png',    label: 'Muro de madera',     cat: 'Muro',      roughness: 0.75, metalness: 0.00, envMapIntensity: 0.64, bumpScale: 0.038 },
+  { core: true, name: 'fenceWood',   file: 'PTP-Floor_05-512x512.png',    label: 'Valla de madera',    cat: 'Muro',      roughness: 0.79, metalness: 0.00, envMapIntensity: 0.60, bumpScale: 0.040 },
+  // Foliage: texturas del suelo construible (mezcla 01·02·04·07 + variantes).
+  { core: true, name: 'meadowDry',   file: 'PTP-Foliage_01-512x512.png',  label: 'Pradera seca',       cat: 'Terreno',   roughness: 0.95, metalness: 0.00, envMapIntensity: 0.50, bumpScale: 0.048 },
+  { core: true, name: 'lawnShort',   file: 'PTP-Foliage_02-512x512.png',  label: 'Césped corto',       cat: 'Terreno',   roughness: 0.94, metalness: 0.00, envMapIntensity: 0.52, bumpScale: 0.042 },
+  { core: true, name: 'mossGround',  file: 'PTP-Foliage_04-512x512.png',  label: 'Musgo',              cat: 'Terreno',   roughness: 0.93, metalness: 0.00, envMapIntensity: 0.48, bumpScale: 0.050 },
+  { core: true, name: 'fernUnder',   file: 'PTP-Foliage_05-512x512.png',  label: 'Sotobosque',         cat: 'Terreno',   roughness: 0.92, metalness: 0.00, envMapIntensity: 0.50, bumpScale: 0.046 },
+  { core: true, name: 'cloverField', file: 'PTP-Foliage_06-512x512.png',  label: 'Campo de trébol',    cat: 'Terreno',   roughness: 0.94, metalness: 0.00, envMapIntensity: 0.52, bumpScale: 0.044 },
+  { core: true, name: 'tropicalFol', file: 'PTP-Foliage_08-512x512.png',  label: 'Selva tropical',     cat: 'Terreno',   roughness: 0.90, metalness: 0.00, envMapIntensity: 0.55, bumpScale: 0.046 },
+  { core: true, name: 'alpineGrass', file: 'PTP-Foliage_09-512x512.png',  label: 'Prado alpino',       cat: 'Terreno',   roughness: 0.93, metalness: 0.00, envMapIntensity: 0.52, bumpScale: 0.046 },
+  // Nuevos acabados: pavimentos y revestimientos (antes sin incorporar).
+  { core: true, name: 'terrazzoFine',   file: 'PTP-Elements_03-512x512.png',  label: 'Terrazo',            cat: 'Pavimento', roughness: 0.45, metalness: 0.00, envMapIntensity: 0.85, bumpScale: 0.022 },
+  { core: true, name: 'deckTiles',      file: 'PTP-Elements_09-512x512.png',  label: 'Deck de terraza',    cat: 'Pavimento', roughness: 0.75, metalness: 0.00, envMapIntensity: 0.62, bumpScale: 0.036 },
+  { core: true, name: 'cobbleGrey',     file: 'PTP-Elements_10-512x512.png',  label: 'Adoquín gris',       cat: 'Pavimento', roughness: 0.88, metalness: 0.00, envMapIntensity: 0.55, bumpScale: 0.055 },
+  { core: true, name: 'reclaimedWood',  file: 'PTP-Floor_07-512x512.png',     label: 'Madera recuperada',  cat: 'Pavimento', roughness: 0.76, metalness: 0.00, envMapIntensity: 0.60, bumpScale: 0.038 },
+  { core: true, name: 'granitePolished',file: 'PTP-Stone_10-512x512.png',     label: 'Granito pulido',     cat: 'Pavimento', roughness: 0.42, metalness: 0.00, envMapIntensity: 0.90, bumpScale: 0.020 },
+  { core: true, name: 'beachSand',      file: 'PTP-Ground_03-512x512.png',    label: 'Arena de playa',     cat: 'Terreno',   roughness: 0.92, metalness: 0.00, envMapIntensity: 0.45, bumpScale: 0.030 },
+  { core: true, name: 'stuccoWarm',     file: 'PTP-Elements_02-512x512.png',  label: 'Estuco cálido',      cat: 'Muro',      roughness: 0.87, metalness: 0.00, envMapIntensity: 0.52, bumpScale: 0.030 },
+  { core: true, name: 'concreteSlabs',  file: 'PTP-Concrete_08-512x512.png',  label: 'Losas de hormigón',  cat: 'Muro',      roughness: 0.88, metalness: 0.00, envMapIntensity: 0.55, bumpScale: 0.042 },
+  { core: true, name: 'woodSlats',      file: 'PTP-Elements_07-512x512.png',  label: 'Listón de madera',   cat: 'Muro',      roughness: 0.72, metalness: 0.00, envMapIntensity: 0.62, bumpScale: 0.036 },
+  { core: true, name: 'wallpaperBotanic',file:'PTP-Elements_08-512x512.png',  label: 'Papel botánico',     cat: 'Muro',      roughness: 0.82, metalness: 0.00, envMapIntensity: 0.55, bumpScale: 0.020 },
+  { core: true, name: 'greyStone',      file: 'PTP-Stone_02-512x512.png',     label: 'Piedra gris',        cat: 'Muro',      roughness: 0.88, metalness: 0.00, envMapIntensity: 0.55, bumpScale: 0.046 },
+  { core: true, name: 'rusticWallStone',file: 'PTP-Stone_08-512x512.png',     label: 'Muro rústico',       cat: 'Muro',      roughness: 0.90, metalness: 0.00, envMapIntensity: 0.52, bumpScale: 0.052 },
+  { core: true, name: 'blueRoofTile',   file: 'PTP-Tile_08-512x512.png',      label: 'Teja azul',          cat: 'Tejado',    roughness: 0.55, metalness: 0.00, envMapIntensity: 0.72, bumpScale: 0.030 },
+  { core: true, name: 'roughSlate',     file: 'PTP-Stone_04-512x512.png',     label: 'Pizarra tosca',      cat: 'Tejado',    roughness: 0.90, metalness: 0.00, envMapIntensity: 0.50, bumpScale: 0.050 },
+  { core: true, name: 'metalGalvanized',file: 'PTP-Metal_07-512x512.png',     label: 'Galvanizado',        cat: 'Metal',     roughness: 0.45, metalness: 0.78, envMapIntensity: 1.20, bumpScale: 0.030 },
+  // Texturas que se aplican desde el selector (carga diferida).
+  { name: 'concreteFine',      file: 'PTP-Concrete_02-512x512.png',  label: 'Hormigón fino',       cat: 'Pavimento', roughness: 0.86, metalness: 0.00, envMapIntensity: 0.58, bumpScale: 0.034 },
+  { name: 'concreteExposed',   file: 'PTP-Concrete_04-512x512.png',  label: 'Hormigón visto',      cat: 'Muro',      roughness: 0.93, metalness: 0.00, envMapIntensity: 0.50, bumpScale: 0.050 },
+  { core: true, name: 'microcement',       file: 'PTP-Concrete_06-512x512.png',  label: 'Microcemento pulido', cat: 'Pavimento', roughness: 0.35, metalness: 0.02, envMapIntensity: 0.95, bumpScale: 0.020 },
+  { name: 'concreteBlocks',    file: 'PTP-Concrete_07-512x512.png',  label: 'Bloque de hormigón',  cat: 'Muro',      roughness: 0.90, metalness: 0.00, envMapIntensity: 0.52, bumpScale: 0.046 },
+  { name: 'mosaicBlue',        file: 'PTP-Elements_04-512x512.png',  label: 'Mosaico azul',        cat: 'Pavimento', roughness: 0.35, metalness: 0.00, envMapIntensity: 0.92, bumpScale: 0.022 },
+  { name: 'pebbleMosaic',      file: 'PTP-Elements_05-512x512.png',  label: 'Piedra lavada',       cat: 'Pavimento', roughness: 0.80, metalness: 0.00, envMapIntensity: 0.58, bumpScale: 0.055 },
+  { name: 'hexBlueTiles',      file: 'PTP-Elements_06-512x512.png',  label: 'Baldosa hexagonal',   cat: 'Pavimento', roughness: 0.50, metalness: 0.00, envMapIntensity: 0.80, bumpScale: 0.028 },
+  { name: 'paverDark',         file: 'PTP-Elements_11-512x512.png',  label: 'Baldosa oscura',      cat: 'Pavimento', roughness: 0.85, metalness: 0.00, envMapIntensity: 0.55, bumpScale: 0.042 },
+  { name: 'paverLight',        file: 'PTP-Elements_12-512x512.png',  label: 'Baldosa clara',       cat: 'Pavimento', roughness: 0.85, metalness: 0.00, envMapIntensity: 0.58, bumpScale: 0.042 },
+  { core: true, name: 'soilDark',          file: 'PTP-Ground_02-512x512.png',    label: 'Tierra negra',        cat: 'Terreno',   roughness: 0.95, metalness: 0.00, envMapIntensity: 0.42, bumpScale: 0.050 },
+  { name: 'barkMulch',         file: 'PTP-Ground_05-512x512.png',    label: 'Mantillo de corteza', cat: 'Terreno',   roughness: 0.94, metalness: 0.00, envMapIntensity: 0.44, bumpScale: 0.052 },
+  { name: 'dryClay',           file: 'PTP-Ground_07-512x512.png',    label: 'Barro seco',          cat: 'Terreno',   roughness: 0.90, metalness: 0.00, envMapIntensity: 0.50, bumpScale: 0.044 },
+  { name: 'riverStones',       file: 'PTP-Ground_08-512x512.png',    label: 'Canto de río',        cat: 'Terreno',   roughness: 0.88, metalness: 0.00, envMapIntensity: 0.58, bumpScale: 0.060 },
+  { name: 'mossyRocks',        file: 'PTP-Ground_09-512x512.png',    label: 'Roca musgosa',        cat: 'Terreno',   roughness: 0.92, metalness: 0.00, envMapIntensity: 0.50, bumpScale: 0.055 },
+  { core: true, name: 'gravelLight',       file: 'PTP-Ground_11-512x512.png',    label: 'Grava clara',         cat: 'Pavimento', roughness: 0.95, metalness: 0.00, envMapIntensity: 0.48, bumpScale: 0.058 },
+  { name: 'desertSand',        file: 'PTP-Ground_12-512x512.png',    label: 'Arena desértica',     cat: 'Terreno',   roughness: 0.93, metalness: 0.00, envMapIntensity: 0.46, bumpScale: 0.032 },
+  { name: 'steelBrushed',      file: 'PTP-Metal_02-512x512.png',     label: 'Acero cepillado',     cat: 'Metal',     roughness: 0.30, metalness: 0.78, envMapIntensity: 1.30, bumpScale: 0.020 },
+  { name: 'copperPatina',      file: 'PTP-Metal_03-512x512.png',     label: 'Cobre',               cat: 'Metal',     roughness: 0.32, metalness: 0.82, envMapIntensity: 1.35, bumpScale: 0.028 },
+  { name: 'goldLeaf',          file: 'PTP-Metal_04-512x512.png',     label: 'Oro',                 cat: 'Metal',     roughness: 0.22, metalness: 0.88, envMapIntensity: 1.50, bumpScale: 0.018 },
+  { name: 'darkIron',          file: 'PTP-Metal_05-512x512.png',     label: 'Hierro negro',        cat: 'Metal',     roughness: 0.45, metalness: 0.72, envMapIntensity: 1.05, bumpScale: 0.026 },
+  { name: 'rustedMetal',       file: 'PTP-Metal_06-512x512.png',     label: 'Metal oxidado',       cat: 'Metal',     roughness: 0.85, metalness: 0.45, envMapIntensity: 0.75, bumpScale: 0.045 },
+  { name: 'brassMetal',        file: 'PTP-Metal_08-512x512.png',     label: 'Latón',               cat: 'Metal',     roughness: 0.34, metalness: 0.82, envMapIntensity: 1.40, bumpScale: 0.022 },
+  { name: 'chromeMetal',       file: 'PTP-Metal_09-512x512.png',     label: 'Cromo',               cat: 'Metal',     roughness: 0.12, metalness: 0.92, envMapIntensity: 1.60, bumpScale: 0.014 },
+  { name: 'linenFabric',       file: 'PTP-Pattern_02-512x512.png',   label: 'Lino',                cat: 'Tela',      roughness: 0.85, metalness: 0.00, envMapIntensity: 0.58, bumpScale: 0.022 },
+  { name: 'herringFabric',     file: 'PTP-Pattern_03-512x512.png',   label: 'Espiga',              cat: 'Tela',      roughness: 0.83, metalness: 0.00, envMapIntensity: 0.60, bumpScale: 0.022 },
+  { name: 'diamondFabric',     file: 'PTP-Pattern_04-512x512.png',   label: 'Diamantes',           cat: 'Tela',      roughness: 0.80, metalness: 0.00, envMapIntensity: 0.62, bumpScale: 0.020 },
+  { name: 'ceramicWhite',      file: 'PTP-Tile_02-512x512.png',      label: 'Cerámica blanca',     cat: 'Pavimento', roughness: 0.30, metalness: 0.00, envMapIntensity: 0.95, bumpScale: 0.018 },
+  { name: 'subwayTile',        file: 'PTP-Tile_03-512x512.png',      label: 'Baldosa metro',       cat: 'Muro',      roughness: 0.28, metalness: 0.00, envMapIntensity: 1.00, bumpScale: 0.018 },
+  { core: true, name: 'vintageTile',       file: 'PTP-Tile_04-512x512.png',      label: 'Baldosa hidráulica',  cat: 'Pavimento', roughness: 0.55, metalness: 0.00, envMapIntensity: 0.75, bumpScale: 0.030 },
 ];
+
+// Registro rápido nombre → definición para el selector y la carga diferida.
+const IMAGE_SURFACE_BY_NAME = new Map(IMAGE_SURFACES.map(s => [s.name, s]));
+// Las superficies no "core" quedan registradas sin mapa: los materiales usan su
+// color liso como respaldo hasta que la textura termina de cargarse bajo demanda.
+for (const s of IMAGE_SURFACES) {
+  if (s.core || SURFACES[s.name]) continue;
+  defineSurface(s.name, {
+    map: null, bump: null,
+    roughness: s.roughness ?? 0.85, metalness: s.metalness ?? 0.0,
+    envMapIntensity: s.envMapIntensity ?? 0.7, bumpScale: s.bumpScale ?? 0.05,
+    file: s.file, label: s.label, cat: s.cat,
+  });
+}
 
 function loadTexture(url, colorSpace = THREE.SRGBColorSpace) {
   return new Promise((resolve, reject) => {
@@ -1131,14 +1228,65 @@ async function loadImageSurface(spec) {
     const metalness = spec.metalness ?? 0.0;
     const envMapIntensity = spec.envMapIntensity ?? 0.7;
     const bumpScale = spec.bumpScale ?? 0.05;
-    defineSurface(spec.name, { map, bump, roughness, metalness, envMapIntensity, bumpScale });
+    defineSurface(spec.name, { map, bump, roughness, metalness, envMapIntensity, bumpScale, file: spec.file, label: spec.label, cat: spec.cat });
   } catch (err) {
     console.warn(`No se pudo cargar la textura ${spec.file}; se mantiene la superficie procedural.`, err);
   }
 }
 
-async function loadImageSurfaces() {
-  await Promise.all(IMAGE_SURFACES.map(loadImageSurface));
+/* Las superficies no "core" se descargan solo cuando el jugador las usa en el
+   selector de texturas o en un preset de terreno. Al terminar, si alguna pieza
+   del estado ya la referencia, se reconstruye la escena para aplicarla. */
+const surfaceLoading = new Map();
+let rebuildPending = false;
+function requestSurfaceLoad(spec) {
+  if (!spec || SURFACES[spec.name]?.map) return Promise.resolve();
+  let p = surfaceLoading.get(spec.name);
+  if (!p) {
+    p = loadImageSurface(spec).then(() => {
+      surfaceLoading.delete(spec.name);
+      onSurfaceReady(spec.name);
+    });
+    surfaceLoading.set(spec.name, p);
+  }
+  return p;
+}
+function ensureSurfaceLoaded(name) {
+  return requestSurfaceLoad(IMAGE_SURFACE_BY_NAME.get(name));
+}
+function surfaceInUse(name) {
+  if (!name) return false;
+  if (selectedTex === name) return true;
+  for (const store of [state.floors, state.roofs, state.walls, state.objects])
+    for (const item of Object.values(store)) if (item.tex === name) return true;
+  const preset = currentGroundPreset();
+  if (preset?.single === name) return true;
+  return false;
+}
+function flushSurfaceRebuild() {
+  if (!rebuildPending && !surfaceLoading.size) return;
+  rebuildPending = false;
+  // Las materiales comparten caché; al llegar una textura nueva hay que
+  // descartar las versiones antiguas y reconstruir todas las piezas.
+  materials.clear();
+  rebuildAll();
+  refreshWorldGround();
+}
+function onSurfaceReady(name) {
+  if (carry) { rebuildPending = true; return; }
+  if (surfaceInUse(name)) flushSurfaceRebuild();
+}
+
+async function loadCoreImageSurfaces() {
+  await Promise.all(IMAGE_SURFACES.filter(s => s.core).map(requestSurfaceLoad));
+}
+// El resto se carga en segundo plano, en tandas cortas para no bloquear el hilo.
+async function loadDeferredImageSurfaces() {
+  for (const spec of IMAGE_SURFACES) {
+    if (spec.core) continue;
+    await requestSurfaceLoad(spec);
+    await new Promise(r => setTimeout(r, 150));
+  }
 }
 
 function defineSurface(name, cfg) { SURFACES[name] = cfg; }
@@ -1610,8 +1758,40 @@ function instantiatePremium(id, customColor) {
   return root;
 }
 
-function buildCatalogObject(id, customColor) {
-  return instantiatePremium(id, customColor) || FURNITURE[id].build(customColor);
+function buildCatalogObject(id, customColor, tex = null) {
+  const g = instantiatePremium(id, customColor) || FURNITURE[id].build(customColor);
+  if (tex && g) applySurfaceOverride(g, tex);
+  return g;
+}
+// Reemplaza la superficie de todas las piezas pintables de un mueble por la
+// textura elegida (vidrios, brillos y materiales transparentes se conservan).
+function applySurfaceOverride(root, tex) {
+  const s = SURFACES[tex];
+  if (!s || !root) return;
+  const seen = new Map();
+  root.traverse(n => {
+    if (!n.isMesh || !n.material) return;
+    const single = !Array.isArray(n.material);
+    const list = single ? [n.material] : n.material;
+    const out = list.map(m0 => {
+      if (!m0 || m0.isMeshBasicMaterial || m0.isMeshPhysicalMaterial || m0.transparent) return m0;
+      if (m0.emissive && m0.emissiveIntensity > 0 && m0.emissive.getHex?.() !== 0) return m0;
+      let m = seen.get(m0);
+      if (!m) {
+        m = m0.clone();
+        if (s.map) m.map = s.map;
+        if (s.bump) { m.bumpMap = s.bump; m.bumpScale = s.bumpScale ?? 0.03; }
+        else { m.bumpMap = null; }
+        m.roughness = s.roughness ?? m.roughness;
+        m.metalness = s.metalness ?? m.metalness;
+        m.envMapIntensity = s.envMapIntensity ?? m.envMapIntensity;
+        m.needsUpdate = true;
+        seen.set(m0, m);
+      }
+      return m;
+    });
+    n.material = single ? out[0] : out;
+  });
 }
 
 const scene = new THREE.Scene();
@@ -1833,6 +2013,97 @@ scene.add(moon);
 let ground = null;
 let plot = null;
 
+/* ---------------- Suelo construible con las texturas PTP-Foliage ---------------- */
+// El terreno edificable usa de forma coherente las texturas de vegetación del
+// repositorio: por defecto una mezcla continua de Foliage 01·02·04·07 y, a
+// partir del botón 🌱 (o la tecla G), cada una de las demás Foliage sueltas.
+const PLOT_GROUND_PRESETS = [
+  { key: 'mix',    name: 'Pradera mixta (Foliage 01·02·04·07)', mix: ['meadowDry', 'lawnShort', 'mossGround', 'grass'] },
+  { key: 'f01',    name: 'Pradera seca (Foliage 01)',            single: 'meadowDry' },
+  { key: 'f02',    name: 'Césped corto (Foliage 02)',           single: 'lawnShort' },
+  { key: 'f04',    name: 'Musgo (Foliage 04)',                   single: 'mossGround' },
+  { key: 'f05',    name: 'Sotobosque (Foliage 05)',              single: 'fernUnder' },
+  { key: 'f06',    name: 'Trébol (Foliage 06)',                  single: 'cloverField' },
+  { key: 'f07',    name: 'Pradera salvaje (Foliage 07)',         single: 'grass' },
+  { key: 'f08',    name: 'Selva (Foliage 08)',                   single: 'tropicalFol' },
+  { key: 'f09',    name: 'Prado alpino (Foliage 09)',            single: 'alpineGrass' },
+];
+function currentGroundPreset() {
+  const n = PLOT_GROUND_PRESETS.length;
+  const i = Number.isInteger(state.groundTex) ? ((state.groundTex % n) + n) % n : 0;
+  return PLOT_GROUND_PRESETS[i];
+}
+
+let groundCompositeTex = null;
+// Composición 2×2 de las cuatro texturas Foliage con bordes difuminados, de
+// modo que el mosaico resultante tilea sin costuras visibles por toda la parcela.
+function buildGroundComposite() {
+  const parts = PLOT_GROUND_PRESETS[0].mix.map(n => SURFACES[n]).filter(s => s?.map?.image);
+  if (parts.length < 4) return null;
+  const size = 1024, cell = size / 2;
+  const c = document.createElement('canvas');
+  c.width = c.height = size;
+  const ctx = c.getContext('2d');
+  try {
+    ctx.fillStyle = ctx.createPattern(parts[0].map.image, 'repeat');
+    ctx.fillRect(0, 0, size, size);
+    parts.forEach((s, i) => {
+      const ox = (i % 2) * cell, oy = Math.floor(i / 2) * cell;
+      const patch = document.createElement('canvas');
+      patch.width = patch.height = cell;
+      const pc = patch.getContext('2d');
+      pc.translate((i * 137) % 64, (i * 89) % 64);
+      pc.fillStyle = pc.createPattern(s.map.image, 'repeat');
+      pc.fillRect(-96, -96, cell + 192, cell + 192);
+      const mask = document.createElement('canvas');
+      mask.width = mask.height = cell;
+      const mc = mask.getContext('2d');
+      const g = mc.createRadialGradient(cell / 2, cell / 2, cell * 0.24, cell / 2, cell / 2, cell * 0.5);
+      g.addColorStop(0, 'rgba(0,0,0,1)');
+      g.addColorStop(1, 'rgba(0,0,0,0)');
+      mc.fillStyle = '#000';
+      mc.fillRect(0, 0, cell, cell);
+      mc.globalCompositeOperation = 'destination-in';
+      mc.fillStyle = g;
+      mc.fillRect(0, 0, cell, cell);
+      pc.globalCompositeOperation = 'destination-in';
+      pc.drawImage(mask, 0, 0);
+      ctx.drawImage(patch, ox, oy);
+    });
+    drawNoise(ctx, size, texRng(11), 0.05);
+  } catch (err) {
+    console.warn('No se pudo componer la textura de terreno; se usará una loseta simple.', err);
+    return null;
+  }
+  const map = new THREE.CanvasTexture(c);
+  map.colorSpace = THREE.SRGBColorSpace;
+  map.wrapS = map.wrapT = THREE.RepeatWrapping;
+  map.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
+  const bump = bumpTexture(luminanceCanvas(c, size), 1);
+  return { map, bump };
+}
+
+function makePlotGroundMaterial() {
+  const preset = currentGroundPreset();
+  let src = null;
+  if (preset?.mix) {
+    if (!groundCompositeTex) groundCompositeTex = buildGroundComposite();
+    src = groundCompositeTex;
+  } else if (preset?.single && SURFACES[preset.single]?.map) {
+    src = SURFACES[preset.single];
+  }
+  if (!src?.map) return tiledMaterial(0xffffff, 'grass', 9, 9, { roughness: 0.95, envMapIntensity: 0.5 });
+  const map = src.map.clone();
+  map.repeat.set(8, 8);
+  map.needsUpdate = true;
+  let bump = null;
+  if (src.bump) { bump = src.bump.clone(); bump.repeat.set(8, 8); bump.needsUpdate = true; }
+  return new THREE.MeshStandardMaterial({
+    color: 0xffffff, roughness: src.roughness ?? 0.94, metalness: 0.0,
+    map, bumpMap: bump, bumpScale: src.bumpScale ?? 0.045, envMapIntensity: src.envMapIntensity ?? 0.5,
+  });
+}
+
 function createWorldGround() {
   ground = new THREE.Mesh(
     new THREE.PlaneGeometry(400, 400),
@@ -1857,7 +2128,24 @@ function refreshWorldGround() {
   ground.material.dispose();
   plot.material.dispose();
   ground.material = tiledMaterial(0xffffff, 'grass', 68, 68, { roughness: 0.94, envMapIntensity: 0.55 });
-  plot.material = tiledMaterial(0xffffff, 'grass', 9, 9, { roughness: 0.95, envMapIntensity: 0.5 });
+  const preset = currentGroundPreset();
+  if (preset?.single && !SURFACES[preset.single]?.map) {
+    ensureSurfaceLoaded(preset.single).then(() => { if (currentGroundPreset() === preset) refreshWorldGround(); });
+  }
+  plot.material = makePlotGroundMaterial();
+}
+
+function cycleGroundTex(dir = 1) {
+  const n = PLOT_GROUND_PRESETS.length;
+  state.groundTex = (((state.groundTex || 0) + dir) % n + n) % n;
+  const preset = currentGroundPreset();
+  if (preset?.single && !SURFACES[preset.single]?.map) {
+    ensureSurfaceLoaded(preset.single).then(() => { if (currentGroundPreset() === preset) refreshWorldGround(); });
+  }
+  refreshWorldGround();
+  toast(`🌱 Suelo: ${preset.name}`, '');
+  snd.click();
+  scheduleSave();
 }
 
 createWorldGround();
@@ -2015,17 +2303,21 @@ function updateEnv(t, dt) {
 }
 
 /* ---------------- Construcción de mallas ---------------- */
-function buildWallMesh(type = 'pared', color) {
+function buildWallMesh(type = 'pared', color, tex = null) {
   const def = BUILD_ITEMS[type] || BUILD_ITEMS.pared;
   const c = color ?? def.color ?? 0xf5f0e8;
   const wallSurfaces = {
     plain: 'plaster', stone: 'wallStone', brick: 'wallBrick',
     concrete: 'wallConcrete', wood: 'wallWood', low: 'wallStone',
+    stucco: 'stuccoWarm', slabs: 'concreteSlabs', slats: 'woodSlats',
+    floral: 'wallpaperBotanic', greyStone: 'greyStone', rusticStone: 'rusticWallStone',
   };
+  // El selector de texturas permite reconvertir cualquier muro a otra superficie.
+  const override = tex && SURFACES[tex] ? tex : null;
 
   if (def.category === 'wall') {
     const h = def.height ?? WALL_H;
-    const surface = wallSurfaces[def.style] || 'plaster';
+    const surface = override || wallSurfaces[def.style] || 'plaster';
     const body = box(1.02, h, 0.16, c, 0, h / 2, 0, true, surface);
     const details = [body];
     if (def.style === 'low') {
@@ -2047,7 +2339,7 @@ function buildWallMesh(type = 'pared', color) {
   if (def.category === 'fence') {
     const h = def.height ?? 1.2;
     const metalFence = def.style === 'metalFence';
-    const surface = metalFence ? 'metal' : 'fenceWood';
+    const surface = override || (metalFence ? 'metal' : 'fenceWood');
     const postColor = metalFence ? shade(c, -.16) : shade(c, -.08);
     const g = grp();
     const postXs = [-.48, 0, .48];
@@ -2071,9 +2363,9 @@ function buildWallMesh(type = 'pared', color) {
 
   if (def.category === 'door') {
     const g = grp(
-      box(1.02, 0.9, 0.14, c, 0, WALL_H - 0.45, 0, true),
-      box(0.09, 2.1, 0.14, c, -0.465, 1.05, 0, true),
-      box(0.09, 2.1, 0.14, c, 0.465, 1.05, 0, true)
+      box(1.02, 0.9, 0.14, c, 0, WALL_H - 0.45, 0, true, override),
+      box(0.09, 2.1, 0.14, c, -0.465, 1.05, 0, true, override),
+      box(0.09, 2.1, 0.14, c, 0.465, 1.05, 0, true, override)
     );
     if (def.style === 'modern') {
       g.add(box(0.84, 2.06, 0.07, 0x424a52, 0, 1.03, 0, true));
@@ -2106,10 +2398,10 @@ function buildWallMesh(type = 'pared', color) {
   const openingH = WALL_H - lowerH - upperH;
   const frameColor = def.style === 'industrial' ? 0x30343a : WHITE;
   const g = grp(
-    box(1.02, lowerH, 0.14, c, 0, lowerH / 2, 0, true),
-    box(1.02, upperH, 0.14, c, 0, WALL_H - upperH / 2, 0, true),
-    box(0.09, openingH, 0.14, c, -0.465, openingY, 0, true),
-    box(0.09, openingH, 0.14, c, 0.465, openingY, 0, true),
+    box(1.02, lowerH, 0.14, c, 0, lowerH / 2, 0, true, override),
+    box(1.02, upperH, 0.14, c, 0, WALL_H - upperH / 2, 0, true, override),
+    box(0.09, openingH, 0.14, c, -0.465, openingY, 0, true, override),
+    box(0.09, openingH, 0.14, c, 0.465, openingY, 0, true, override),
     glass(0.86, openingH, panorama ? 0x8ecfe4 : 0xaad4e8, panorama ? 0.52 : 0.43, 0, openingY, 0),
     box(0.88, 0.05, 0.06, frameColor, 0, openingY - openingH / 2, 0.04),
     box(0.88, 0.05, 0.06, frameColor, 0, openingY + openingH / 2, 0.04)
@@ -2148,7 +2440,7 @@ function rampGeometry(width = .94, depth = .94, height = .82) {
   return geometry;
 }
 
-function buildFloorMesh(type = 'suelo', color) {
+function buildFloorMesh(type = 'suelo', color, tex = null) {
   const def = BUILD_ITEMS[type] || BUILD_ITEMS.suelo;
   const c = color ?? def.color ?? 0xc9a06a;
   const surfaceMap = {
@@ -2156,8 +2448,14 @@ function buildFloorMesh(type = 'suelo', color) {
     marble: 'marble', terracotta: 'terracotta', parquet: 'parquet',
     concrete: 'concrete', stone: 'floorStone', gravel: 'floorGravel',
     slate: 'floorSlate', hex: 'floorHex', stairs: 'woodDark', ramp: 'wallConcrete',
+    terrazzo: 'terrazzoFine', deck: 'deckTiles', cobble: 'cobbleGrey',
+    reclaimed: 'reclaimedWood', granite: 'granitePolished', microcement: 'microcement',
+    hydraulic: 'vintageTile', meadow: 'meadowDry', moss: 'mossGround',
+    clover: 'cloverField', beach: 'beachSand', gravelLight: 'gravelLight',
+    soil: 'soilDark',
   };
-  const surface = surfaceMap[def.style] || 'wood';
+  const override = tex && SURFACES[tex] ? tex : null;
+  const surface = override || surfaceMap[def.style] || 'wood';
 
   if (def.style === 'stairs') {
     const g = grp();
@@ -2216,13 +2514,14 @@ function buildFloorMesh(type = 'suelo', color) {
   }
   return g;
 }
-function buildRoofMesh(type = 'techo', color) {
+function buildRoofMesh(type = 'techo', color, tex = null) {
   const def = BUILD_ITEMS[type] || BUILD_ITEMS.techo;
   const c = color ?? def.color ?? 0xa8524a;
-  const surface = def.style === 'flat' ? 'concrete' : 'roofTile';
+  const roofSurfaces = { flat: 'concrete', tile: 'roofTile', tileBlue: 'blueRoofTile', slateTop: 'roughSlate', metalPanel: 'metalGalvanized' };
+  const surface = (tex && SURFACES[tex] ? tex : null) || roofSurfaces[def.style] || 'roofTile';
   const g = grp(box(1.0, 0.14, 1.0, c, 0, WALL_H + 0.07, 0, true, surface));
-  if (def.style === 'tile') {
-    for (const z of [-.32, 0, .32]) g.add(box(.98,.025,.035,shade(c,-.18),0,WALL_H+.15,z));
+  if (def.style === 'tile' || def.style === 'tileBlue') {
+    for (const z of [-.32, 0, .32]) g.add(box(.98,.025,.035,shade(c,-.18),0,WALL_H+.15,z, false, surface));
   }
   return g;
 }
@@ -2242,7 +2541,7 @@ function objTransform(obj) {
 
 function addFloorMesh(key, data) {
   const [x, z] = key.split(',').map(Number);
-  const m = buildFloorMesh(data.t || 'suelo', data.c);
+  const m = buildFloorMesh(data.t || 'suelo', data.c, data.tex || null);
   m.position.set(x + 0.5 - S / 2, 0, z + 0.5 - S / 2);
   const def = BUILD_ITEMS[data.t] || BUILD_ITEMS.suelo;
   m.rotation.y = def.rotatable ? normalizeRotation(data.r) * Math.PI / 2 : 0;
@@ -2251,13 +2550,13 @@ function addFloorMesh(key, data) {
 }
 function addRoofMesh(key, data) {
   const [x, z] = key.split(',').map(Number);
-  const m = buildRoofMesh(data.t || 'techo', data.c);
+  const m = buildRoofMesh(data.t || 'techo', data.c, data.tex || null);
   m.position.set(x + 0.5 - S / 2, 0, z + 0.5 - S / 2);
   m.userData = { kind: 'roof', key };
   buildGroup.add(m); meshes.roofs[key] = m;
 }
 function addWallMesh(key, data) {
-  const m = buildWallMesh(data.t, data.c);
+  const m = buildWallMesh(data.t, data.c, data.tex || null);
   const t = wallTransform(key);
   m.position.set(t.x, 0, t.z); m.rotation.y = t.ry;
   m.userData = { kind: 'wall', key };
@@ -2266,7 +2565,7 @@ function addWallMesh(key, data) {
 function addObjectMesh(obj) {
   const def = FURNITURE[obj.t];
   if (!def) return;
-  const m = buildCatalogObject(obj.t, obj.c);
+  const m = buildCatalogObject(obj.t, obj.c, obj.tex || null);
   if (!m) return;
   const t = objTransform(obj);
   m.position.set(t.x, 0, t.z); m.rotation.y = t.ry;
@@ -2449,14 +2748,64 @@ function occupiedMap(exceptId = null) {
   return occ;
 }
 
-/* ---------------- Herramienta actual ---------------- */
-let tool = null;        // {mode:'build'|'furniture'|'paint'|'delete', id}
+/* ---------------- Herramienta actual y modo colocación ---------------- */
+// Al elegir cualquier material u objeto del catálogo ya no se coloca de golpe
+// bajo el cursor: entra en un MODO COLOCACIÓN. La pieza queda "en la mano"
+// (fantasma flotante), se mueve con la cuadrícula extendida por todo el
+// territorio construible y solo se asienta al confirmar (clic, ✅ o Enter).
+// Con la mano 🖐️ ocurre lo mismo sobre piezas ya colocadas: clic para cogerlas,
+// arrastrar o segundo clic para soltarlas, Esc para devolverlas a su sitio.
+let tool = null;        // {mode:'build'|'furniture'|'paint'|'delete'|'select'|'hammer', id}
 let toolRot = 0;
 let selectedColor = PALETTE[0];
 let selectedColorCustom = false;
+let selectedTex = null; // textura elegida para las próximas colocaciones
 let ghost = null;
+let placementGridOn = false;
+let carry = null;       // pieza cogida con la mano: {kind, key, data, node, rot, fromPointerDown}
 const ghostMatOk = new THREE.MeshLambertMaterial({ color: 0x6ee7a0, transparent: true, opacity: 0.55, depthWrite: false });
 const ghostMatBad = new THREE.MeshLambertMaterial({ color: 0xff6b6b, transparent: true, opacity: 0.55, depthWrite: false });
+
+/* Marcador de celda: loseta translúcida + contorno que sigue a la pieza en mano */
+const placeIndicator = new THREE.Group();
+placeIndicator.visible = false;
+scene.add(placeIndicator);
+{
+  const tile = new THREE.Mesh(
+    new THREE.PlaneGeometry(1, 1),
+    new THREE.MeshBasicMaterial({ color: 0x8ef0b6, transparent: true, opacity: 0.26, depthWrite: false, side: THREE.DoubleSide })
+  );
+  tile.rotation.x = -Math.PI / 2;
+  const outline = new THREE.LineLoop(
+    new THREE.BufferGeometry().setFromPoints([
+      new THREE.Vector3(-0.5, -0.5, 0), new THREE.Vector3(0.5, -0.5, 0),
+      new THREE.Vector3(0.5, 0.5, 0), new THREE.Vector3(-0.5, 0.5, 0),
+    ]),
+    new THREE.LineBasicMaterial({ color: 0xd8ffe9, transparent: true, opacity: 0.95, depthWrite: false })
+  );
+  outline.rotation.x = -Math.PI / 2;
+  placeIndicator.add(tile, outline);
+}
+function showIndicator(x, z, w, d, ok, ry = 0) {
+  placeIndicator.visible = true;
+  placeIndicator.position.set(x, 0.035, z);
+  placeIndicator.scale.set(w, 1, d);
+  placeIndicator.rotation.y = ry;
+  placeIndicator.children[0].material.color.setHex(ok ? 0x8ef0b6 : 0xff8d8d);
+  placeIndicator.children[1].material.color.setHex(ok ? 0xd8ffe9 : 0xffc9c9);
+}
+function hideIndicator() { placeIndicator.visible = false; }
+
+// La cuadrícula del territorio se enciende durante la colocación para poder
+// situar la pieza en cualquier punto de la parcela.
+function setPlacementGrid(on) {
+  placementGridOn = on;
+  gridHelper.material.opacity = on ? 0.34 : 0.06;
+  border.material.opacity = on ? 0.95 : 0.7;
+  canvas.classList.toggle('placing', on);
+  if (!on) hideIndicator();
+}
+const placingTool = () => tool && (tool.mode === 'build' || tool.mode === 'furniture');
 
 function setGhostValid(ok) {
   if (!ghost) return;
@@ -2471,11 +2820,11 @@ function makeGhost() {
   let g = null;
   if (tool.mode === 'build') {
     const def = BUILD_ITEMS[tool.id];
-    if (def.kind === 'floor') g = buildFloorMesh(tool.id);
-    else if (def.kind === 'roof') g = buildRoofMesh(tool.id);
-    else g = buildWallMesh(tool.id);
+    if (def.kind === 'floor') g = buildFloorMesh(tool.id, null, selectedTex);
+    else if (def.kind === 'roof') g = buildRoofMesh(tool.id, null, selectedTex);
+    else g = buildWallMesh(tool.id, null, selectedTex);
   } else {
-    g = buildCatalogObject(tool.id);
+    g = buildCatalogObject(tool.id, undefined, selectedTex);
   }
   g.traverse(n => { if (n.isMesh) { n.material = ghostMatOk; n.castShadow = false; n.receiveShadow = false; } });
   g.visible = false;
@@ -2488,15 +2837,36 @@ function selectedToolDef(t = tool) {
   if (t.mode === 'build') return BUILD_ITEMS[t.id];
   if (t.mode === 'furniture') return FURNITURE[t.id];
   if (t.mode === 'paint') return { name: 'Pintar', ico: '🎨' };
-  if (t.mode === 'select') return { name: 'Seleccionar', ico: '🖐️' };
+  if (t.mode === 'select') return { name: 'Mano', ico: '🖐️' };
   if (t.mode === 'hammer') return { name: 'Mazo', ico: '🔨' };
   return { name: 'Vender', ico: '🧹' };
 }
 function updateRotationUI() {
   const btn = document.getElementById('btn-rotate');
-  if (btn) btn.innerHTML = `🔄 Rotar ${toolRot * 90}° <kbd>R</kbd>`;
+  if (btn) btn.innerHTML = `🔄 Rotar ${(carry ? carry.rot : toolRot) * 90}° <kbd>R</kbd>`;
+}
+// La barra inferior refleja en todo momento el estado del modo colocación.
+function updateContextBar() {
+  const bar = document.getElementById('context-controls');
+  const show = !!tool || !!carry;
+  bar.classList.toggle('hidden', !show);
+  const lbl = document.getElementById('selection-label');
+  if (carry) {
+    const d = carry.kind === 'object' ? FURNITURE[carry.data.t] : BUILD_ITEMS[carry.data.t];
+    lbl.textContent = `✋ Llevando: ${d?.name || 'pieza'} · clic para soltar`;
+  } else if (tool) {
+    const def = selectedToolDef();
+    lbl.textContent = placingTool() ? `${def.ico} ${def.name} · modo colocación` : `${def.ico} ${def.name}`;
+  }
+  const canRotate = placingTool()
+    || (carry && carry.kind !== 'wall' && !(carry.kind === 'floor' && !BUILD_ITEMS[carry.data.t]?.rotatable));
+  document.getElementById('btn-rotate').style.display = canRotate ? '' : 'none';
+  document.getElementById('btn-place').style.display = (placingTool() || carry) ? '' : 'none';
+  document.getElementById('btn-cancel').innerHTML = carry ? '↩️ Devolver <kbd>Esc</kbd>' : '✖ Cancelar <kbd>Esc</kbd>';
+  updateRotationUI();
 }
 function selectTool(t) {
+  if (carry) cancelCarry(true);
   tool = t;
   toolRot = 0;
   makeGhost();
@@ -2504,14 +2874,145 @@ function selectTool(t) {
     const on = t && b.dataset.mode === t.mode && b.dataset.id === t.id;
     b.classList.toggle('active', on);
   });
-  const ctx = document.getElementById('context-controls');
-  ctx.classList.toggle('hidden', !t);
-  const canRotateTool = t && (t.mode === 'furniture' || (t.mode === 'build' && BUILD_ITEMS[t.id]?.rotatable));
-  document.getElementById('btn-rotate').style.display = canRotateTool ? '' : 'none';
-  const def = selectedToolDef(t);
-  document.getElementById('selection-label').textContent = def ? `${def.ico} ${def.name}` : '';
-  updateRotationUI();
+  setPlacementGrid(!!placingTool());
+  updateContextBar();
+  if (t && placingTool() && !localStorage.getItem('mihogar3d-place-hint')) {
+    localStorage.setItem('mihogar3d-place-hint', '1');
+    toast('✋ Modo colocación: la pieza te sigue por la cuadrícula. Clic o ✅ para soltarla, R rota, Esc la suelta.', 'success');
+  }
   if (t) snd.click();
+}
+
+/* ---------------- Llevar piezas con la mano (estilo Heartopia) ---------------- */
+function nodeFor(kind, key) {
+  return kind === 'object' ? meshes.objects[key] : meshes[kind + 's'][key];
+}
+function startCarry(kind, key, fromPointerDown = false) {
+  if (carry) return false;
+  const data = state[kind + 's'][key];
+  if (!data) return false;
+  const node = nodeFor(kind, key);
+  if (!node) return false;
+  if (selection && (selection.kind !== kind || selection.key !== key)) clearSelection();
+  selection = { kind, key };
+  refreshSelHelper();
+  renderSelectPanel();
+  carry = { kind, key, data, node, rot: normalizeRotation(data.r || 0), fromPointerDown };
+  setPlacementGrid(true);
+  updateCarryVisual();
+  updateContextBar();
+  snd.select();
+  return true;
+}
+// Celda/borde destino + validación para la pieza que llevamos puesta.
+function carryValidTarget() {
+  if (!carry || !hover) return null;
+  if (!nodeFor(carry.kind, carry.key)) return null;
+  const { kind, key, data } = carry;
+  if (kind === 'wall') {
+    if (!hover.edgeKey) return null;
+    const t = wallTransform(hover.edgeKey);
+    return {
+      key: hover.edgeKey, x: t.x, z: t.z, ry: t.ry, bar: true,
+      ok: hover.edgeKey === key || !state.walls[hover.edgeKey],
+    };
+  }
+  if (kind === 'floor' || kind === 'roof') {
+    const def = BUILD_ITEMS[data.t] || (kind === 'floor' ? BUILD_ITEMS.suelo : BUILD_ITEMS.techo);
+    const store = state[kind + 's'];
+    return {
+      key: hover.cellKey, cx: hover.cx, cz: hover.cz,
+      x: hover.cx + 0.5 - S / 2, z: hover.cz + 0.5 - S / 2,
+      ry: def.rotatable ? carry.rot * Math.PI / 2 : 0,
+      rotatable: !!def.rotatable,
+      ok: hover.cellOk && (hover.cellKey === key || !store[hover.cellKey]),
+    };
+  }
+  const def = FURNITURE[data.t];
+  const rot = carry.rot;
+  const w = rot % 2 ? def.d : def.w, d = rot % 2 ? def.w : def.d;
+  const { cx, cz } = hover;
+  const inside = hover.cellOk && cx >= 0 && cz >= 0 && cx + w <= S && cz + d <= S;
+  let ok = inside;
+  if (inside) {
+    const occ = occupiedMap(key);
+    for (let dx = 0; dx < w; dx++) for (let dz = 0; dz < d; dz++)
+      if (occ.has((cx + dx) + ',' + (cz + dz))) { ok = false; break; }
+  }
+  return { key: hover.cellKey, cx, cz, w, d, x: cx + w / 2 - S / 2, z: cz + d / 2 - S / 2, ry: rot * Math.PI / 2, ok };
+}
+function updateCarryVisual() {
+  if (!carry) return;
+  const node = nodeFor(carry.kind, carry.key);
+  if (!node) { carry = null; setPlacementGrid(!!placingTool()); updateContextBar(); return; }
+  carry.node = node;
+  const t = carryValidTarget();
+  if (!t) { hideIndicator(); return; }
+  node.position.set(t.x, node.position.y, t.z);
+  node.rotation.y = t.ry;
+  if (t.w) showIndicator(t.x, t.z, t.w + 0.06, t.d + 0.06, t.ok);
+  else if (t.bar) showIndicator(t.x, t.z, 1.08, 0.26, t.ok, t.ry);
+  else showIndicator(t.x, t.z, 1.02, 1.02, t.ok);
+}
+function rotateCarry() {
+  if (!carry || carry.kind === 'wall') return;
+  if (carry.kind === 'floor' && !BUILD_ITEMS[carry.data.t]?.rotatable) return;
+  carry.rot = (carry.rot + 1) % 4;
+  updateCarryVisual();
+  updateRotationUI();
+  snd.click();
+}
+function finishCarryUi() {
+  setPlacementGrid(!!placingTool());
+  refreshSelHelper();
+  renderSelectPanel();
+  updateContextBar();
+}
+function dropCarry() {
+  if (!carry) return false;
+  const t = carryValidTarget();
+  if (!t) { snd.error(); toast('Apunta a la parcela para soltar 🎯', 'error'); return false; }
+  if (!t.ok) { snd.error(); toast('No cabe ahí 🚫 — muévela a un hueco libre', 'error'); return false; }
+  const { kind, key, data } = carry;
+  if (kind === 'object') {
+    data.x = t.cx; data.z = t.cz; data.r = carry.rot;
+    removeMesh('object', key);
+    addObjectMesh(data);
+  } else {
+    const store = state[kind + 's'];
+    if (kind === 'floor' && t.rotatable) data.r = carry.rot;
+    delete store[key];
+    store[t.key] = data;
+    removeMesh(kind, key);
+    const adder = { floor: addFloorMesh, roof: addRoofMesh, wall: addWallMesh }[kind];
+    adder(t.key, data);
+    if (selection && selection.kind === kind && selection.key === key) selection.key = t.key;
+  }
+  carry = null;
+  finishCarryUi();
+  spawnDust(new THREE.Vector3(t.x, 0.15, t.z), 6, 0xbfd7b0);
+  snd.place();
+  scheduleSave();
+  checkMissions();
+  if (rebuildPending) flushSurfaceRebuild();
+  return true;
+}
+function cancelCarry(silent = false) {
+  if (!carry) return;
+  const { kind, key } = carry;
+  const data = state[kind + 's'][key];
+  if (kind === 'object') {
+    removeMesh('object', key);
+    if (data) addObjectMesh(data);
+  } else if (data) {
+    removeMesh(kind, key);
+    const adder = { floor: addFloorMesh, roof: addRoofMesh, wall: addWallMesh }[kind];
+    adder(key, data);
+  }
+  carry = null;
+  finishCarryUi();
+  if (!silent) { snd.remove(); toast('Pieza devuelta a su sitio ↩️', ''); }
+  if (rebuildPending) flushSurfaceRebuild();
 }
 
 /* ---------------- Picking ---------------- */
@@ -2600,10 +3101,13 @@ function place() {
   if (!tool || !canPlace()) { if (tool && hover) snd.error(); return; }
   const cost = toolCost();
   if (!spend(cost)) return;
+  const tex = selectedTex && SURFACES[selectedTex] ? selectedTex : null;
+  if (tex) ensureSurfaceLoaded(tex); // por si aún está en carga diferida
   if (tool.mode === 'build') {
     const def = BUILD_ITEMS[tool.id];
     const data = { t: tool.id, c: selectedColorCustom ? selectedColor : def.color };
     if (def.rotatable) data.r = toolRot;
+    if (tex) data.tex = tex;
     if (def.kind === 'floor') {
       state.floors[hover.cellKey] = data;
       addFloorMesh(hover.cellKey, data);
@@ -2618,10 +3122,12 @@ function place() {
     const id = 'o' + (state.nextId++);
     const obj = { id, t: tool.id, x: hover.cx, z: hover.cz, r: toolRot };
     if (selectedColorCustom) obj.c = selectedColor;
+    if (tex) obj.tex = tex;
     state.objects[id] = obj;
     addObjectMesh(obj);
   }
   refreshGhost();
+  updateContextBar();
   snd.place();
   scheduleSave();
   checkMissions();
@@ -2655,6 +3161,7 @@ function removeBuildItem(kind, key, refund) {
   else cost = (FURNITURE[data.t] || { cost: 0 }).cost;
   delete store[key];
   removeMesh(kind, key);
+  if (carry && carry.kind === kind && carry.key === key) { carry = null; finishCarryUi(); }
   if (refund) {
     const r = Math.floor(cost / 2);
     state.money += r;
@@ -2720,15 +3227,49 @@ function renderSelectPanel() {
   if (!tgt || !selPanelEl) { clearSelection(); return; }
   const def = selection.kind === 'object' ? FURNITURE[tgt.t] : BUILD_ITEMS[tgt.t];
   const refund = Math.floor((def ? def.cost : 0) / 2);
-  document.getElementById('sp-name').textContent = def ? `${def.ico} ${def.name}` : 'Pieza';
+  document.getElementById('sp-name').textContent = carry
+    ? `✋ Llevando: ${def ? def.name : 'Pieza'}`
+    : (def ? `${def.ico} ${def.name}` : 'Pieza');
   document.getElementById('sp-sell').textContent = `♻️ Vender +${fmt(refund)}`;
   const isObj = selection.kind === 'object';
   const isRotatableBuild = selection.kind === 'floor' && BUILD_ITEMS[tgt.t]?.rotatable;
   document.getElementById('sp-size-row').classList.toggle('hidden', !isObj);
   document.getElementById('sp-rotate').classList.toggle('hidden', !isObj && !isRotatableBuild);
+  const moveBtn = document.getElementById('sp-move');
+  if (moveBtn) moveBtn.textContent = carry ? '⬇️ Soltar aquí' : '📦 Mover';
   const s = isObj ? (tgt.s || 1) : 1;
   document.querySelectorAll('.size-btn').forEach(b => b.classList.toggle('active', Math.abs(+b.dataset.scale - s) < 0.01));
+  document.querySelectorAll('#sp-tex .tex-swatch, #sp-tex .tex-none').forEach(el =>
+    el.classList.toggle('active', (el.dataset.tex || null) === (tgt.tex || null)));
   selPanelEl.classList.remove('hidden');
+}
+function applySelTex(name) {
+  if (!selection) return;
+  const { kind, key } = selection;
+  const apply = () => {
+    if (kind === 'object') {
+      const obj = state.objects[key];
+      if (!obj) return;
+      if (name) obj.tex = name; else delete obj.tex;
+      removeMesh('object', key);
+      addObjectMesh(obj);
+    } else {
+      const store = state[kind + 's'];
+      const data = store[key];
+      if (!data) return;
+      if (name) data.tex = name; else delete data.tex;
+      removeMesh(kind, key);
+      const adder = { floor: addFloorMesh, wall: addWallMesh, roof: addRoofMesh }[kind];
+      adder(key, data);
+    }
+    if (carry) updateCarryVisual();
+    refreshSelHelper();
+    renderSelectPanel();
+    snd.click();
+    scheduleSave();
+  };
+  if (name && !SURFACES[name]?.map) ensureSurfaceLoaded(name).then(apply);
+  else apply();
 }
 function applySelColor(c) {
   if (!selection) return;
@@ -2744,6 +3285,7 @@ function applySelColor(c) {
     removeMesh(selection.kind, selection.key);
     adder(selection.key, store[selection.key]);
   }
+  if (carry) updateCarryVisual();
   refreshSelHelper();
   snd.click();
   scheduleSave();
@@ -2793,6 +3335,16 @@ function rotateSelected() {
   snd.click();
   scheduleSave();
 }
+function texSwatchEl(name, onClick, parentSel) {
+  const s = SURFACES[name] || {};
+  const b = document.createElement('button');
+  b.className = 'tex-swatch';
+  b.dataset.tex = name;
+  b.title = s.label ? `${s.label} (${s.cat || 'textura'})` : name;
+  if (s.file) b.style.backgroundImage = `url(${TEXTURE_ROOT + s.file})`;
+  b.addEventListener('click', () => onClick(name));
+  return b;
+}
 function initSelectPanel() {
   const pal = document.getElementById('sp-colors');
   if (!pal) return;
@@ -2804,8 +3356,27 @@ function initSelectPanel() {
     s.addEventListener('click', () => applySelColor(c));
     pal.appendChild(s);
   });
+  // Fila de texturas del panel de selección: repite la textura en la pieza actual.
+  const texRow = document.getElementById('sp-tex');
+  if (texRow && !texRow.childElementCount) {
+    const none = document.createElement('button');
+    none.className = 'tex-swatch tex-none';
+    none.dataset.tex = '';
+    none.textContent = '∅';
+    none.title = 'Textura original del material';
+    none.addEventListener('click', () => applySelTex(null));
+    texRow.appendChild(none);
+    for (const spec of IMAGE_SURFACES) {
+      texRow.appendChild(texSwatchEl(spec.name, n => applySelTex(n === (selTarget()?.tex || null) ? null : n)));
+    }
+  }
+  const moveBtn = document.getElementById('sp-move');
+  if (moveBtn) moveBtn.addEventListener('click', () => {
+    if (carry) dropCarry();
+    else if (selection) startCarry(selection.kind, selection.key, false);
+  });
   document.querySelectorAll('.size-btn').forEach(b => b.addEventListener('click', () => applySelScale(+b.dataset.scale)));
-  document.getElementById('sp-rotate').addEventListener('click', rotateSelected);
+  document.getElementById('sp-rotate').addEventListener('click', () => { if (carry) rotateCarry(); else rotateSelected(); });
   document.getElementById('sp-sell').addEventListener('click', () => { if (selection) removeBuildItem(selection.kind, selection.key, true); });
   document.getElementById('sp-delete').addEventListener('click', () => { if (selection) { const { kind, key } = selection; const node = state[kind + 's'][key] && (kind === 'object' ? meshes.objects[key] : meshes[kind + 's'][key]); if (node) spawnDust(new THREE.Box3().setFromObject(node).getCenter(new THREE.Vector3()), 8); removeBuildItem(kind, key, false); } });
   document.getElementById('sp-close').addEventListener('click', clearSelection);
@@ -2919,16 +3490,19 @@ function normalizeState(data) {
     if (!validCellKey(key) || !def || def.kind !== 'floor') continue;
     next.floors[key] = { t: item.t, c: safeColor(item.c, def.color) };
     if (def.rotatable) next.floors[key].r = normalizeRotation(item.r);
+    if (typeof item.tex === 'string' && SURFACES[item.tex]) next.floors[key].tex = item.tex;
   }
   for (const [key, item] of Object.entries(record(data.roofs) ? data.roofs : {})) {
     const def = BUILD_ITEMS[item?.t];
     if (!validCellKey(key) || !def || def.kind !== 'roof') continue;
     next.roofs[key] = { t: item.t, c: safeColor(item.c, def.color) };
+    if (typeof item.tex === 'string' && SURFACES[item.tex]) next.roofs[key].tex = item.tex;
   }
   for (const [key, item] of Object.entries(record(data.walls) ? data.walls : {})) {
     const def = BUILD_ITEMS[item?.t];
     if (!validEdgeKey(key) || !def || def.kind !== 'wall') continue;
     next.walls[key] = { t: item.t, c: safeColor(item.c, def.color) };
+    if (typeof item.tex === 'string' && SURFACES[item.tex]) next.walls[key].tex = item.tex;
   }
 
   let generatedId = 1;
@@ -2948,6 +3522,7 @@ function normalizeState(data) {
     if (next.objects[obj.id]) obj.id = `o${generatedId}`;
     obj.s = Number.isFinite(+item.s) ? Math.max(.5, Math.min(2, +item.s)) : 1;
     if (item.c !== undefined) obj.c = safeColor(item.c, def.color ?? PALETTE[0]);
+    if (typeof item.tex === 'string' && SURFACES[item.tex]) obj.tex = item.tex;
     next.objects[obj.id] = obj;
     const numericId = Number(obj.id.slice(1));
     if (Number.isFinite(numericId)) generatedId = Math.max(generatedId, numericId + 1);
@@ -2958,6 +3533,8 @@ function normalizeState(data) {
     ? data.missionsDone.filter(id => typeof id === 'string' && validMissionIds.has(id))
     : [];
   next.missionsDone = [...new Set(completed)];
+  const groundN = PLOT_GROUND_PRESETS.length;
+  next.groundTex = Number.isInteger(+data.groundTex) ? ((+data.groundTex % groundN) + groundN) % groundN : 0;
   return next;
 }
 let saveTimer = null;
@@ -3056,6 +3633,32 @@ function itemButton(mode, id, def) {
   return b;
 }
 
+/* Selector de texturas del pincel: se aplica a todo lo que coloques o lleves. */
+function buildTexPicker() {
+  const grid = document.getElementById('tex-grid');
+  if (!grid || grid.childElementCount) return;
+  for (const spec of IMAGE_SURFACES) {
+    grid.appendChild(texSwatchEl(spec.name, n => setBrushTex(n === selectedTex ? null : n)));
+  }
+  const none = document.getElementById('tex-none');
+  if (none) none.addEventListener('click', () => setBrushTex(null));
+  refreshTexUI();
+}
+function setBrushTex(name) {
+  selectedTex = name;
+  if (name) ensureSurfaceLoaded(name);
+  if (ghost && placingTool()) makeGhost();
+  refreshTexUI();
+  snd.click();
+  toast(name ? `🎨 Pincel de textura: ${SURFACES[name]?.label || name}` : '🎨 Pincel: textura original de cada pieza', '');
+}
+function refreshTexUI() {
+  document.querySelectorAll('#tex-grid .tex-swatch').forEach(el =>
+    el.classList.toggle('active', el.dataset.tex === selectedTex));
+  const none = document.getElementById('tex-none');
+  if (none) none.classList.toggle('active', !selectedTex);
+}
+
 function buildUI() {
   const pC = document.querySelector('[data-panel="construccion"]');
   let lastSection = '';
@@ -3090,6 +3693,8 @@ function buildUI() {
     });
   });
 
+  buildTexPicker();
+
   // Paleta
   const pal = document.getElementById('palette');
   PALETTE.forEach((c, i) => {
@@ -3123,6 +3728,8 @@ function enterWalk() {
   walkYaw = Math.PI; walkPitch = 0;
   document.getElementById('walk-hint').classList.remove('hidden');
   document.getElementById('btn-walk').classList.add('active');
+  if (carry) cancelCarry(true);
+  setPlacementGrid(false);
   selectTool(null);
   clearSelection();
   setInventoryOpen(false);
@@ -3173,36 +3780,43 @@ function refreshGhost() {
     return;
   }
   ghost.visible = true;
+  const ok = canPlace();
   if (tool.mode === 'build' && BUILD_ITEMS[tool.id].kind === 'wall') {
-    if (!hover.edgeKey) { ghost.visible = false; return; }
+    if (!hover.edgeKey) { ghost.visible = false; hideIndicator(); return; }
     const t = wallTransform(hover.edgeKey);
     ghost.position.set(t.x, 0, t.z);
     ghost.rotation.y = t.ry;
+    showIndicator(t.x, t.z, 1.08, 0.26, ok, t.ry);
   } else if (tool.mode === 'build') {
     const def = BUILD_ITEMS[tool.id];
     ghost.position.set(hover.cx + 0.5 - S / 2, 0, hover.cz + 0.5 - S / 2);
     ghost.rotation.y = def.rotatable ? toolRot * Math.PI / 2 : 0;
+    showIndicator(hover.cx + 0.5 - S / 2, hover.cz + 0.5 - S / 2, 1.02, 1.02, ok);
   } else {
     const def = FURNITURE[tool.id];
     const w = toolRot % 2 ? def.d : def.w, d = toolRot % 2 ? def.w : def.d;
     ghost.position.set(hover.cx + w / 2 - S / 2, 0, hover.cz + d / 2 - S / 2);
     ghost.rotation.y = toolRot * Math.PI / 2;
+    showIndicator(hover.cx + w / 2 - S / 2, hover.cz + d / 2 - S / 2, w + 0.06, d + 0.06, ok);
   }
-  setGhostValid(canPlace());
+  setGhostValid(ok);
 }
 function updatePlacementHover(e) {
-  if (walkMode || !tool || ['paint', 'delete', 'select', 'hammer'].includes(tool.mode)) {
+  const wantHover = !walkMode && (!!carry || placingTool());
+  if (!wantHover) {
     if (ghost) ghost.visible = false;
     hover = null;
     return;
   }
   const p = pickGround(e);
-  if (!p) { hover = null; if (ghost) ghost.visible = false; return; }
+  if (!p) { hover = null; if (ghost) ghost.visible = false; hideIndicator(); return; }
   const cellOk = p.cx >= 0 && p.cx < S && p.cz >= 0 && p.cz < S;
   hover = { ...p, cellOk, cellKey: p.cx + ',' + p.cz, edgeKey: nearestEdge(p) };
-  refreshGhost();
+  if (ghost) refreshGhost();
+  if (carry) updateCarryVisual();
 }
 function rotateTool() {
+  if (carry) { rotateCarry(); return; }
   const rotatableBuild = tool?.mode === 'build' && BUILD_ITEMS[tool.id]?.rotatable;
   if (!tool || (tool.mode !== 'furniture' && !rotatableBuild)) return;
   toolRot = (toolRot + 1) % 4;
@@ -3220,6 +3834,11 @@ canvas.addEventListener('pointerdown', e => {
     // puntero evita que un clic de colocación desplace accidentalmente la cámara.
     placementPointer = e.pointerId;
     controls.enableRotate = false;
+    // Mano 🖐️: pulsar sobre una pieza la levanta y entra en modo colocación.
+    if (tool.mode === 'select' && !carry) {
+      const hit = pickBuild(e);
+      if (hit) startCarry(hit.node.userData.kind, hit.node.userData.key, true);
+    }
   }
 }, { capture: true });
 canvas.addEventListener('pointerup', e => {
@@ -3231,13 +3850,23 @@ canvas.addEventListener('pointerup', e => {
   if (!downPos) return;
   const moved = Math.hypot(e.clientX - downPos.x, e.clientY - downPos.y);
   downPos = null;
-  if (moved > 6 || e.button !== 0) return;
+  if (e.button !== 0) return;
+  // Llevar una pieza: un clic corto la deja "en la mano"; soltar tras arrastrar
+  // la coloca donde apunte la cuadrícula.
+  if (carry) {
+    if (moved > 6 || !carry.fromPointerDown) { updatePlacementHover(e); dropCarry(); }
+    else carry.fromPointerDown = false;
+    return;
+  }
   if (!tool) return;
-  if (tool.mode === 'paint') paintAt(e);
-  else if (tool.mode === 'delete') deleteAt(e);
-  else if (tool.mode === 'hammer') hammerAt(e);
-  else if (tool.mode === 'select') selectAt(e);
-  else { updatePlacementHover(e); place(); }
+  if (tool.mode === 'paint') { if (moved <= 6) paintAt(e); return; }
+  if (tool.mode === 'delete') { if (moved <= 6) deleteAt(e); return; }
+  if (tool.mode === 'hammer') { if (moved <= 6) hammerAt(e); return; }
+  if (tool.mode === 'select') { if (moved <= 6) selectAt(e); return; }
+  // Modo colocación: el arrastre con la herramienta activa sirve para
+  // posicionar la pieza; al soltar, se coloca en la celda final.
+  if (moved > 6) updatePlacementHover(e);
+  place();
 });
 canvas.addEventListener('pointercancel', e => {
   if (placementPointer === e.pointerId) {
@@ -3250,14 +3879,21 @@ canvas.addEventListener('pointermove', updatePlacementHover);
 
 window.addEventListener('keydown', e => {
   keys[e.code] = true;
-  if (e.code === 'KeyR') {
-    if (selection && selection.kind === 'object') { e.preventDefault(); rotateSelected(); }
-    else if (tool && tool.mode === 'furniture') { e.preventDefault(); rotateTool(); }
+  if (e.code === 'KeyR' && !walkMode) {
+    if (carry) { e.preventDefault(); rotateCarry(); }
+    else if (selection && selection.kind === 'object') { e.preventDefault(); rotateSelected(); }
+    else if (tool && (tool.mode === 'furniture' || (tool.mode === 'build' && BUILD_ITEMS[tool.id]?.rotatable))) { e.preventDefault(); rotateTool(); }
   }
   if (e.code === 'Escape' && !walkMode) {
-    if (selection) clearSelection();
+    if (carry) cancelCarry();
+    else if (selection) clearSelection();
     else selectTool(null);
   }
+  if (e.code === 'Enter' && !walkMode) {
+    if (carry) { e.preventDefault(); dropCarry(); }
+    else if (placingTool()) { e.preventDefault(); place(); }
+  }
+  if (e.code === 'KeyG' && !walkMode && !e.target?.closest?.('input')) { cycleGroundTex(1); }
 });
 window.addEventListener('keyup', e => { keys[e.code] = false; });
 
@@ -3313,17 +3949,34 @@ document.getElementById('btn-close-help').addEventListener('click', () => {
   snd.click();
 });
 document.getElementById('btn-rotate').addEventListener('click', rotateTool);
-document.getElementById('btn-cancel').addEventListener('click', () => selectTool(null));
+document.getElementById('btn-cancel').addEventListener('click', () => {
+  if (carry) cancelCarry();
+  else selectTool(null);
+});
+document.getElementById('btn-place').addEventListener('click', () => {
+  if (carry) dropCarry();
+  else place();
+});
+document.getElementById('btn-ground').addEventListener('click', () => cycleGroundTex(1));
 
 /* ---------------- Inicio ---------------- */
 async function startGame() {
-  await Promise.all([preloadPremiumAssets(), loadImageSurfaces()]);
+  await Promise.all([preloadPremiumAssets(), loadCoreImageSurfaces()]);
+  loadGame();                 // el estado decide el preset de suelo del terreno
   refreshWorldGround();
   initSkyCycle();
   buildUI();
-  if (loadGame()) rebuildAll();
+  if (Object.keys(state.floors).length + Object.keys(state.walls).length +
+      Object.keys(state.roofs).length + Object.keys(state.objects).length) rebuildAll();
   updateMoney();
   renderMissions();
+  loadDeferredImageSurfaces().then(() => {
+    // Cuando las texturas restantes llegan, refresca el selector de miniaturas.
+    document.querySelectorAll('.tex-swatch').forEach(el => {
+      const s = SURFACES[el.dataset.tex];
+      if (s?.file) el.style.backgroundImage = `url(${TEXTURE_ROOT + s.file})`;
+    });
+  }).catch(() => {});
   if (!localStorage.getItem(HELP_KEY)) document.getElementById('help-modal').classList.remove('hidden');
   setLoaderMessage('Tu parcela está lista');
 
@@ -3351,6 +4004,10 @@ function animate() {
     selHelper.material.opacity = 0.55 + 0.35 * Math.sin(elapsed * 5);
     selHelper.update();
   }
+  // La pieza en mano (fantasma del catálogo o pieza llevada) flota suavemente.
+  if (ghost && ghost.visible) ghost.position.y = 0.12 + Math.sin(elapsed * 3.4) * 0.05;
+  if (carry && carry.node) carry.node.position.y = 0.18 + Math.sin(elapsed * 4.4) * 0.035;
+  if (placeIndicator.visible) placeIndicator.children[0].material.opacity = 0.2 + 0.12 * Math.sin(elapsed * 6);
   renderer.render(scene, camera);
 }
 animate();
