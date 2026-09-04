@@ -64,7 +64,20 @@
   <div id="context-controls" class="ui hidden">
     <span id="selection-label" class="selection-pill"></span>
     <button id="btn-rotate" class="pill-btn">🔄 Rotar 0° <kbd>R</kbd></button>
+    <button id="btn-tex" class="pill-btn hidden">🎨 Textura <kbd>T</kbd></button>
+    <button id="btn-confirm" class="pill-btn cta hidden">✔ Confirmar <kbd>Enter</kbd></button>
     <button id="btn-cancel" class="pill-btn">✖ Cancelar <kbd>Esc</kbd></button>
+  </div>
+  <!-- Barra de colocación estilo Heartopia -->
+  <div id="placement-controls" class="ui hidden">
+    <div class="placement-card">
+      <span class="placement-info">📌 Modo colocación — mueve el ratón por la cuadrícula · clic para colocar · <kbd>R</kbd> rotar · <kbd>T</kbd> textura · <kbd>Enter</kbd> confirmar · <kbd>Esc</kbd> cancelar</span>
+      <div class="placement-actions">
+        <button id="btn-confirm-rotate" class="pill-btn">🔄 0°</button>
+        <button id="btn-confirm-tick" class="pill-btn cta">✔ Colocar</button>
+        <button id="btn-confirm-cancel" class="pill-btn">✖ Cancelar</button>
+      </div>
+    </div>
   </div>
 
   <!-- Panel de selección (mano) -->

@@ -162,6 +162,7 @@ kbd {
   position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%);
   display: flex; align-items: center; justify-content: center; gap: 10px;
   max-width: calc(100vw - 20px);
+  flex-wrap: wrap;
 }
 .selection-pill {
   background: rgba(24, 27, 40, 0.94); backdrop-filter: blur(10px);
@@ -179,6 +180,29 @@ kbd {
   transition: background 0.15s;
 }
 .pill-btn:hover { background: rgba(255,255,255,0.16); }
+.pill-btn.cta { background: linear-gradient(90deg, var(--accent), #ff8a5c); color: #2a1a05; border-color: transparent; }
+
+/* ---------- Barra de colocación Heartopia ---------- */
+#placement-controls {
+  position: fixed; bottom: 74px; left: 50%; transform: translateX(-50%);
+  display: flex; justify-content: center;
+  max-width: calc(100vw - 20px);
+  z-index: 9;
+}
+.placement-card {
+  background: rgba(24, 27, 40, 0.94); backdrop-filter: blur(10px);
+  border: 1px solid rgba(110, 231, 160, 0.35);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  padding: 10px 14px;
+  display: flex; flex-direction: column; gap: 8px;
+  align-items: center;
+}
+.placement-info {
+  font-size: 12px; color: var(--text-dim); text-align: center; line-height: 1.4;
+}
+.placement-info kbd { font-size: 10px; }
+.placement-actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
 
 /* ---------- Panel de selección (mano) ---------- */
 #select-panel {
