@@ -18,6 +18,7 @@ python3 -m http.server 8000
 - 🏗️ **Modo colocación**: al elegir cualquier material u objeto entra en modo colocación con una **cuadrícula dorada extendida por todo el terreno construible**; sitúa la pieza, rótala con `R` y fíjala con un clic (`Esc` cancela).
 - 🖐️ **Coger y mover con la mano** (estilo Heartopia): arrastra cualquier pieza ya colocada —suelos, muros, techos o muebles— para levantarla y soltarla en otra celda libre; el botón derecho o `Esc` la devuelve a su sitio.
 - 🌱 **Suelos verde jardín**: todo el suelo construible (11 acabados + escaleras y rampas) usa los cinco albedos `PTP-Foliage` de `media/image/` —césped, hierba fina, pradera floral, floración rosa y adoquines ajardinados— con tintes coherentes.
+- 🟫 **Base del terreno mate**: el suelo del mundo y la parcela usan el albedo `PTP-Ground_08` (tierra con gravilla) con rugosidad alta y reflejos reducidos, de modo que el terreno no brilla.
 - 🖼️ **Función de cambio de textura**: 44 esquemas hechos con el resto de albedos de la carpeta (ladrillos, piedras, hormigones, maderas, metales, aguas, azulejos, patrones…). Cada pieza colocada o movida estrena el esquema activo; el modo **Auto** avanza el ciclo en cada acción y **🪄 Aplicar a todo** re-vesta la casa entera.
 - 🧱 **Construcción sobre cuadrícula** con muros de piedra, ladrillo, hormigón y madera, minimuros, vallas, 4 puertas, 4 ventanas y techos.
 - 🎨 **Materiales PBR** con sombreado, bump y reflejos. Iluminación ACES, reflejos ambientales y cantos suavizados. Todas las superficies usan los albedos incluidos en `media/image/`.
