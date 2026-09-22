@@ -1078,11 +1078,15 @@ function bumpTexture(canvas, repeat = 1) {
 }
 
 /* ------- Texturas PBR desde /media/image (sustituyen a las procedurales) -------
-   Los suelos construibles usan exclusivamente los cinco albedos PTP-Foliage
-   (01, 02, 04, 07 y 08), de modo que toda la parcela comparte un lenguaje
-   visual verde y ajardinado. El resto de albedos de la carpeta se incorpora
-   en TEXTURE_SCHEMES (más abajo) para la función de cambio de textura.       */
+   La base del terreno (suelo del mundo y parcela) usa el albedo
+   PTP-Ground_08 (tierra mate, sin brillo). Los suelos construibles usan
+   exclusivamente los cinco albedos PTP-Foliage (01, 02, 04, 07 y 08), de
+   modo que toda la parcela construida comparte un lenguaje visual verde y
+   ajardinado. El resto de albedos de la carpeta se incorpora en
+   TEXTURE_SCHEMES (más abajo) para la función de cambio de textura.       */
 const IMAGE_SURFACES = [
+  // --- Base del terreno (suelo del mundo y parcela) ---
+  { name: 'baseGround', file: 'PTP-Ground_08-512x512.png',   roughness: 0.97, metalness: 0.00, envMapIntensity: 0.35, bumpScale: 0.050 }, // tierra mate: no brilla
   // --- Revestimientos de suelo (los 5 Foliage del repositorio) ---
   { name: 'grass',      file: 'PTP-Foliage_07-512x512.png',  roughness: 0.94, metalness: 0.00, envMapIntensity: 0.55, bumpScale: 0.045 }, // césped fresco
   { name: 'grassFine',  file: 'PTP-Foliage_04-512x512.png',  roughness: 0.92, metalness: 0.00, envMapIntensity: 0.55, bumpScale: 0.040 }, // hierba fina clara
@@ -1334,6 +1338,14 @@ makeSurface('grass', 1, (ctx, s, rnd, bump) => {
     ctx.stroke();
   }
 });
+// Fallback procedural de la base del terreno (PTP-Ground_08): tierra con
+// gravilla, solo se ve si el albedo no puede cargarse (p. ej. copia parcial).
+makeSurface('baseGround', 20, (ctx, s, rnd, bump) => {
+  ctx.fillStyle = bump ? '#8a8a8a' : '#8a5a33';
+  ctx.fillRect(0, 0, s, s);
+  drawNoise(ctx, s, rnd, bump ? 0.18 : 0.10);
+  drawSpeckle(ctx, s, rnd, bump ? ['#6f6f6f', '#a5a5a5'] : ['#6d4426', '#a06c3d', '#7c4f2c', '#5c3a22'], 0.5);
+}, { roughness: 0.97, metalness: 0.0, envMapIntensity: 0.35, bumpScale: 0.05 });
 makeSurface('wood', 2, (ctx, s, rnd, bump) => {
   const base = bump ? '#8a8a8a' : '#8b5a2b';
   ctx.fillStyle = base; ctx.fillRect(0, 0, s, s);
@@ -1922,7 +1934,7 @@ let plot = null;
 function createWorldGround() {
   ground = new THREE.Mesh(
     new THREE.PlaneGeometry(400, 400),
-    tiledMaterial(0xffffff, 'grass', 68, 68, { roughness: 0.94, envMapIntensity: 0.55 })
+    tiledMaterial(0xffffff, 'baseGround', 68, 68, { roughness: 0.97, envMapIntensity: 0.35 })
   );
   ground.rotation.x = -Math.PI / 2;
   ground.receiveShadow = true;
@@ -1930,7 +1942,7 @@ function createWorldGround() {
 
   plot = new THREE.Mesh(
     new THREE.PlaneGeometry(S, S),
-    tiledMaterial(0xffffff, 'grass', 9, 9, { roughness: 0.95, envMapIntensity: 0.5 })
+    tiledMaterial(0xffffff, 'baseGround', 9, 9, { roughness: 0.97, envMapIntensity: 0.3 })
   );
   plot.rotation.x = -Math.PI / 2;
   plot.position.y = 0.01;
@@ -1942,8 +1954,8 @@ function refreshWorldGround() {
   if (!ground || !plot) return;
   ground.material.dispose();
   plot.material.dispose();
-  ground.material = tiledMaterial(0xffffff, 'grass', 68, 68, { roughness: 0.94, envMapIntensity: 0.55 });
-  plot.material = tiledMaterial(0xffffff, 'grass', 9, 9, { roughness: 0.95, envMapIntensity: 0.5 });
+  ground.material = tiledMaterial(0xffffff, 'baseGround', 68, 68, { roughness: 0.97, envMapIntensity: 0.35 });
+  plot.material = tiledMaterial(0xffffff, 'baseGround', 9, 9, { roughness: 0.97, envMapIntensity: 0.3 });
 }
 
 createWorldGround();
