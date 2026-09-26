@@ -11,7 +11,6 @@ import { RoundedBoxGeometry } from '../vendor/geometries/RoundedBoxGeometry.js';
 /* ---------------- Constantes ---------------- */
 const S = 40;             // tamaño de la parcela (celdas)
 const WALL_H = 3;         // altura de pared
-const START_MONEY = 25000;
 const SAVE_KEY = 'mihogar3d-save-v1';
 const HELP_KEY = 'mihogar3d-help-v1';
 const TEXTURE_ROOT = 'media/image/';
@@ -246,7 +245,7 @@ function trellisBranchAngles(n) {
 const WOOD = 0x8b5a2b, WOOD_D = 0x6b4423, WHITE = 0xf2f2f2, METAL = 0xb9bec7, DARK = 0x2b2f38;
 
 const FURNITURE = {
-  cama: { name: 'Cama', ico: '🛏️', cost: 450, w: 1, d: 2, build(c = 0x4a7fb5) {
+  cama: { name: 'Cama', ico: '🛏️', w: 1, d: 2, build(c = 0x4a7fb5) {
     return grp(
       box(0.95, 0.25, 1.95, WOOD_D, 0, 0.2),
       box(0.9, 0.18, 1.85, WHITE, 0, 0.41),
@@ -255,7 +254,7 @@ const FURNITURE = {
       box(0.95, 0.7, 0.1, WOOD_D, 0, 0.45, -0.93)
     );
   } },
-  sofa: { name: 'Sofá', ico: '🛋️', cost: 380, w: 2, d: 1, build(c = 0xb8443f) {
+  sofa: { name: 'Sofá', ico: '🛋️', w: 2, d: 1, build(c = 0xb8443f) {
     return grp(
       box(1.9, 0.35, 0.85, c, 0, 0.28, 0, true),
       box(1.9, 0.55, 0.22, c, 0, 0.6, -0.31, true),
@@ -266,13 +265,13 @@ const FURNITURE = {
       box(1.9, 0.12, 0.85, WOOD_D, 0, 0.06, 0)
     );
   } },
-  mesa: { name: 'Mesa', ico: '🍽️', cost: 220, w: 2, d: 1, build(c = WOOD) {
+  mesa: { name: 'Mesa', ico: '🍽️', w: 2, d: 1, build(c = WOOD) {
     const g = grp(box(1.85, 0.08, 0.9, c, 0, 0.76, 0, true));
     for (const [px, pz] of [[-0.82, -0.35], [0.82, -0.35], [-0.82, 0.35], [0.82, 0.35]])
       g.add(box(0.09, 0.74, 0.09, WOOD_D, px, 0.37, pz));
     return g;
   } },
-  silla: { name: 'Silla', ico: '🪑', cost: 90, w: 1, d: 1, build(c = WOOD) {
+  silla: { name: 'Silla', ico: '🪑', w: 1, d: 1, build(c = WOOD) {
     const g = grp(
       box(0.45, 0.06, 0.45, c, 0, 0.45, 0, true),
       box(0.45, 0.5, 0.06, c, 0, 0.73, -0.2, true)
@@ -281,28 +280,28 @@ const FURNITURE = {
       g.add(box(0.06, 0.44, 0.06, WOOD_D, px, 0.22, pz));
     return g;
   } },
-  lampara: { name: 'Lámpara', ico: '💡', cost: 120, w: 1, d: 1, light: { y: 1.45, i: 12, color: 0xffd9a0 }, build(c = 0xe8d9b5) {
+  lampara: { name: 'Lámpara', ico: '💡', w: 1, d: 1, light: { y: 1.45, i: 12, color: 0xffd9a0 }, build(c = 0xe8d9b5) {
     return grp(
       cyl(0.16, 0.2, 0.05, DARK, 0, 0.03),
       cyl(0.025, 0.025, 1.15, METAL, 0, 0.63),
       cyl(0.22, 0.3, 0.35, c, 0, 1.35, 0, 14, true)
     );
   } },
-  tv: { name: 'Televisor', ico: '📺', cost: 600, w: 1, d: 1, build(c = WOOD_D) {
+  tv: { name: 'Televisor', ico: '📺', w: 1, d: 1, build(c = WOOD_D) {
     return grp(
       box(0.95, 0.4, 0.4, c, 0, 0.2, 0, true),
       box(0.9, 0.55, 0.06, 0x11141a, 0, 0.75, 0),
       box(0.82, 0.47, 0.02, 0x1d2f45, 0, 0.75, 0.025)
     );
   } },
-  nevera: { name: 'Nevera', ico: '🧊', cost: 700, w: 1, d: 1, build(c = WHITE) {
+  nevera: { name: 'Nevera', ico: '🧊', w: 1, d: 1, build(c = WHITE) {
     return grp(
       box(0.8, 1.8, 0.75, c, 0, 0.9, 0, true),
       box(0.05, 0.5, 0.06, METAL, 0.3, 1.25, 0.39),
       box(0.05, 0.3, 0.06, METAL, 0.3, 0.6, 0.39)
     );
   } },
-  cocina: { name: 'Cocina', ico: '🍳', cost: 550, w: 1, d: 1, anim: 'cocina', build(c = 0x8a8f98) {
+  cocina: { name: 'Cocina', ico: '🍳', w: 1, d: 1, anim: 'cocina', build(c = 0x8a8f98) {
     const g = grp(
       box(0.95, 0.85, 0.65, c, 0, 0.43, 0, true),
       box(0.98, 0.06, 0.68, 0x3a3f4a, 0, 0.89),
@@ -322,7 +321,7 @@ const FURNITURE = {
     }
     return g;
   } },
-  inodoro: { name: 'Inodoro', ico: '🚽', cost: 250, w: 1, d: 1, build() {
+  inodoro: { name: 'Inodoro', ico: '🚽', w: 1, d: 1, build() {
     return grp(
       cyl(0.24, 0.18, 0.35, WHITE, 0, 0.18, 0.08),
       cyl(0.27, 0.27, 0.06, WHITE, 0, 0.39, 0.08),
@@ -330,7 +329,7 @@ const FURNITURE = {
       box(0.34, 0.06, 0.12, METAL, 0, 0.8, -0.25)
     );
   } },
-  banera: { name: 'Bañera', ico: '🛁', cost: 480, w: 2, d: 1, build() {
+  banera: { name: 'Bañera', ico: '🛁', w: 2, d: 1, build() {
     return grp(
       box(1.75, 0.55, 0.8, WHITE, 0, 0.28),
       box(1.55, 0.08, 0.6, 0x9fd8e8, 0, 0.52),
@@ -338,7 +337,7 @@ const FURNITURE = {
       sph(0.05, METAL, -0.75, 0.8)
     );
   } },
-  estanteria: { name: 'Estantería', ico: '📚', cost: 300, w: 1, d: 1, build(c = WOOD) {
+  estanteria: { name: 'Estantería', ico: '📚', w: 1, d: 1, build(c = WOOD) {
     const g = grp(
       box(0.9, 1.8, 0.3, c, 0, 0.9, 0, true),
       box(0.8, 1.7, 0.24, 0x1f232d, 0, 0.9, 0.02)
@@ -351,12 +350,12 @@ const FURNITURE = {
     }
     return g;
   } },
-  alfombra: { name: 'Alfombra', ico: '🟫', cost: 150, w: 2, d: 2, decor: true, build(c = 0xc96f4a) {
+  alfombra: { name: 'Alfombra', ico: '🟫', w: 2, d: 2, decor: true, build(c = 0xc96f4a) {
     const m = box(1.85, 0.03, 1.85, c, 0, 0.095, 0, true);
     const b = box(1.6, 0.032, 1.6, 0xe8d9b5, 0, 0.096, 0);
     return grp(m, b);
   } },
-  planta_interior: { name: 'Planta interior', ico: '🪴', cost: 85, w: 1, d: 1, decor: true, build(c = 0xc96f4a) {
+  planta_interior: { name: 'Planta interior', ico: '🪴', w: 1, d: 1, decor: true, build(c = 0xc96f4a) {
     const g = grp(
       cyl(0.2, 0.28, 0.42, c, 0, 0.21, 0, 16, true),
       cyl(0.035, 0.045, 0.75, 0x3f7d4a, 0, 0.75)
@@ -365,7 +364,7 @@ const FURNITURE = {
       g.add(sph(s, 0x4c9159, x, y, z));
     return g;
   } },
-  cuadro: { name: 'Cuadro', ico: '🖼️', cost: 110, w: 1, d: 1, decor: true, build(c = 0x4a7fb5) {
+  cuadro: { name: 'Cuadro', ico: '🖼️', w: 1, d: 1, decor: true, build(c = 0x4a7fb5) {
     return grp(
       rbox(0.94, 1.07, 0.09, WOOD_D, 0, 1.15, -0.35, .035, false, 'wood'),
       rbox(0.78, 0.9, 0.035, c, 0, 1.15, -0.292, .015, true, 'fabric'),
@@ -375,14 +374,14 @@ const FURNITURE = {
       rbox(0.62, 0.08, 0.18, WOOD_D, 0, 0.1, -0.28, .02, false, 'wood')
     );
   } },
-  espejo: { name: 'Espejo', ico: '🪞', cost: 160, w: 1, d: 1, decor: true, build(c = 0xe8d9b5) {
+  espejo: { name: 'Espejo', ico: '🪞', w: 1, d: 1, decor: true, build(c = 0xe8d9b5) {
     return grp(
       box(0.82, 1.55, 0.09, c, 0, 0.92, -0.32, true),
       glass(0.68, 1.4, 0xc9e8f2, 0.7, 0, 0.92, -0.265),
       box(0.7, 0.08, 0.34, WOOD_D, 0, 0.08, -0.24)
     );
   } },
-  jarron: { name: 'Jarrón', ico: '🏺', cost: 70, w: 1, d: 1, decor: true, build(c = 0x4a7fb5) {
+  jarron: { name: 'Jarrón', ico: '🏺', w: 1, d: 1, decor: true, build(c = 0x4a7fb5) {
     const g = grp(lathe([[.13,0],[.22,.06],[.27,.22],[.25,.42],[.17,.58],[.13,.61],[.13,.69],[.17,.71]], c, 0, 0, 0, true, 'clay', 36));
     g.add(lathe([[0,0],[.16,.012],[.17,.025]], 0x2d2620, 0, .69, 0, false, 'rough', 28));
     const stems = [[-.06,.68,.01,-.12,1.15,.02],[.04,.68,0,.14,1.08,.02],[0,.68,-.02,.02,1.26,-.04]];
@@ -394,7 +393,7 @@ const FURNITURE = {
     }
     return g;
   } },
-  reloj_pie: { name: 'Reloj de pie', ico: '🕰️', cost: 290, w: 1, d: 1, decor: true, anim: 'reloj', build(c = WOOD) {
+  reloj_pie: { name: 'Reloj de pie', ico: '🕰️', w: 1, d: 1, decor: true, anim: 'reloj', build(c = WOOD) {
     const face = new THREE.Mesh(new THREE.CylinderGeometry(0.27, 0.27, 0.035, 24), mat(0xf4e8c8));
     face.rotation.x = Math.PI / 2; face.position.set(0, 1.46, 0.19);
     const h2 = new THREE.Group(); h2.position.set(0, 1.46, 0.225);
@@ -414,7 +413,7 @@ const FURNITURE = {
     body.add(rbox(.7,.11,.48,c,0,.08,0,.04,true,'wood'), rbox(.66,.09,.45,c,0,1.76,0,.035,true,'wood'));
     return body;
   } },
-  candelabro: { name: 'Candelabro', ico: '🕯️', cost: 130, w: 1, d: 1, decor: true, light: { y: 1.25, i: 7, color: 0xffb45c }, build(c = METAL) {
+  candelabro: { name: 'Candelabro', ico: '🕯️', w: 1, d: 1, decor: true, light: { y: 1.25, i: 7, color: 0xffb45c }, build(c = METAL) {
     const g = grp(lathe([[.22,0],[.22,.025],[.15,.07],[.055,.1]],c,0,0,0,true,'metal',28),cyl(.03,.045,.86,c,0,.52,0,16,true,'metal'));
     for (const x of [-.28, 0, .28]) {
       if(x) g.add(tube([[0,.78,0],[x*.45,.82,0],[x,.91,0]],.022,c,18,8,'metal'));
@@ -424,7 +423,7 @@ const FURNITURE = {
     }
     return g;
   } },
-  acuario: { name: 'Acuario', ico: '🐠', cost: 420, w: 2, d: 1, decor: true, light: { y: 1.25, i: 5, color: 0x68cfee }, anim: 'acuario', build(c = 0x4a7fb5) {
+  acuario: { name: 'Acuario', ico: '🐠', w: 2, d: 1, decor: true, light: { y: 1.25, i: 5, color: 0x68cfee }, anim: 'acuario', build(c = 0x4a7fb5) {
     const waterMat = new THREE.MeshPhysicalMaterial({ color:0x55bad2,transparent:true,opacity:.2,transmission:.2,roughness:.04,depthWrite:false,side:THREE.DoubleSide });
     const water = new THREE.Mesh(new THREE.BoxGeometry(1.42,.58,.48),waterMat); water.position.set(0,1.01,0); water.castShadow=false;
     const g = grp(
@@ -446,16 +445,16 @@ const FURNITURE = {
     }
     return g;
   } },
-  puff: { name: 'Puf', ico: '🟠', cost: 120, w: 1, d: 1, decor: true, build(c = 0xc96f4a) {
+  puff: { name: 'Puf', ico: '🟠', w: 1, d: 1, decor: true, build(c = 0xc96f4a) {
     return grp(cyl(0.38, 0.43, 0.42, c, 0, 0.23, 0, 18, true), cyl(0.33, 0.38, 0.08, shade(c, .15), 0, 0.48));
   } },
-  mesa_centro: { name: 'Mesa de centro', ico: '☕', cost: 190, w: 2, d: 1, decor: true, build(c = WOOD) {
+  mesa_centro: { name: 'Mesa de centro', ico: '☕', w: 2, d: 1, decor: true, build(c = WOOD) {
     const g = grp(box(1.55, 0.09, 0.72, c, 0, 0.48, 0, true));
     for (const [x, z] of [[-.65,-.26],[.65,-.26],[-.65,.26],[.65,.26]]) g.add(box(.07,.45,.07,WOOD_D,x,.23,z));
     g.add(cyl(.12,.1,.09,0xf5f0e8,.25,.57,0,16));
     return g;
   } },
-  biombo: { name: 'Biombo', ico: '🎐', cost: 240, w: 2, d: 1, decor: true, build(c = 0xe8d9b5) {
+  biombo: { name: 'Biombo', ico: '🎐', w: 2, d: 1, decor: true, build(c = 0xe8d9b5) {
     const g = grp();
     for (let i = 0; i < 3; i++) {
       const x = -.62 + i * .62;
@@ -465,7 +464,7 @@ const FURNITURE = {
     }
     return g;
   } },
-  arbol: { name: 'Árbol', ico: '🌳', cost: 100, w: 1, d: 1, out: true, anim: 'sway', build() {
+  arbol: { name: 'Árbol', ico: '🌳', w: 1, d: 1, out: true, anim: 'sway', build() {
     const t = grp(trunk(0.14, 1.25, 0x6b4423));
     const b1 = branch(0.035, 0.055, 0.5, 0.0, 1.0, 0.0, 0x6b4423); b1.rotation.z = 0.7;
     const b2 = branch(0.03, 0.05, 0.42, 0.0, 1.0, 0.0, 0x6b4423); b2.rotation.z = -0.75; b2.rotation.y = 1.4;
@@ -481,7 +480,7 @@ const FURNITURE = {
     f.userData.anim = 'sway';
     return grp(t, f);
   } },
-  flores: { name: 'Flores', ico: '🌷', cost: 40, w: 1, d: 1, out: true, anim: 'sway', build() {
+  flores: { name: 'Flores', ico: '🌷', w: 1, d: 1, out: true, anim: 'sway', build() {
     const g = grp(box(0.85, 0.08, 0.85, 0x4a3626, 0, 0.05, 0, true, 'clay'));
     const p = grp();
     const cols = [0xe85d75, 0xf2c94c, 0xa06fc9, 0xff8a5c, 0x78b4ff, 0xff6fa0];
@@ -505,12 +504,12 @@ const FURNITURE = {
     g.add(grassTuft(0.34, -0.32, 0x4c9159, 0.9));
     return g;
   } },
-  seto: { name: 'Seto', ico: '🌿', cost: 60, w: 1, d: 1, out: true, build() {
+  seto: { name: 'Seto', ico: '🌿', w: 1, d: 1, out: true, build() {
     const g = grp(box(0.9, 0.62, 0.45, 0x2f6b3a, 0, 0.31, 0, true, 'leaves'));
     for (let i = 0; i < 6; i++) g.add(leafBlob(0.2, i % 2 ? 0x3f7d4a : 0x4c9159, -0.36 + (i % 3) * 0.36, 0.66, (Math.floor(i / 3) - 0.5) * 0.34, 1.1, 0.62, 1));
     return g;
   } },
-  cerezo: { name: 'Cerezo', ico: '🌸', cost: 135, w: 1, d: 1, out: true, anim: 'sway', build() {
+  cerezo: { name: 'Cerezo', ico: '🌸', w: 1, d: 1, out: true, anim: 'sway', build() {
     const t = grp(trunk(0.12, 1.35, 0x6b4423));
     const b = branch(0.035, 0.06, 0.5, 0.03, 1.05, 0, 0x6b4423); b.rotation.z = 0.7;
     t.add(b);
@@ -527,7 +526,7 @@ const FURNITURE = {
     f.userData.anim = 'sway';
     return grp(t, f);
   } },
-  arce: { name: 'Arce', ico: '🍁', cost: 130, w: 1, d: 1, out: true, anim: 'sway', build() {
+  arce: { name: 'Arce', ico: '🍁', w: 1, d: 1, out: true, anim: 'sway', build() {
     const t = grp(trunk(0.13, 1.3, 0x66503a));
     const f = grp(
       leafBlob(0.55, 0xd8542f, 0, 1.62, 0, 1.1, 0.82, 1),
@@ -538,7 +537,7 @@ const FURNITURE = {
     f.userData.anim = 'sway';
     return grp(t, f);
   } },
-  abedul: { name: 'Abedul', ico: '🌳', cost: 115, w: 1, d: 1, out: true, anim: 'sway', build() {
+  abedul: { name: 'Abedul', ico: '🌳', w: 1, d: 1, out: true, anim: 'sway', build() {
     const t = grp(trunk(0.1, 1.6, 0xe8e2d5));
     for (const s of [-0.35, 0.3, -0.1, 0.42]) t.add(box(0.03, 0.12 + Math.abs(s) * 0.1, 0.015, 0x3a3a3a, s * 0.12, 1.2 + (s + 0.35) * 0.2, 0.08));
     const f = grp(
@@ -550,7 +549,7 @@ const FURNITURE = {
     f.userData.anim = 'sway';
     return grp(t, f);
   } },
-  manzano: { name: 'Manzano', ico: '🍎', cost: 150, w: 1, d: 1, out: true, anim: 'sway', build() {
+  manzano: { name: 'Manzano', ico: '🍎', w: 1, d: 1, out: true, anim: 'sway', build() {
     const t = grp(trunk(0.14, 1.2, 0x6b4423));
     const f = grp(
       leafBlob(0.6, 0x3f7d4a, 0, 1.55, 0, 1.1, 0.82, 1),
@@ -563,7 +562,7 @@ const FURNITURE = {
     f.userData.anim = 'sway';
     return grp(t, f);
   } },
-  sauce: { name: 'Sauce', ico: '🌳', cost: 165, w: 1, d: 1, out: true, anim: 'sway', build() {
+  sauce: { name: 'Sauce', ico: '🌳', w: 1, d: 1, out: true, anim: 'sway', build() {
     const t = grp(trunk(0.13, 1.5, 0x6b4423));
     const f = grp(leafBlob(0.5, 0x4c9159, 0, 1.8, 0, 1.1, 0.7, 1.1));
     for (let i = 0; i < 10; i++) {
@@ -574,7 +573,7 @@ const FURNITURE = {
     f.userData.anim = 'sway';
     return grp(t, f);
   } },
-  rosal: { name: 'Rosal', ico: '🌹', cost: 75, w: 1, d: 1, out: true, anim: 'sway', build() {
+  rosal: { name: 'Rosal', ico: '🌹', w: 1, d: 1, out: true, anim: 'sway', build() {
     const g = grp(...(() => { const a = []; for (let i = 0; i < 6; i++) a.push(leafBlob(0.24, 0x3f7d4a, -0.28 + (i % 3) * 0.28, 0.34 + Math.floor(i / 3) * 0.2, (Math.floor(i / 3) - 0.5) * 0.24, 1.1, 0.8, 1)); return a; })());
     const roses = [0xe85d75, 0xff6fa0, 0xd23b7a, 0xf2c94c];
     for (let i = 0; i < 5; i++) {
@@ -584,7 +583,7 @@ const FURNITURE = {
     }
     return g;
   } },
-  margaritas: { name: 'Margaritas', ico: '🌼', cost: 55, w: 1, d: 1, out: true, anim: 'sway', build() {
+  margaritas: { name: 'Margaritas', ico: '🌼', w: 1, d: 1, out: true, anim: 'sway', build() {
     const g = grp(box(0.8, 0.07, 0.8, 0x3f4a3a, 0, 0.045, 0, true, 'clay'));
     const p = grp();
     const cols = [0xf5f0e8, 0xfff6d9, 0xf2c94c, 0xfdf3d0];
@@ -603,7 +602,7 @@ const FURNITURE = {
     g.add(p);
     return g;
   } },
-  girasoles: { name: 'Girasoles', ico: '🌻', cost: 80, w: 1, d: 1, out: true, anim: 'sway', build() {
+  girasoles: { name: 'Girasoles', ico: '🌻', w: 1, d: 1, out: true, anim: 'sway', build() {
     const g = grp(box(0.82, 0.08, 0.82, 0x4a3626, 0, 0.05, 0, true, 'clay'));
     const p = grp();
     for (let i = 0; i < 4; i++) {
@@ -623,7 +622,7 @@ const FURNITURE = {
     g.add(p);
     return g;
   } },
-  lavanda: { name: 'Lavanda', ico: '💜', cost: 65, w: 1, d: 1, out: true, anim: 'sway', build() {
+  lavanda: { name: 'Lavanda', ico: '💜', w: 1, d: 1, out: true, anim: 'sway', build() {
     const g = grp(box(0.8, 0.06, 0.8, 0x8a8f98, 0, 0.04, 0, true, 'stone'));
     const p = grp();
     for (let i = 0; i < 12; i++) {
@@ -638,7 +637,7 @@ const FURNITURE = {
     g.add(p);
     return g;
   } },
-  hortensia: { name: 'Hortensia', ico: '💠', cost: 85, w: 1, d: 1, out: true, anim: 'sway', build() {
+  hortensia: { name: 'Hortensia', ico: '💠', w: 1, d: 1, out: true, anim: 'sway', build() {
     const g = grp(...(() => { const a = []; for (let i = 0; i < 5; i++) a.push(leafBlob(0.22, 0x3f7d4a, -0.26 + (i % 3) * 0.26, 0.3 + Math.floor(i / 3) * 0.16, (Math.floor(i / 3) - 0.5) * 0.22, 1.1, 0.9, 1)); return a; })());
     const dome = grp();
     const cols = [0x9bb8e8, 0xb6d2ef, 0xbf9bdc, 0x88a7dd];
@@ -651,7 +650,7 @@ const FURNITURE = {
     g.add(dome);
     return g;
   } },
-  helecho: { name: 'Helecho', ico: '🌿', cost: 60, w: 1, d: 1, out: true, anim: 'sway', build() {
+  helecho: { name: 'Helecho', ico: '🌿', w: 1, d: 1, out: true, anim: 'sway', build() {
     const g = grp(...(() => { const a = []; for (let i = 0; i < 5; i++) a.push(leafBlob(0.16, 0x3f7d4a, -0.28 + (i % 3) * 0.28, 0.16 + Math.floor(i / 3) * 0.12, (Math.floor(i / 3) - 0.5) * 0.28, 1, 0.7, 1)); return a; })());
     const blades = grp();
     for (let i = 0; i < 10; i++) {
@@ -666,7 +665,7 @@ const FURNITURE = {
     g.add(blades);
     return g;
   } },
-  farola: { name: 'Farola', ico: '🏮', cost: 180, w: 1, d: 1, out: true, light: { y: 2.35, i: 18, color: 0xffe2b0 }, build() {
+  farola: { name: 'Farola', ico: '🏮', w: 1, d: 1, out: true, light: { y: 2.35, i: 18, color: 0xffe2b0 }, build() {
     const glowMat = new THREE.MeshPhysicalMaterial({color:0xffe1a3,emissive:0xffb861,emissiveIntensity:.5,transparent:true,opacity:.78,roughness:.12,envMapIntensity:1.5});
     const glow = new THREE.Mesh(new THREE.CylinderGeometry(.16,.19,.34,8),glowMat); glow.position.y=2.35;
     const g=grp(
@@ -680,7 +679,7 @@ const FURNITURE = {
     for(let i=0;i<4;i++){const a=i*Math.PI/2; g.add(cyl(.012,.012,.34,DARK,Math.cos(a)*.17,2.35,Math.sin(a)*.17,6,false,'metal'));}
     return g;
   } },
-  banco_jardin: { name: 'Banco', ico: '🪑', cost: 210, w: 2, d: 1, out: true, build(c = WOOD) {
+  banco_jardin: { name: 'Banco', ico: '🪑', w: 2, d: 1, out: true, build(c = WOOD) {
     const g = grp(
       box(1.75, .12, .55, c, 0, .48, .08, true),
       box(1.75, .65, .1, c, 0, .83, -.22, true)
@@ -691,7 +690,7 @@ const FURNITURE = {
     }
     return g;
   } },
-  fuente: { name: 'Fuente', ico: '⛲', cost: 520, w: 2, d: 2, out: true, anim: 'fuente', build(c = 0x8a8f98) {
+  fuente: { name: 'Fuente', ico: '⛲', w: 2, d: 2, out: true, anim: 'fuente', build(c = 0x8a8f98) {
     const g = grp(
       cyl(.78,.92,.28,c,0,.14,0,24,true,'stone'),
       cyl(.66,.66,.08,0x67b8d4,0,.3,0,24,false,'water'),
@@ -713,7 +712,7 @@ const FURNITURE = {
     }
     return g;
   } },
-  barbacoa: { name: 'Barbacoa', ico: '🔥', cost: 360, w: 1, d: 1, out: true, build(c = DARK) {
+  barbacoa: { name: 'Barbacoa', ico: '🔥', w: 1, d: 1, out: true, build(c = DARK) {
     const bowl=new THREE.Mesh(new THREE.SphereGeometry(.39,28,14,0,Math.PI*2,Math.PI/2,Math.PI/2),mat(c,{surface:'metal',roughness:.28,metalness:.65})); bowl.position.y=.92; bowl.scale.z=.82; bowl.userData.paint=true;
     const lid=new THREE.Mesh(new THREE.SphereGeometry(.39,28,12,0,Math.PI*2,0,Math.PI/2),mat(c,{surface:'metal',roughness:.28,metalness:.65})); lid.position.set(0,1.11,-.22); lid.rotation.x=-.68; lid.scale.z=.82; lid.userData.paint=true;
     const g=grp(bowl,lid,cyl(.055,.055,.16,DARK,0,1.48,-.05,14,false,'metal'));
@@ -725,7 +724,7 @@ const FURNITURE = {
     g.add(rbox(.56,.04,.32,0x6b4423,0,.43,0,.015,false,'wood'));
     return g;
   } },
-  estanque: { name: 'Estanque', ico: '💧', cost: 280, w: 2, d: 2, out: true, anim: 'estanque', build() {
+  estanque: { name: 'Estanque', ico: '💧', w: 2, d: 2, out: true, anim: 'estanque', build() {
     const g = grp(
       cyl(.82,.9,.16,0x6b6f74,0,.08,0,28,false,'stone'),
       cyl(.72,.74,.08,0x4dbddd,0,.18,0,28,false,'water')
@@ -738,7 +737,7 @@ const FURNITURE = {
     return g;
   } },
   /* ---- Nuevas decoraciones de interior ---- */
-  piano: { name: 'Piano', ico: '🎹', cost: 950, w: 2, d: 1, build(c = 0x20242b) {
+  piano: { name: 'Piano', ico: '🎹', w: 2, d: 1, build(c = 0x20242b) {
     const g = grp(
       rbox(1.54,.86,.5,c,0,.46,-.08,.055,true,'wood'),
       rbox(1.64,.11,.6,shade(c,.08),0,.94,-.08,.035,true,'wood'),
@@ -754,7 +753,7 @@ const FURNITURE = {
     g.add(rbox(.15,.025,.08,0xc19b45,-.09,.08,.2,.008),rbox(.15,.025,.08,0xc19b45,.09,.08,.2,.008));
     return g;
   } },
-  peluche: { name: 'Peluche', ico: '🧸', cost: 95, w: 1, d: 1, decor: true, anim: 'bob', build(c = 0xb98850) {
+  peluche: { name: 'Peluche', ico: '🧸', w: 1, d: 1, decor: true, anim: 'bob', build(c = 0xb98850) {
     const f = grp(
       sph(0.22, c, 0, 0.22, 0),
       sph(0.16, c, 0, 0.5, 0),
@@ -767,7 +766,7 @@ const FURNITURE = {
     f.userData.anim = 'bob';
     return grp(box(0.5, 0.05, 0.3, 0x4a3626, 0, 0.025), f);
   } },
-  globo: { name: 'Globos', ico: '🎈', cost: 60, w: 1, d: 1, decor: true, anim: 'bob', build(c = 0xe85d75) {
+  globo: { name: 'Globos', ico: '🎈', w: 1, d: 1, decor: true, anim: 'bob', build(c = 0xe85d75) {
     const b = grp();
     const cols = [c, 0xf2c94c, 0x4a7fb5];
     for (let i = 0; i < 3; i++) {
@@ -778,7 +777,7 @@ const FURNITURE = {
     b.userData.anim = 'bob';
     return grp(cyl(0.015, 0.015, 1.1, METAL, 0, 0.55), b);
   } },
-  pizarra: { name: 'Pizarra', ico: '📋', cost: 130, w: 1, d: 1, decor: true, build(c = WOOD) {
+  pizarra: { name: 'Pizarra', ico: '📋', w: 1, d: 1, decor: true, build(c = WOOD) {
     const l1 = box(0.08, 0.95, 0.05, c, -0.34, 0.47, -0.2); l1.rotation.x = -0.28;
     const l2 = box(0.08, 0.95, 0.05, c, 0.34, 0.47, -0.2); l2.rotation.x = -0.28;
     return grp(
@@ -791,14 +790,14 @@ const FURNITURE = {
       box(0.12, 0.02, 0.03, WHITE, -0.1, 0.76, -0.1)
     );
   } },
-  lampara_mesa: { name: 'Lámpara de mesa', ico: '🪔', cost: 75, w: 1, d: 1, decor: true, light: { y: 0.55, i: 6, color: 0xffd9a0 }, build(c = METAL) {
+  lampara_mesa: { name: 'Lámpara de mesa', ico: '🪔', w: 1, d: 1, decor: true, light: { y: 0.55, i: 6, color: 0xffd9a0 }, build(c = METAL) {
     return grp(
       cyl(0.14, 0.18, 0.04, c, 0, 0.02),
       cyl(0.02, 0.02, 0.4, c, 0, 0.22),
       cyl(0.12, 0.18, 0.22, 0xf5e6c8, 0, 0.5, 0, 12, true)
     );
   } },
-  neon: { name: 'Neón luna', ico: '🌙', cost: 260, w: 1, d: 1, decor: true, anim: 'neon', light: { y: 1.3, i: 7, color: 0xff7ad9 }, build(c = 0x1e222c) {
+  neon: { name: 'Neón luna', ico: '🌙', w: 1, d: 1, decor: true, anim: 'neon', light: { y: 1.3, i: 7, color: 0xff7ad9 }, build(c = 0x1e222c) {
     const torus = new THREE.Mesh(
       new THREE.TorusGeometry(0.26, 0.035, 10, 28),
       new THREE.MeshStandardMaterial({ color: 0xff9ae0, emissive: 0xff3fae, emissiveIntensity: 0.9, roughness: 0.18, envMapIntensity: 1.0 })
@@ -813,7 +812,7 @@ const FURNITURE = {
     );
   } },
   /* ---- Nuevas decoraciones de exterior ---- */
-  pino: { name: 'Pino', ico: '🌲', cost: 120, w: 1, d: 1, out: true, anim: 'sway', build() {
+  pino: { name: 'Pino', ico: '🌲', w: 1, d: 1, out: true, anim: 'sway', build() {
     const f = grp();
     const coneDefs = [[0.42, 0.55, 0.78, 0x2f6b3f], [0.34, 0.52, 1.08, 0x357a48], [0.25, 0.48, 1.38, 0x3d8a52], [0.16, 0.4, 1.66, 0x4c9159]];
     for (const [r, h, y, col] of coneDefs) {
@@ -824,7 +823,7 @@ const FURNITURE = {
     f.userData.anim = 'sway';
     return grp(trunk(0.1, 0.55, 0x5a3a22), f);
   } },
-  palmera: { name: 'Palmera', ico: '🌴', cost: 140, w: 1, d: 1, out: true, anim: 'sway', build() {
+  palmera: { name: 'Palmera', ico: '🌴', w: 1, d: 1, out: true, anim: 'sway', build() {
     const fr = grp();
     for (let i = 0; i < 8; i++) {
       const w = new THREE.Group();
@@ -846,7 +845,7 @@ const FURNITURE = {
     trunkMesh.castShadow = true; trunkMesh.receiveShadow = true;
     return grp(trunkMesh, fr);
   } },
-  cactus: { name: 'Cactus', ico: '🌵', cost: 45, w: 1, d: 1, out: true, build() {
+  cactus: { name: 'Cactus', ico: '🌵', w: 1, d: 1, out: true, build() {
     const cactusMat=mat(0x39894e,{surface:'leaves',roughness:.7});
     const body=new THREE.Mesh(new THREE.CapsuleGeometry(.135,.72,8,16),cactusMat); body.position.y=.57; body.castShadow=true;
     const g=grp(lathe([[.24,0],[.28,.08],[.24,.18]],0xb86745,0,0,0,false,'clay',28),body);
@@ -858,7 +857,7 @@ const FURNITURE = {
     const flower=grp(); flower.position.set(0,1.1,0); for(let i=0;i<7;i++){const a=i/7*Math.PI*2;flower.add(ellipsoid(.055,.025,.08,0xe85d75,Math.cos(a)*.045,0,Math.sin(a)*.045,false,'fabric',12));} flower.add(sph(.025,0xf2c94c,0,.02,0));g.add(flower);
     return g;
   } },
-  hoguera: { name: 'Hoguera', ico: '🔥', cost: 300, w: 1, d: 1, out: true, anim: 'hoguera', light: { y: 0.7, i: 9, color: 0xff7a2a }, build() {
+  hoguera: { name: 'Hoguera', ico: '🔥', w: 1, d: 1, out: true, anim: 'hoguera', light: { y: 0.7, i: 9, color: 0xff7a2a }, build() {
     const g = grp();
     for (let i = 0; i < 7; i++) {
       const a = (i / 7) * Math.PI * 2;
@@ -883,7 +882,7 @@ const FURNITURE = {
     }
     return g;
   } },
-  valla: { name: 'Valla', ico: '🚧', cost: 45, w: 1, d: 1, out: true, build(c = 0xd8b579) {
+  valla: { name: 'Valla', ico: '🚧', w: 1, d: 1, out: true, build(c = 0xd8b579) {
     const g = grp();
     for (const x of [-0.42, 0, 0.42]) {
       g.add(rbox(0.08, 0.68, 0.08, c, x, 0.34, 0, .018, true, 'wood'));
@@ -893,14 +892,14 @@ const FURNITURE = {
     g.add(rbox(0.98, 0.07, 0.05, c, 0, 0.28, 0, .014, true, 'wood'));
     return g;
   } },
-  camino: { name: 'Camino de piedras', ico: '🪨', cost: 55, w: 1, d: 2, out: true, build(c = 0xb9bec7) {
+  camino: { name: 'Camino de piedras', ico: '🪨', w: 1, d: 2, out: true, build(c = 0xb9bec7) {
     const g = grp();
     const spots = [[-.13,-.72,.34,.24],[.16,-.28,.31,.25],[-.1,.17,.33,.23],[.12,.63,.29,.22]];
     for (let i=0;i<spots.length;i++) { const [x,z,rx,rz]=spots[i]; const stone=roughRock(rx,.055+(i%2)*.012,rz,i%2?shade(c,-.08):shade(c,.04),x,.055,z,i*.67); stone.userData.paint=true; g.add(stone); }
     for(const [x,z] of [[-.38,-.5],[.36,-.05],[-.34,.48]]) g.add(grassTuft(x,z,0x4f8e50,.55));
     return g;
   } },
-  estatua: { name: 'Estatua', ico: '🗿', cost: 380, w: 1, d: 1, out: true, build(c = 0xcfd4da) {
+  estatua: { name: 'Estatua', ico: '🗿', w: 1, d: 1, out: true, build(c = 0xcfd4da) {
     const stone=mat(c,{surface:'stone',roughness:.88});
     const torso=new THREE.Mesh(new THREE.CapsuleGeometry(.2,.52,8,20),stone.clone()); torso.position.y=.93; torso.scale.set(.82,1,.6); torso.userData.paint=true;
     const head=ellipsoid(.16,.21,.15,c,0,1.5,0,true,'stone',24);
@@ -916,7 +915,7 @@ const FURNITURE = {
     for(const x of [-.13,-.065,0,.065,.13]) g.add(tube([[x,.55,.11],[x*.85,.78,.14],[x*.65,1.05,.12]],.012,shade(c,-.11),10,6,'stone'));
     return g;
   } },
-  carpa: { name: 'Carpa', ico: '⛺', cost: 450, w: 2, d: 2, out: true, build(c = 0xb8443f) {
+  carpa: { name: 'Carpa', ico: '⛺', w: 2, d: 2, out: true, build(c = 0xb8443f) {
     const positions=[
       -.95,0,-.85, 0,1.55,-.85, 0,1.55,.85,  -.95,0,-.85, 0,1.55,.85, -.95,0,.85,
        .95,0,-.85, 0,1.55,.85, 0,1.55,-.85,   .95,0,-.85, .95,0,.85, 0,1.55,.85,
@@ -934,7 +933,7 @@ const FURNITURE = {
     }
     return g;
   } },
-  arco_florido: { name: 'Arco de flores', ico: '🌸', cost: 280, w: 2, d: 1, out: true, build(c = 0xe8d9b5) {
+  arco_florido: { name: 'Arco de flores', ico: '🌸', w: 2, d: 1, out: true, build(c = 0xe8d9b5) {
     const g = grp(
       cyl(0.05, 0.05, 1.6, c, -0.85, 0.8, 0, 10, true),
       cyl(0.05, 0.05, 1.6, c, 0.85, 0.8, 0, 10, true)
@@ -952,7 +951,7 @@ const FURNITURE = {
     }
     return g;
   } },
-  hongo: { name: 'Hongo gigante', ico: '🍄', cost: 65, w: 1, d: 1, out: true, build(c = 0xe85d35) {
+  hongo: { name: 'Hongo gigante', ico: '🍄', w: 1, d: 1, out: true, build(c = 0xe85d35) {
     const stem=lathe([[.14,0],[.18,.05],[.16,.23],[.12,.46],[.16,.55]],0xeee5d3,0,0,0,false,'rough',28);
     const cap=new THREE.Mesh(new THREE.SphereGeometry(.42,28,14,0,Math.PI*2,0,Math.PI/2),mat(c,{surface:'fabric',roughness:.75})); cap.scale.y=.55; cap.position.y=.54; cap.castShadow=true; cap.userData.paint=true;
     const g=grp(stem,cap);
@@ -967,42 +966,43 @@ const FURNITURE = {
 const BUILD_ITEMS = {
   // Suelos: todas las celdas construibles comparten los cinco albedos
   // PTP-Foliage de media/image, con tintes coherentes para dar variedad.
-  suelo:             { name: 'Césped', ico: '🟩', cost: 20, kind: 'floor', section: 'Suelos', style: 'lawn', color: 0xffffff },
-  suelo_roble:       { name: 'Césped claro', ico: '🌿', cost: 28, kind: 'floor', section: 'Suelos', style: 'lawnFine', color: 0xffffff },
-  suelo_baldosa:     { name: 'Pradera floral', ico: '🌺', cost: 32, kind: 'floor', section: 'Suelos', style: 'meadow', color: 0xffffff },
-  suelo_marmol:      { name: 'Floración rosa', ico: '🌸', cost: 55, kind: 'floor', section: 'Suelos', style: 'bloom', color: 0xffffff },
-  suelo_terracota:   { name: 'Adoquín ajardinado', ico: '🧱', cost: 30, kind: 'floor', section: 'Suelos', style: 'pavers', color: 0xffffff },
-  suelo_parquet:     { name: 'Césped dorado', ico: '🟨', cost: 24, kind: 'floor', section: 'Suelos', style: 'lawn', color: 0xd8c87a },
-  suelo_hormigon:    { name: 'Hierba fina', ico: '🍃', cost: 24, kind: 'floor', section: 'Suelos', style: 'lawnFine', color: 0xc2dba6 },
-  suelo_piedra:      { name: 'Pradera oscura', ico: '🌲', cost: 38, kind: 'floor', section: 'Suelos', style: 'meadow', color: 0x8fae76 },
-  suelo_grava:       { name: 'Trébol', ico: '🍀', cost: 18, kind: 'floor', section: 'Suelos', style: 'bloom', color: 0xcfe3b8 },
-  suelo_pizarra:     { name: 'Césped sombreado', ico: '⬛', cost: 44, kind: 'floor', section: 'Suelos', style: 'lawn', color: 0x7d9c6e },
-  suelo_mosaico:     { name: 'Adoquín claro', ico: '⬜', cost: 48, kind: 'floor', section: 'Suelos', style: 'pavers', color: 0xd8d2c0 },
+  suelo:             { name: 'Césped', ico: '🟩', kind: 'floor', section: 'Suelos', style: 'lawn', color: 0xffffff },
+  suelo_roble:       { name: 'Césped claro', ico: '🌿', kind: 'floor', section: 'Suelos', style: 'lawnFine', color: 0xffffff },
+  suelo_baldosa:     { name: 'Pradera floral', ico: '🌺', kind: 'floor', section: 'Suelos', style: 'meadow', color: 0xffffff },
+  suelo_marmol:      { name: 'Floración rosa', ico: '🌸', kind: 'floor', section: 'Suelos', style: 'bloom', color: 0xffffff },
+  suelo_terracota:   { name: 'Adoquín ajardinado', ico: '🧱', kind: 'floor', section: 'Suelos', style: 'pavers', color: 0xffffff },
+  suelo_parquet:     { name: 'Césped dorado', ico: '🟨', kind: 'floor', section: 'Suelos', style: 'lawn', color: 0xd8c87a },
+  suelo_hormigon:    { name: 'Hierba fina', ico: '🍃', kind: 'floor', section: 'Suelos', style: 'lawnFine', color: 0xc2dba6 },
+  suelo_piedra:      { name: 'Pradera oscura', ico: '🌲', kind: 'floor', section: 'Suelos', style: 'meadow', color: 0x8fae76 },
+  suelo_grava:       { name: 'Trébol', ico: '🍀', kind: 'floor', section: 'Suelos', style: 'bloom', color: 0xcfe3b8 },
+  suelo_pizarra:     { name: 'Césped sombreado', ico: '⬛', kind: 'floor', section: 'Suelos', style: 'lawn', color: 0x7d9c6e },
+  suelo_mosaico:     { name: 'Adoquín claro', ico: '⬜', kind: 'floor', section: 'Suelos', style: 'pavers', color: 0xd8d2c0 },
 
   // Muros y vallas ocupan un borde de la cuadrícula (h: horizontal, v: vertical).
-  pared:             { name: 'Pared enlucida', ico: '🧱', cost: 60, kind: 'wall', category: 'wall', section: 'Muros', style: 'plain', color: 0xf5f0e8 },
-  muro_piedra:       { name: 'Muro de piedra', ico: '🪨', cost: 95, kind: 'wall', category: 'wall', section: 'Muros', style: 'stone', color: 0x8e969d },
-  muro_ladrillo:     { name: 'Muro de ladrillo', ico: '🧱', cost: 85, kind: 'wall', category: 'wall', section: 'Muros', style: 'brick', color: 0xb85f4c },
-  muro_hormigon:     { name: 'Muro de hormigón', ico: '◼️', cost: 72, kind: 'wall', category: 'wall', section: 'Muros', style: 'concrete', color: 0x92979c },
-  muro_madera:       { name: 'Muro de madera', ico: '🪵', cost: 78, kind: 'wall', category: 'wall', section: 'Muros', style: 'wood', color: 0x9b693d },
-  minimuro:          { name: 'Minimuro', ico: '▰', cost: 48, kind: 'wall', category: 'wall', section: 'Muros', style: 'low', color: 0x969da0, height: 1.15 },
-  valla:             { name: 'Valla de madera', ico: '🚧', cost: 45, kind: 'wall', category: 'fence', section: 'Vallas', style: 'fence', color: 0xd8b579, height: 1.22 },
-  valla_metal:       { name: 'Valla metálica', ico: '⛓️', cost: 70, kind: 'wall', category: 'fence', section: 'Vallas', style: 'metalFence', color: 0x707983, height: 1.35 },
+  pared:             { name: 'Pared enlucida', ico: '🧱', kind: 'wall', category: 'wall', section: 'Muros', style: 'plain', color: 0xf5f0e8 },
+  muro_piedra:       { name: 'Muro de piedra', ico: '🪨', kind: 'wall', category: 'wall', section: 'Muros', style: 'stone', color: 0x8e969d },
+  muro_ladrillo:     { name: 'Muro de ladrillo', ico: '🧱', kind: 'wall', category: 'wall', section: 'Muros', style: 'brick', color: 0xb85f4c },
+  muro_hormigon:     { name: 'Muro de hormigón', ico: '◼️', kind: 'wall', category: 'wall', section: 'Muros', style: 'concrete', color: 0x92979c },
+  muro_madera:       { name: 'Muro de madera', ico: '🪵', kind: 'wall', category: 'wall', section: 'Muros', style: 'wood', color: 0x9b693d },
+  minimuro:          { name: 'Minimuro', ico: '▰', kind: 'wall', category: 'wall', section: 'Muros', style: 'low', color: 0x969da0, height: 1.15 },
+  pilar:             { name: 'Pilar', ico: '🏛️', kind: 'wall', category: 'pillar', section: 'Muros', style: 'pillar', color: 0xf5f0e8 },
+  valla:             { name: 'Valla de madera', ico: '🚧', kind: 'wall', category: 'fence', section: 'Vallas', style: 'fence', color: 0xd8b579, height: 1.22 },
+  valla_metal:       { name: 'Valla metálica', ico: '⛓️', kind: 'wall', category: 'fence', section: 'Vallas', style: 'metalFence', color: 0x707983, height: 1.35 },
 
   // Accesos: son piezas de suelo elevadas; R permite orientar la subida.
-  escalera:          { name: 'Escalera', ico: '🪜', cost: 90, kind: 'floor', section: 'Accesos', style: 'stairs', color: 0x9b693d, rotatable: true },
-  rampa:             { name: 'Rampa', ico: '📐', cost: 85, kind: 'floor', section: 'Accesos', style: 'ramp', color: 0x92979c, rotatable: true },
+  escalera:          { name: 'Escalera', ico: '🪜', kind: 'floor', section: 'Accesos', style: 'stairs', color: 0x9b693d, rotatable: true },
+  rampa:             { name: 'Rampa', ico: '📐', kind: 'floor', section: 'Accesos', style: 'ramp', color: 0x92979c, rotatable: true },
 
-  puerta:            { name: 'Clásica', ico: '🚪', cost: 150, kind: 'wall', category: 'door', section: 'Puertas', style: 'classic', color: 0xf5f0e8 },
-  puerta_moderna:    { name: 'Moderna', ico: '🚪', cost: 230, kind: 'wall', category: 'door', section: 'Puertas', style: 'modern', color: 0xe8e4dc },
-  puerta_doble:      { name: 'Doble', ico: '🚪', cost: 290, kind: 'wall', category: 'door', section: 'Puertas', style: 'double', color: 0xf5f0e8 },
-  puerta_rustica:    { name: 'Rústica', ico: '🪵', cost: 210, kind: 'wall', category: 'door', section: 'Puertas', style: 'rustic', color: 0xead9bc },
-  ventana:           { name: 'Clásica', ico: '🪟', cost: 120, kind: 'wall', category: 'window', section: 'Ventanas', style: 'classic', color: 0xf5f0e8 },
-  ventana_doble:     { name: 'Doble', ico: '🪟', cost: 175, kind: 'wall', category: 'window', section: 'Ventanas', style: 'double', color: 0xf5f0e8 },
-  ventana_panorama:  { name: 'Panorámica', ico: '🌅', cost: 220, kind: 'wall', category: 'window', section: 'Ventanas', style: 'panorama', color: 0xe8e4dc },
-  ventana_industrial:{ name: 'Industrial', ico: '🏭', cost: 195, kind: 'wall', category: 'window', section: 'Ventanas', style: 'industrial', color: 0xe6e0d4 },
-  techo:             { name: 'Teja', ico: '🏠', cost: 40, kind: 'roof', section: 'Techos', style: 'tile', color: 0xa8524a },
-  techo_moderno:     { name: 'Plano', ico: '⬜', cost: 48, kind: 'roof', section: 'Techos', style: 'flat', color: 0x777d86 },
+  puerta:            { name: 'Clásica', ico: '🚪', kind: 'wall', category: 'door', section: 'Puertas', style: 'classic', color: 0xf5f0e8 },
+  puerta_moderna:    { name: 'Moderna', ico: '🚪', kind: 'wall', category: 'door', section: 'Puertas', style: 'modern', color: 0xe8e4dc },
+  puerta_doble:      { name: 'Doble', ico: '🚪', kind: 'wall', category: 'door', section: 'Puertas', style: 'double', color: 0xf5f0e8 },
+  puerta_rustica:    { name: 'Rústica', ico: '🪵', kind: 'wall', category: 'door', section: 'Puertas', style: 'rustic', color: 0xead9bc },
+  ventana:           { name: 'Clásica', ico: '🪟', kind: 'wall', category: 'window', section: 'Ventanas', style: 'classic', color: 0xf5f0e8 },
+  ventana_doble:     { name: 'Doble', ico: '🪟', kind: 'wall', category: 'window', section: 'Ventanas', style: 'double', color: 0xf5f0e8 },
+  ventana_panorama:  { name: 'Panorámica', ico: '🌅', kind: 'wall', category: 'window', section: 'Ventanas', style: 'panorama', color: 0xe8e4dc },
+  ventana_industrial:{ name: 'Industrial', ico: '🏭', kind: 'wall', category: 'window', section: 'Ventanas', style: 'industrial', color: 0xe6e0d4 },
+  techo:             { name: 'Teja', ico: '🏠', kind: 'roof', section: 'Techos', style: 'tile', color: 0xa8524a },
+  techo_moderno:     { name: 'Plano', ico: '⬜', kind: 'roof', section: 'Techos', style: 'flat', color: 0x777d86 },
 };
 
 /* ---------------- Sonido (WebAudio) ---------------- */
@@ -1032,7 +1032,7 @@ const snd = {
 /* ---------------- Estado ---------------- */
 let state = newState();
 function newState() {
-  return { money: START_MONEY, floors: {}, walls: {}, roofs: {}, objects: {}, nextId: 1, missionsDone: [] };
+  return { floors: {}, walls: {}, roofs: {}, objects: {}, nextId: 1, missionsDone: [] };
 }
 
 /* ---------------- Escena ---------------- */
@@ -2134,6 +2134,18 @@ function buildWallMesh(type = 'pared', color) {
     concrete: 'wallConcrete', wood: 'wallWood', low: 'wallStone',
   };
 
+  if (def.category === 'pillar') {
+    // Columna exenta: base, fuste y capitel; admite tandas largas de pilares.
+    const h = def.height ?? WALL_H;
+    const surface = 'plaster';
+    return grp(
+      rbox(.36, .12, .36, shade(c, -.12), 0, .06, 0, .02, true, surface),
+      rbox(.26, h - .32, .26, c, 0, h / 2 + .01, 0, .018, true, surface),
+      rbox(.38, .1, .38, shade(c, .1), 0, h - .07, 0, .02, true, surface),
+      rbox(.32, .07, .32, shade(c, .16), 0, h - .005, 0, .018, true, surface)
+    );
+  }
+
   if (def.category === 'wall') {
     const h = def.height ?? WALL_H;
     const surface = wallSurfaces[def.style] || 'plaster';
@@ -2500,7 +2512,7 @@ function runObjAnims(t) {
   for (const fn of objAnims.values()) fn(t);
 }
 
-/* ---------------- Partículas (polvo al romper / vender) ---------------- */
+/* ---------------- Partículas (polvo al romper / retirar) ---------------- */
 const particles = [];
 function spawnDust(pos, n = 9, color = 0xd6cfc2) {
   for (let i = 0; i < n; i++) {
@@ -2554,6 +2566,8 @@ function occupiedMap(exceptId = null) {
 /* ---------------- Herramienta actual ---------------- */
 let tool = null;        // {mode:'build'|'furniture'|'paint'|'delete', id}
 let toolRot = 0;
+let toolLen = 1;        // nº de piezas seguidas al colocar materiales de construcción
+const MAX_TOOL_LEN = 8;
 let selectedColor = PALETTE[0];
 let selectedColorCustom = false;
 let ghost = null;
@@ -2570,14 +2584,17 @@ function clearGhost() {
 function makeGhost() {
   clearGhost();
   if (!tool || ['paint', 'delete', 'select', 'hammer'].includes(tool.mode)) return;
-  let g = null;
+  const g = new THREE.Group();
   if (tool.mode === 'build') {
+    // Un segmento por pieza de la tanda (largo 1..MAX_TOOL_LEN).
     const def = BUILD_ITEMS[tool.id];
-    if (def.kind === 'floor') g = buildFloorMesh(tool.id);
-    else if (def.kind === 'roof') g = buildRoofMesh(tool.id);
-    else g = buildWallMesh(tool.id);
+    for (let i = 0; i < Math.max(1, toolLen); i++) {
+      if (def.kind === 'floor') g.add(buildFloorMesh(tool.id));
+      else if (def.kind === 'roof') g.add(buildRoofMesh(tool.id));
+      else g.add(buildWallMesh(tool.id));
+    }
   } else {
-    g = buildCatalogObject(tool.id);
+    g.add(buildCatalogObject(tool.id));
   }
   g.traverse(n => { if (n.isMesh) { n.material = ghostMatOk; n.castShadow = false; n.receiveShadow = false; } });
   g.visible = false;
@@ -2592,11 +2609,15 @@ function selectedToolDef(t = tool) {
   if (t.mode === 'paint') return { name: 'Pintar', ico: '🎨' };
   if (t.mode === 'select') return { name: 'Seleccionar', ico: '🖐️' };
   if (t.mode === 'hammer') return { name: 'Mazo', ico: '🔨' };
-  return { name: 'Vender', ico: '🧹' };
+  return { name: 'Retirar', ico: '🧹' };
 }
 function updateRotationUI() {
   const btn = document.getElementById('btn-rotate');
-  if (btn) btn.innerHTML = `🔄 Rotar ${toolRot * 90}° <kbd>R</kbd>`;
+  if (!btn) return;
+  const isBuild = tool && tool.mode === 'build';
+  const rotatesPiece = tool && (tool.mode === 'furniture' || (isBuild && BUILD_ITEMS[tool.id]?.rotatable));
+  // En materiales no giratorios R cambia el sentido de la tanda, no gira la pieza.
+  btn.innerHTML = rotatesPiece ? `🔄 Rotar ${toolRot * 90}° <kbd>R</kbd>` : `🔄 Sentido <kbd>R</kbd>`;
 }
 // Etiqueta contextual: describe el modo colocación y, si se está cargando
 // una pieza con la mano, cómo soltarla.
@@ -2611,13 +2632,29 @@ function updateContextLabel() {
   const def = selectedToolDef(tool);
   if (!def) { el.textContent = ''; return; }
   const placing = tool && ['build', 'furniture'].includes(tool.mode);
-  el.textContent = `${def.ico} ${def.name}` + (placing ? ' · modo colocación: clic para colocar' : '');
+  const largo = tool && tool.mode === 'build' ? ` · largo ${toolLen}` : '';
+  el.textContent = `${def.ico} ${def.name}` + (placing ? ' · modo colocación: clic para colocar' + largo : '');
+}
+function updateLenUI() {
+  const label = document.getElementById('len-label');
+  if (label) label.textContent = `📏 Largo: ${toolLen}`;
+}
+function setToolLen(n) {
+  const v = Math.max(1, Math.min(MAX_TOOL_LEN, Math.floor(n)));
+  if (v === toolLen) return;
+  toolLen = v;
+  makeGhost();
+  refreshGhost();
+  updateLenUI();
+  updateContextLabel();
+  snd.click();
 }
 function selectTool(t) {
   // Cambiar de herramienta con una pieza cogida la devuelve a su sitio.
   if (carry) cancelCarry();
   tool = t;
   toolRot = 0;
+  toolLen = 1;
   makeGhost();
   document.querySelectorAll('.item-btn').forEach(b => {
     const on = t && b.dataset.mode === t.mode && b.dataset.id === t.id;
@@ -2625,8 +2662,12 @@ function selectTool(t) {
   });
   const ctx = document.getElementById('context-controls');
   ctx.classList.toggle('hidden', !t);
-  const canRotateTool = t && (t.mode === 'furniture' || (t.mode === 'build' && BUILD_ITEMS[t.id]?.rotatable));
+  // R rota piezas y también cambia el sentido de la tanda de construcción.
+  const canRotateTool = t && (t.mode === 'furniture' || t.mode === 'build');
   document.getElementById('btn-rotate').style.display = canRotateTool ? '' : 'none';
+  const lenCtl = document.getElementById('len-control');
+  if (lenCtl) lenCtl.classList.toggle('hidden', !(t && t.mode === 'build'));
+  updateLenUI();
   // Modo colocación: la cuadrícula cubre toda la parcela mientras se sitúa
   // una pieza del catálogo (construcción o mobiliario).
   const placing = t && ['build', 'furniture'].includes(t.mode);
@@ -2683,13 +2724,53 @@ function nearestEdge(p) {
 }
 
 /* ---------------- Validación y colocación ---------------- */
+// Tanda de piezas seguidas que se colocarán de un clic. La dirección sale de
+// toolRot (0 → +X, 1 → +Z, 2 → −X, 3 → −Z); en los muros siempre sigue el
+// borde y R solo invierte el sentido.
+function runStepVector() {
+  return [[1, 0], [0, 1], [-1, 0], [0, -1]][toolRot % 4];
+}
+function wallRunStep(orient) {
+  const sign = toolRot % 2 ? -1 : 1;
+  return orient === 'h' ? [sign, 0] : [0, sign];
+}
+function buildRunTargets() {
+  if (!tool || tool.mode !== 'build' || !hover) return [];
+  const def = BUILD_ITEMS[tool.id];
+  const n = Math.max(1, toolLen);
+  const out = [];
+  if (def.kind === 'wall') {
+    if (!hover.edgeKey) return [];
+    const [orient, xs, zs] = hover.edgeKey.split(':');
+    const x0 = +xs, z0 = +zs;
+    const [dx, dz] = wallRunStep(orient);
+    for (let i = 0; i < n; i++) {
+      const key = `${orient}:${x0 + dx * i}:${z0 + dz * i}`;
+      out.push({ key, ok: validEdgeKey(key) });
+    }
+    return out;
+  }
+  const [dx, dz] = runStepVector();
+  for (let i = 0; i < n; i++) {
+    const cx = hover.cx + dx * i, cz = hover.cz + dz * i;
+    const key = cx + ',' + cz;
+    out.push({ key, cx, cz, ok: validCellKey(key) });
+  }
+  return out;
+}
+
 function canPlace() {
   if (!hover) return false;
   if (tool.mode === 'build') {
     const kind = BUILD_ITEMS[tool.id].kind;
-    if (kind === 'floor') return hover.cellOk && !state.floors[hover.cellKey];
-    if (kind === 'roof') return hover.cellOk && !state.roofs[hover.cellKey];
-    return hover.edgeKey && !state.walls[hover.edgeKey];
+    const targets = buildRunTargets();
+    if (!targets.length) return false;
+    return targets.every(t => {
+      if (!t.ok) return false;
+      if (kind === 'floor') return !state.floors[t.key];
+      if (kind === 'roof') return !state.roofs[t.key];
+      return !state.walls[t.key];
+    });
   }
   if (tool.mode === 'furniture') {
     const def = FURNITURE[tool.id];
@@ -2704,41 +2785,29 @@ function canPlace() {
   return false;
 }
 
-function toolCost() {
-  if (!tool) return 0;
-  if (tool.mode === 'build') return BUILD_ITEMS[tool.id].cost;
-  if (tool.mode === 'furniture') return FURNITURE[tool.id].cost;
-  return 0;
-}
-
-function spend(amount) {
-  if (state.money < amount) { toast('¡No tienes suficiente dinero! 💸', 'error'); snd.error(); return false; }
-  state.money -= amount;
-  updateMoney(true);
-  return true;
-}
-
 function place() {
   if (!tool || !canPlace()) { if (tool && hover) snd.error(); return; }
-  const cost = toolCost();
-  if (!spend(cost)) return;
   // Función de cambio de textura: cada pieza colocada estrena el esquema
   // activo (los suelos conservan su césped coherente de media/image).
   if (tool.mode === 'build') {
+    // Construcción libre y por tanda: se colocan a la vez tantas piezas
+    // seguidas como indique el largo seleccionado.
     const def = BUILD_ITEMS[tool.id];
-    const data = { t: tool.id, c: selectedColorCustom ? selectedColor : def.color };
-    if (def.rotatable) data.r = toolRot;
-    if (def.kind === 'floor') {
-      state.floors[hover.cellKey] = data;
-      addFloorMesh(hover.cellKey, data);
-    } else if (def.kind === 'roof') {
-      data.tx = textureIndex;
-      state.roofs[hover.cellKey] = data;
-      addRoofMesh(hover.cellKey, data);
-    } else {
-      data.tx = textureIndex;
-      state.walls[hover.edgeKey] = data;
-      addWallMesh(hover.edgeKey, data);
+    for (const target of buildRunTargets()) {
+      const data = { t: tool.id, c: selectedColorCustom ? selectedColor : def.color };
+      if (def.rotatable) data.r = toolRot;
+      if (def.kind === 'floor') {
+        state.floors[target.key] = data;
+        addFloorMesh(target.key, data);
+      } else if (def.kind === 'roof') {
+        data.tx = textureIndex;
+        state.roofs[target.key] = data;
+        addRoofMesh(target.key, data);
+      } else {
+        data.tx = textureIndex;
+        state.walls[target.key] = data;
+        addWallMesh(target.key, data);
+      }
     }
   } else {
     const id = 'o' + (state.nextId++);
@@ -2770,24 +2839,14 @@ function paintAt(ev) {
   scheduleSave();
 }
 
-/* ---------------- Eliminación unificada (vender / mazo / panel) ---------------- */
-function removeBuildItem(kind, key, refund) {
+/* ---------------- Eliminación unificada (retirar / mazo / panel) ---------------- */
+function removeBuildItem(kind, key, announce) {
   const store = state[kind + 's'];
   const data = store[key];
   if (!data) return;
-  let cost = 0;
-  if (kind === 'floor') cost = (BUILD_ITEMS[data.t] || BUILD_ITEMS.suelo).cost;
-  else if (kind === 'roof') cost = (BUILD_ITEMS[data.t] || BUILD_ITEMS.techo).cost;
-  else if (kind === 'wall') cost = (BUILD_ITEMS[data.t] || BUILD_ITEMS.pared).cost;
-  else cost = (FURNITURE[data.t] || { cost: 0 }).cost;
   delete store[key];
   removeMesh(kind, key);
-  if (refund) {
-    const r = Math.floor(cost / 2);
-    state.money += r;
-    updateMoney(true);
-    toast(`Vendido por ${fmt(r)} ♻️`, 'success');
-  }
+  if (announce) toast('Pieza retirada ♻️', 'success');
   if (selection && selection.kind === kind && selection.key === key) clearSelection();
   scheduleSave();
 }
@@ -3026,12 +3085,11 @@ function renderSelectPanel() {
   const tgt = selTarget();
   if (!tgt || !selPanelEl) { clearSelection(); return; }
   const def = selection.kind === 'object' ? FURNITURE[tgt.t] : BUILD_ITEMS[tgt.t];
-  const refund = Math.floor((def ? def.cost : 0) / 2);
   document.getElementById('sp-name').textContent = def ? `${def.ico} ${def.name}` : 'Pieza';
-  document.getElementById('sp-sell').textContent = `♻️ Vender +${fmt(refund)}`;
   const isObj = selection.kind === 'object';
   const isRotatableBuild = selection.kind === 'floor' && BUILD_ITEMS[tgt.t]?.rotatable;
   document.getElementById('sp-size-row').classList.toggle('hidden', !isObj);
+  document.getElementById('sp-len-row').classList.toggle('hidden', isObj);
   document.getElementById('sp-rotate').classList.toggle('hidden', !isObj && !isRotatableBuild);
   const s = isObj ? (tgt.s || 1) : 1;
   document.querySelectorAll('.size-btn').forEach(b => b.classList.toggle('active', Math.abs(+b.dataset.scale - s) < 0.01));
@@ -3100,6 +3158,57 @@ function rotateSelected() {
   snd.click();
   scheduleSave();
 }
+/* ---- Alargar / acortar materiales de construcción ya colocados ---- */
+function selNeighborKeys() {
+  if (!selection) return [];
+  if (selection.kind === 'wall') {
+    const [orient, xs, zs] = selection.key.split(':');
+    const x = +xs, z = +zs;
+    // Los muros solo crecen o menguan siguiendo su propio borde.
+    return orient === 'h'
+      ? [`h:${x + 1}:${z}`, `h:${x - 1}:${z}`]
+      : [`v:${x}:${z + 1}`, `v:${x}:${z - 1}`];
+  }
+  const [x, z] = selection.key.split(',').map(Number);
+  return [`${x + 1},${z}`, `${x - 1},${z}`, `${x},${z + 1}`, `${x},${z - 1}`];
+}
+function growSelected() {
+  const tgt = selTarget();
+  if (!tgt || selection.kind === 'object') return;
+  const store = state[selection.kind + 's'];
+  const validKey = selection.kind === 'wall' ? validEdgeKey : validCellKey;
+  for (const key of selNeighborKeys()) {
+    if (!validKey(key) || store[key]) continue;
+    store[key] = { ...tgt };
+    const adder = { floor: addFloorMesh, wall: addWallMesh, roof: addRoofMesh }[selection.kind];
+    adder(key, store[key]);
+    refreshSelHelper();
+    snd.place();
+    checkMissions();
+    scheduleSave();
+    return;
+  }
+  toast('No cabe ahí 🚫', 'error');
+  snd.error();
+}
+function shrinkSelected() {
+  const tgt = selTarget();
+  if (!tgt || selection.kind === 'object') return;
+  const store = state[selection.kind + 's'];
+  const validKey = selection.kind === 'wall' ? validEdgeKey : validCellKey;
+  for (const key of selNeighborKeys()) {
+    if (!validKey(key)) continue;
+    const other = store[key];
+    if (other && other.t === tgt.t) {
+      removeBuildItem(selection.kind, key, false);
+      toast('Tramo acortado ✂️', 'success');
+      snd.remove();
+      return;
+    }
+  }
+  toast('No hay tramo contiguo que quitar 🚫', 'error');
+  snd.error();
+}
 function initSelectPanel() {
   const pal = document.getElementById('sp-colors');
   if (!pal) return;
@@ -3112,6 +3221,8 @@ function initSelectPanel() {
     pal.appendChild(s);
   });
   document.querySelectorAll('.size-btn').forEach(b => b.addEventListener('click', () => applySelScale(+b.dataset.scale)));
+  document.getElementById('sp-len-minus').addEventListener('click', shrinkSelected);
+  document.getElementById('sp-len-plus').addEventListener('click', growSelected);
   document.getElementById('sp-rotate').addEventListener('click', rotateSelected);
   document.getElementById('sp-sell').addEventListener('click', () => { if (selection) removeBuildItem(selection.kind, selection.key, true); });
   document.getElementById('sp-delete').addEventListener('click', () => { if (selection) { const { kind, key } = selection; const node = state[kind + 's'][key] && (kind === 'object' ? meshes.objects[key] : meshes[kind + 's'][key]); if (node) spawnDust(new THREE.Box3().setFromObject(node).getCenter(new THREE.Vector3()), 8); removeBuildItem(kind, key, false); } });
@@ -3135,22 +3246,22 @@ function countDecor() { return Object.values(state.objects).filter(o => FURNITUR
 function countOut() { return Object.values(state.objects).filter(o => FURNITURE[o.t]?.out).length; }
 
 const MISSIONS = [
-  { id: 'm1', name: '🏗️ Primeros cimientos', desc: 'Coloca 10 suelos', reward: 300, goal: 10, prog: countFloors },
-  { id: 'm2', name: '🧱 Cuatro paredes', desc: 'Construye 12 paredes', reward: 500, goal: 12, prog: () => countWalls('pared') },
-  { id: 'm3', name: '🚪 Puerta principal', desc: 'Instala 1 puerta', reward: 250, goal: 1, prog: () => countWalls('puerta') },
-  { id: 'm4', name: '🪟 Que entre la luz', desc: 'Pon 2 ventanas', reward: 300, goal: 2, prog: () => countWalls('ventana') },
-  { id: 'm5', name: '⬜ Bajo techo', desc: 'Cubre 10 techos', reward: 500, goal: 10, prog: countRoofs },
-  { id: 'm6', name: '🛏️ Dulces sueños', desc: 'Coloca una cama', reward: 350, goal: 1, prog: () => countObj('cama') },
-  { id: 'm7', name: '🛋️ Salón acogedor', desc: 'Sofá + televisor', reward: 500, goal: 2, prog: () => Math.min(countObj('sofa'), 1) + Math.min(countObj('tv'), 1) },
-  { id: 'm8', name: '🍳 Cocina completa', desc: 'Cocina + nevera', reward: 500, goal: 2, prog: () => Math.min(countObj('cocina'), 1) + Math.min(countObj('nevera'), 1) },
-  { id: 'm9', name: '🛁 Baño listo', desc: 'Inodoro + bañera', reward: 450, goal: 2, prog: () => Math.min(countObj('inodoro'), 1) + Math.min(countObj('banera'), 1) },
-  { id: 'm10', name: '🌳 Jardín verde', desc: '5 plantas de exterior', reward: 400, goal: 5, prog: countOut },
-  { id: 'm11', name: '🏆 Gran decorador', desc: 'Coloca 15 muebles', reward: 800, goal: 15, prog: countFurn },
-  { id: 'm12', name: '🪴 Toque personal', desc: 'Añade 5 adornos', reward: 450, goal: 5, prog: countDecor },
-  { id: 'm13', name: '🎹 Alma de músico', desc: 'Coloca un piano', reward: 400, goal: 1, prog: () => countObj('piano') },
-  { id: 'm14', name: '🌴 Jardín tropical', desc: 'Pino, palmera y cactus', reward: 500, goal: 3, prog: () => Math.min(countObj('pino'), 1) + Math.min(countObj('palmera'), 1) + Math.min(countObj('cactus'), 1) },
-  { id: 'm15', name: '🔥 Ronda de fuego', desc: 'Hoguera + barbacoa', reward: 450, goal: 2, prog: () => Math.min(countObj('hoguera'), 1) + Math.min(countObj('barbacoa'), 1) },
-  { id: 'm16', name: '🌙 Noche con encanto', desc: 'Farola + neón o candelabro', reward: 450, goal: 2, prog: () => Math.min(countObj('farola'), 1) + Math.min(Math.min(countObj('neon'), 1) + Math.min(countObj('candelabro'), 1), 1) },
+  { id: 'm1', name: '🏗️ Primeros cimientos', desc: 'Coloca 10 suelos', goal: 10, prog: countFloors },
+  { id: 'm2', name: '🧱 Cuatro paredes', desc: 'Construye 12 paredes', goal: 12, prog: () => countWalls('pared') },
+  { id: 'm3', name: '🚪 Puerta principal', desc: 'Instala 1 puerta', goal: 1, prog: () => countWalls('puerta') },
+  { id: 'm4', name: '🪟 Que entre la luz', desc: 'Pon 2 ventanas', goal: 2, prog: () => countWalls('ventana') },
+  { id: 'm5', name: '⬜ Bajo techo', desc: 'Cubre 10 techos', goal: 10, prog: countRoofs },
+  { id: 'm6', name: '🛏️ Dulces sueños', desc: 'Coloca una cama', goal: 1, prog: () => countObj('cama') },
+  { id: 'm7', name: '🛋️ Salón acogedor', desc: 'Sofá + televisor', goal: 2, prog: () => Math.min(countObj('sofa'), 1) + Math.min(countObj('tv'), 1) },
+  { id: 'm8', name: '🍳 Cocina completa', desc: 'Cocina + nevera', goal: 2, prog: () => Math.min(countObj('cocina'), 1) + Math.min(countObj('nevera'), 1) },
+  { id: 'm9', name: '🛁 Baño listo', desc: 'Inodoro + bañera', goal: 2, prog: () => Math.min(countObj('inodoro'), 1) + Math.min(countObj('banera'), 1) },
+  { id: 'm10', name: '🌳 Jardín verde', desc: '5 plantas de exterior', goal: 5, prog: countOut },
+  { id: 'm11', name: '🏆 Gran decorador', desc: 'Coloca 15 muebles', goal: 15, prog: countFurn },
+  { id: 'm12', name: '🪴 Toque personal', desc: 'Añade 5 adornos', goal: 5, prog: countDecor },
+  { id: 'm13', name: '🎹 Alma de músico', desc: 'Coloca un piano', goal: 1, prog: () => countObj('piano') },
+  { id: 'm14', name: '🌴 Jardín tropical', desc: 'Pino, palmera y cactus', goal: 3, prog: () => Math.min(countObj('pino'), 1) + Math.min(countObj('palmera'), 1) + Math.min(countObj('cactus'), 1) },
+  { id: 'm15', name: '🔥 Ronda de fuego', desc: 'Hoguera + barbacoa', goal: 2, prog: () => Math.min(countObj('hoguera'), 1) + Math.min(countObj('barbacoa'), 1) },
+  { id: 'm16', name: '🌙 Noche con encanto', desc: 'Farola + neón o candelabro', goal: 2, prog: () => Math.min(countObj('farola'), 1) + Math.min(Math.min(countObj('neon'), 1) + Math.min(countObj('candelabro'), 1), 1) },
 ];
 
 function checkMissions() {
@@ -3158,9 +3269,7 @@ function checkMissions() {
     if (state.missionsDone.includes(m.id)) continue;
     if (m.prog() >= m.goal) {
       state.missionsDone.push(m.id);
-      state.money += m.reward;
-      updateMoney(true);
-      toast(`${m.name} completada · +${fmt(m.reward)} 🎉`, 'reward');
+      toast(`${m.name} completada 🎉`, 'reward');
       snd.cash();
     }
   }
@@ -3178,7 +3287,7 @@ function renderMissions() {
     const el = document.createElement('div');
     el.className = 'mission' + (done ? ' done' : '');
     el.innerHTML = `
-      <div class="m-title"><span>${done ? '✅ ' : ''}${m.name}</span><span class="m-reward">+${fmt(m.reward)}</span></div>
+      <div class="m-title"><span>${done ? '✅ ' : ''}${m.name}</span></div>
       <div class="m-bar"><div class="m-fill" style="width:${(p / m.goal) * 100}%"></div></div>
       <div class="m-progress">${m.desc} — ${p}/${m.goal}</div>`;
     list.appendChild(el);
@@ -3223,7 +3332,7 @@ function normalizeRotation(value) {
 function normalizeState(data) {
   const next = newState();
   if (!record(data)) return next;
-  next.money = Number.isFinite(+data.money) ? Math.max(0, Math.floor(+data.money)) : START_MONEY;
+  // Partidas antiguas podían incluir dinero; se ignora: ahora se construye libremente.
 
   for (const [key, item] of Object.entries(record(data.floors) ? data.floors : {})) {
     const def = BUILD_ITEMS[item?.t];
@@ -3293,7 +3402,7 @@ function loadGame() {
     const raw = localStorage.getItem(SAVE_KEY);
     if (!raw) return false;
     const data = JSON.parse(raw);
-    if (!record(data) || typeof data.money !== 'number') return false;
+    if (!record(data)) return false;
     state = normalizeState(data);
     return true;
   } catch (e) { return false; }
@@ -3312,10 +3421,9 @@ function importGame(file) {
   fr.onload = () => {
     try {
       const data = JSON.parse(fr.result);
-      if (!record(data) || typeof data.money !== 'number' || !record(data.floors)) throw new Error('formato');
+      if (!record(data) || !record(data.floors)) throw new Error('formato');
       state = normalizeState(data);
       rebuildAll();
-      updateMoney();
       renderMissions();
       saveGame();
       toast('Casa importada ⬆️', 'success');
@@ -3325,14 +3433,6 @@ function importGame(file) {
 }
 
 /* ---------------- UI ---------------- */
-const fmt = n => n.toLocaleString('es-ES') + ' €';
-function updateMoney(pop = false) {
-  const el = document.getElementById('money-value');
-  el.textContent = fmt(state.money);
-  const box = document.getElementById('money');
-  box.classList.toggle('broke', state.money < 100);
-  if (pop) { box.classList.remove('pop'); void box.offsetWidth; box.classList.add('pop'); }
-}
 let toastTimer = null;
 function toast(msg, type = '') {
   const t = document.getElementById('toast');
@@ -3362,9 +3462,8 @@ function itemButton(mode, id, def) {
   const b = document.createElement('button');
   b.className = 'item-btn' + (mode === 'delete' ? ' tool-danger' : '');
   b.dataset.mode = mode; b.dataset.id = id;
-  b.title = `${def.name}${def.cost != null ? ` · ${fmt(def.cost)}` : ''}`;
-  const price = def.cost != null ? `<span class="price">${fmt(def.cost)}</span>` : `<span class="price free">gratis</span>`;
-  b.innerHTML = `<span class="ico">${def.ico}</span><span class="name">${def.name}</span>${price}`;
+  b.title = def.name;
+  b.innerHTML = `<span class="ico">${def.ico}</span><span class="name">${def.name}</span>`;
   b.addEventListener('click', () => {
     if (tool && tool.mode === mode && tool.id === id) selectTool(null);
     else selectTool({ mode, id });
@@ -3392,7 +3491,7 @@ function buildUI() {
   const pH = document.querySelector('[data-panel="herramientas"]');
   pH.appendChild(itemButton('select', 'select', { name: 'Seleccionar', ico: '🖐️' }));
   pH.appendChild(itemButton('paint', 'paint', { name: 'Pintar', ico: '🎨' }));
-  pH.appendChild(itemButton('delete', 'delete', { name: 'Vender', ico: '🧹' }));
+  pH.appendChild(itemButton('delete', 'delete', { name: 'Retirar', ico: '🧹' }));
   pH.appendChild(itemButton('hammer', 'hammer', { name: 'Mazo', ico: '🔨' }));
 
   // Función de cambio de textura: elige el acabado (albedos de media/image)
@@ -3510,15 +3609,23 @@ function refreshGhost() {
     return;
   }
   ghost.visible = true;
-  if (tool.mode === 'build' && BUILD_ITEMS[tool.id].kind === 'wall') {
-    if (!hover.edgeKey) { ghost.visible = false; return; }
-    const t = wallTransform(hover.edgeKey);
-    ghost.position.set(t.x, 0, t.z);
-    ghost.rotation.y = t.ry;
-  } else if (tool.mode === 'build') {
+  if (tool.mode === 'build') {
     const def = BUILD_ITEMS[tool.id];
-    ghost.position.set(hover.cx + 0.5 - S / 2, 0, hover.cz + 0.5 - S / 2);
-    ghost.rotation.y = def.rotatable ? toolRot * Math.PI / 2 : 0;
+    const targets = buildRunTargets();
+    if (!targets.length) { ghost.visible = false; return; }
+    ghost.children.forEach((seg, i) => {
+      const t = targets[i];
+      if (!t) { seg.visible = false; return; }
+      seg.visible = true;
+      if (def.kind === 'wall') {
+        const wt = wallTransform(t.key);
+        seg.position.set(wt.x, 0, wt.z);
+        seg.rotation.y = wt.ry;
+      } else {
+        seg.position.set(t.cx + 0.5 - S / 2, 0, t.cz + 0.5 - S / 2);
+        seg.rotation.y = def.rotatable ? toolRot * Math.PI / 2 : 0;
+      }
+    });
   } else {
     const def = FURNITURE[tool.id];
     const w = toolRot % 2 ? def.d : def.w, d = toolRot % 2 ? def.w : def.d;
@@ -3558,8 +3665,8 @@ function updatePlacementHover(e) {
   refreshGhost();
 }
 function rotateTool() {
-  const rotatableBuild = tool?.mode === 'build' && BUILD_ITEMS[tool.id]?.rotatable;
-  if (!tool || (tool.mode !== 'furniture' && !rotatableBuild)) return;
+  const canRotate = tool && (tool.mode === 'furniture' || tool.mode === 'build');
+  if (!canRotate) return;
   toolRot = (toolRot + 1) % 4;
   updateRotationUI();
   refreshGhost(); // la previsualización se actualiza aunque el ratón esté quieto
@@ -3654,7 +3761,16 @@ window.addEventListener('keydown', e => {
   if (e.code === 'KeyR') {
     if (carry) { e.preventDefault(); if (rotateCarry()) refreshCarryGhost(); }
     else if (selection && (selection.kind === 'object' || selection.kind === 'floor')) { e.preventDefault(); rotateSelected(); }
-    else if (tool && tool.mode === 'furniture') { e.preventDefault(); rotateTool(); }
+    else if (tool && (tool.mode === 'furniture' || tool.mode === 'build')) { e.preventDefault(); rotateTool(); }
+  }
+  // Teclas + / −: alargan o acortan la tanda de construcción (o la pieza seleccionada).
+  if (e.code === 'Equal' || e.code === 'NumpadAdd' || e.key === '+') {
+    if (!carry && tool && tool.mode === 'build') { e.preventDefault(); setToolLen(toolLen + 1); }
+    else if (!carry && selection && selection.kind !== 'object') { e.preventDefault(); growSelected(); }
+  }
+  if (e.code === 'Minus' || e.code === 'NumpadSubtract' || e.key === '-') {
+    if (!carry && tool && tool.mode === 'build') { e.preventDefault(); setToolLen(toolLen - 1); }
+    else if (!carry && selection && selection.kind !== 'object') { e.preventDefault(); shrinkSelected(); }
   }
   if (e.code === 'Escape' && !walkMode) {
     if (carry) cancelCarry();
@@ -3704,7 +3820,6 @@ document.getElementById('btn-reset').addEventListener('click', () => {
   if (!confirm('¿Seguro que quieres empezar de cero? Se borrará tu casa actual.')) return;
   state = newState();
   rebuildAll();
-  updateMoney();
   renderMissions();
   saveGame();
   toast('Nueva parcela lista 🌱', 'success');
@@ -3716,6 +3831,8 @@ document.getElementById('btn-close-help').addEventListener('click', () => {
   snd.click();
 });
 document.getElementById('btn-rotate').addEventListener('click', rotateTool);
+document.getElementById('btn-len-minus').addEventListener('click', () => setToolLen(toolLen - 1));
+document.getElementById('btn-len-plus').addEventListener('click', () => setToolLen(toolLen + 1));
 document.getElementById('btn-cancel').addEventListener('click', () => {
   if (carry) cancelCarry();
   else selectTool(null);
@@ -3728,7 +3845,6 @@ async function startGame() {
   initSkyCycle();
   buildUI();
   if (loadGame()) rebuildAll();
-  updateMoney();
   renderMissions();
   if (!localStorage.getItem(HELP_KEY)) document.getElementById('help-modal').classList.remove('hidden');
   setLoaderMessage('Tu parcela está lista');

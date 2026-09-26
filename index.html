@@ -26,7 +26,6 @@
   <!-- Barra superior -->
   <header id="topbar" class="ui">
     <div class="brand">🏠 <span>Mi Hogar 3D</span></div>
-    <div id="money" class="money" title="Tu presupuesto">💰 <span id="money-value">0 €</span></div>
     <div class="top-actions">
       <button id="btn-catalog" class="icon-btn active" title="Abrir o cerrar el catálogo de construcción" aria-expanded="true">🧰</button>
       <button id="btn-daynight" class="icon-btn" title="Alternar día / noche">🌙</button>
@@ -58,11 +57,17 @@
       <div class="panel" data-panel="herramientas"></div>
     </div>
     <div id="palette" title="Color seleccionado"></div>
+    <a id="more-games" class="more-games" href="https://pensamientoincansable.github.io/Juegos-3D/" target="_blank" rel="noopener noreferrer" title="Jugar a más juegos 3D de Juegos π">🎮 Más juegos 3D de Juegos π</a>
   </aside>
 
   <!-- Controles contextuales -->
   <div id="context-controls" class="ui hidden">
     <span id="selection-label" class="selection-pill"></span>
+    <div id="len-control" class="len-control hidden" title="Cuántas piezas seguidas colocar de un clic">
+      <button id="btn-len-minus" class="pill-btn len-btn" title="Acortar la tanda (tecla −)">➖</button>
+      <span id="len-label" class="len-label">📏 Largo: 1</span>
+      <button id="btn-len-plus" class="pill-btn len-btn" title="Alargar la tanda (tecla +)">➕</button>
+    </div>
     <button id="btn-rotate" class="pill-btn">🔄 Rotar 0° <kbd>R</kbd></button>
     <button id="btn-cancel" class="pill-btn">✖ Cancelar <kbd>Esc</kbd></button>
   </div>
@@ -85,9 +90,16 @@
         <button class="pill-btn size-btn" data-scale="1.3" title="Grande">G</button>
       </div>
     </div>
+    <div class="sp-row" id="sp-len-row">
+      <span class="sp-label">Largo</span>
+      <div class="sp-sizes">
+        <button id="sp-len-minus" class="pill-btn len-btn" title="Acortar: quita un tramo contiguo (tecla −)">➖ Acortar</button>
+        <button id="sp-len-plus" class="pill-btn len-btn" title="Alargar: añade un tramo contiguo (tecla +)">➕ Alargar</button>
+      </div>
+    </div>
     <div class="sp-actions">
       <button id="sp-rotate" class="pill-btn" title="Rotar 90° (R)">🔄 Rotar</button>
-      <button id="sp-sell" class="pill-btn">♻️ Vender</button>
+      <button id="sp-sell" class="pill-btn">♻️ Retirar</button>
       <button id="sp-delete" class="pill-btn danger">🗑️ Eliminar</button>
     </div>
   </aside>
@@ -116,16 +128,18 @@
         <li>🏗️ Al elegir una pieza entras en el <b>modo colocación</b>: una <b>cuadrícula dorada</b> cubre todo el terreno construible; mueve la pieza donde quieras y haz clic para fijarla (<kbd>R</kbd> rota · <kbd>Esc</kbd> cancela).</li>
         <li>🌱 <b>Todo el suelo construible</b> usa las texturas verdes del repositorio: céspedes, hierba fina, praderas florales, floración rosa y <b>adoquines ajardinados</b>, también en escaleras y rampas.</li>
         <li>🛋️ Amuebla tu casa, añade <b>decoración</b> y crea un jardín con árboles (roble, pino, palmera, cerezo, arce, abedul, manzano, sauce…), rosas, margaritas, girasoles, lavanda, hortensias, fuente y estanque.</li>
-        <li>🖐️ Con la herramienta <b>mano</b> arrastra cualquier pieza para <b>cogerla y moverla</b> por la cuadrícula (como en Heartopia): suéltala con un clic en una celda libre; un toque sencillo abre su panel de <b>color</b>, <b>tamaño</b> (S / M / G), rotación, <b>venderla</b> o eliminarla.</li>
+        <li>🖐️ Con la herramienta <b>mano</b> arrastra cualquier pieza para <b>cogerla y moverla</b> por la cuadrícula (como en Heartopia): suéltala con un clic en una celda libre; un toque sencillo abre su panel de <b>color</b>, <b>tamaño</b> (S / M / G), <b>largo</b>, rotación, <b>retirarla</b> o eliminarla.</li>
+        <li>📏 <b>Alarga los materiales de construcción</b> (suelos, muros, pilares, vallas, puertas, ventanas, techos…): elige el <b>largo</b> al colocarlos para dibujar tramos largos de un clic, o usa <b>➕ Alargar / ➖ Acortar</b> en el panel de selección (<kbd>+</kbd> / <kbd>−</kbd>).</li>
         <li>🖼️ Nueva <b>función de texturas</b> en Herramientas: cada pieza colocada o movida estrena uno de los <b>44 albedos de media/image</b> (ladrillo, piedra, metales, agua, azulejos…). Con <b>Auto</b> el ciclo avanza solo y con <b>🪄 Aplicar a todo</b> re-vestirás la casa entera.</li>
         <li>🎨 <b>Paleta ampliada</b> de 24 colores coordinados con las texturas, y herramienta <b>pintar</b> para personalizarlo todo.</li>
-        <li>🔨 El <b>mazo</b> rompe cualquier cosa de un golpe (con polvo incluido y sin reembolso): ideal para los errores de construcción.</li>
+        <li>🔨 El <b>mazo</b> rompe cualquier cosa de un golpe (con polvo incluido): ideal para los errores de construcción.</li>
         <li>⛲ Tu casa tiene <b>vida</b>: la fuente salpica, la cocina humea, la hoguera arde, los peces nadan y por el jardín vuelan mariposas y pájaros (¡luciérnagas de noche!).</li>
-        <li>💰 Cada pieza cuesta dinero: completa <b>misiones 🏆</b> para ganar más.</li>
-        <li>🔄 Pulsa <kbd>R</kbd> para rotar muebles, escaleras o rampas (incluso mientras las mueves con la mano); <kbd>Esc</kbd> cancela/deselecciona y la herramienta 🧹 vende (recuperas el 50 %).</li>
+        <li>💰 <b>Construcción libre</b>: no hay dinero ni límites económicos; crea todo lo que imagines. Las <b>misiones 🏆</b> son retos para guiarte.</li>
+        <li>🔄 Pulsa <kbd>R</kbd> para rotar muebles, escaleras o rampas (incluso mientras las mueves con la mano) o cambiar el sentido de la tanda de piezas; <kbd>Esc</kbd> cancela/deselecciona y la herramienta 🧹 retira piezas.</li>
         <li>🚶 Activa el <b>modo paseo</b> para caminar dentro de tu casa en primera persona.</li>
         <li>🖱️ Cámara: sin herramienta activa, arrastra para orbitar; la rueda acerca y el botón derecho desplaza. Con una pieza cogida, el botón derecho la devuelve a su sitio.</li>
         <li>💾 Tu casa se <b>guarda automáticamente</b> en este navegador. También puedes exportarla a un archivo.</li>
+        <li>🎮 Al final del menú tienes un acceso a <b>más juegos 3D de Juegos π</b>.</li>
       </ul>
       <button id="btn-close-help" class="cta">¡A construir! 🔨</button>
     </div>
