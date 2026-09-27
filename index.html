@@ -2,10 +2,13 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <title>Mi Hogar 3D — Construye tu hogar de ensueño</title>
   <meta name="description" content="Mi Hogar 3D: un juego de construcción de casas en 3D. Diseña, decora y pasea por tu hogar de ensueño directamente en el navegador." />
-  <meta name="theme-color" content="#1a1d29" />
+  <meta name="theme-color" content="#0c1220" />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏠</text></svg>" />
   <link rel="stylesheet" href="css/style.css" />
   <script type="importmap">
@@ -15,39 +18,100 @@
 <body>
   <!-- Pantalla de carga -->
   <div id="loader">
-    <div class="loader-house">🏠</div>
+    <div class="loader-house">🏛️</div>
     <h1>Mi Hogar 3D</h1>
-    <p id="loader-status">Preparando modelos de alta calidad…</p>
+    <p id="loader-status">Preparando el atelier…</p>
   </div>
 
   <!-- Lienzo 3D -->
   <canvas id="scene"></canvas>
 
+  <!-- Menú principal — temática de arquitectura -->
+  <div id="main-menu" class="hidden" role="dialog" aria-labelledby="menu-title">
+    <div class="menu-blueprint" aria-hidden="true">
+      <div class="bp-grid"></div>
+      <div class="bp-vignette"></div>
+      <svg class="bp-facade" viewBox="0 0 640 280" preserveAspectRatio="xMidYEnd meet">
+        <g fill="none" stroke="currentColor" stroke-width="1.15">
+          <path d="M40 248 H600" />
+          <path d="M72 248 V168 H568 V248" />
+          <path d="M88 168 L320 48 L552 168" />
+          <path d="M104 168 L320 62 L536 168" />
+          <rect x="292" y="58" width="56" height="22" />
+          <path d="M300 58 L320 42 L340 58" />
+          <rect x="96" y="176" width="28" height="72" />
+          <rect x="140" y="176" width="28" height="72" />
+          <rect x="184" y="176" width="28" height="72" />
+          <rect x="428" y="176" width="28" height="72" />
+          <rect x="472" y="176" width="28" height="72" />
+          <rect x="516" y="176" width="28" height="72" />
+          <path d="M96 176 Q110 158 124 176" />
+          <path d="M140 176 Q154 158 168 176" />
+          <path d="M184 176 Q198 158 212 176" />
+          <path d="M428 176 Q442 158 456 176" />
+          <path d="M472 176 Q486 158 500 176" />
+          <path d="M516 176 Q530 158 544 176" />
+          <rect x="248" y="168" width="144" height="80" />
+          <path d="M248 208 H392" />
+          <rect x="268" y="176" width="40" height="64" />
+          <rect x="332" y="176" width="40" height="64" />
+          <path d="M268 176 Q288 158 308 176" />
+          <path d="M332 176 Q352 158 372 176" />
+          <circle cx="304" cy="208" r="2.2" fill="currentColor" stroke="none" />
+          <circle cx="336" cy="208" r="2.2" fill="currentColor" stroke="none" />
+        </g>
+      </svg>
+      <div class="bp-compass">
+        <span>N</span>
+        <div class="bp-rose"></div>
+      </div>
+      <div class="bp-scale">
+        <span>0</span><i></i><i></i><i></i><i></i><i></i><span>10 m</span>
+      </div>
+    </div>
+    <div class="menu-content">
+      <p class="menu-kicker">Atelier de arquitectura</p>
+      <h1 id="menu-title">Mi Hogar 3D</h1>
+      <p class="menu-tagline">Proyecta, construye y habita tu casa de ensueño</p>
+      <div class="menu-actions">
+        <button id="btn-play" class="menu-btn primary" type="button">▶ Jugar</button>
+        <a id="more-games" class="menu-btn ghost" href="https://pensamientoincansable.github.io/Juegos-3D/" target="_blank" rel="noopener noreferrer">🎮 Más juegos 3D</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Aviso de orientación: el juego se juega en horizontal -->
+  <div id="rotate-hint">
+    <div class="rotate-phone" aria-hidden="true">📱</div>
+    <p>Gira el dispositivo a horizontal para jugar</p>
+  </div>
+
   <!-- Barra superior -->
   <header id="topbar" class="ui">
+    <button id="btn-menu" class="icon-btn" title="Volver al menú" type="button">⌂</button>
     <div class="brand">🏠 <span>Mi Hogar 3D</span></div>
     <div class="top-actions">
-      <button id="btn-catalog" class="icon-btn active" title="Abrir o cerrar el catálogo de construcción" aria-expanded="true">🧰</button>
-      <button id="btn-daynight" class="icon-btn" title="Alternar día / noche">🌙</button>
-      <button id="btn-walk" class="icon-btn" title="Modo paseo (primera persona)">🚶</button>
-      <button id="btn-screenshot" class="icon-btn" title="Capturar imagen">📷</button>
-      <button id="btn-missions" class="icon-btn" title="Misiones">🏆<span id="missions-badge" class="badge hidden">0</span></button>
-      <button id="btn-save" class="icon-btn" title="Guardar partida">💾</button>
-      <button id="btn-export" class="icon-btn" title="Exportar casa (JSON)">⬇️</button>
-      <button id="btn-import" class="icon-btn" title="Importar casa (JSON)">⬆️</button>
-      <button id="btn-reset" class="icon-btn" title="Empezar de cero">🗑️</button>
-      <button id="btn-help" class="icon-btn" title="Ayuda">❓</button>
+      <button id="btn-catalog" class="icon-btn active" title="Abrir o cerrar el catálogo de construcción" aria-expanded="true" type="button">🧰</button>
+      <button id="btn-daynight" class="icon-btn" title="Alternar día / noche" type="button">🌙</button>
+      <button id="btn-walk" class="icon-btn" title="Modo paseo (primera persona)" type="button">🚶</button>
+      <button id="btn-screenshot" class="icon-btn" title="Capturar imagen" type="button">📷</button>
+      <button id="btn-missions" class="icon-btn" title="Misiones" type="button">🏆<span id="missions-badge" class="badge hidden">0</span></button>
+      <button id="btn-save" class="icon-btn" title="Guardar partida" type="button">💾</button>
+      <button id="btn-export" class="icon-btn" title="Exportar casa (JSON)" type="button">⬇️</button>
+      <button id="btn-import" class="icon-btn" title="Importar casa (JSON)" type="button">⬆️</button>
+      <button id="btn-reset" class="icon-btn" title="Empezar de cero" type="button">🗑️</button>
+      <button id="btn-help" class="icon-btn" title="Guía tutorial" type="button">❓</button>
     </div>
   </header>
 
   <!-- Panel lateral de construcción -->
   <aside id="sidebar" class="ui">
     <nav id="tabs">
-      <button class="tab active" data-tab="construccion" title="Construcción">🧱</button>
-      <button class="tab" data-tab="muebles" title="Muebles">🛋️</button>
-      <button class="tab" data-tab="decoracion" title="Decoración">🪴</button>
-      <button class="tab" data-tab="exterior" title="Exterior">🌳</button>
-      <button class="tab" data-tab="herramientas" title="Herramientas">🛠️</button>
+      <button class="tab active" data-tab="construccion" title="Construcción" type="button">🧱</button>
+      <button class="tab" data-tab="muebles" title="Muebles" type="button">🛋️</button>
+      <button class="tab" data-tab="decoracion" title="Decoración" type="button">🪴</button>
+      <button class="tab" data-tab="exterior" title="Exterior" type="button">🌳</button>
+      <button class="tab" data-tab="herramientas" title="Herramientas" type="button">🛠️</button>
     </nav>
     <div id="tab-panels">
       <div class="panel active" data-panel="construccion"></div>
@@ -57,26 +121,33 @@
       <div class="panel" data-panel="herramientas"></div>
     </div>
     <div id="palette" title="Color seleccionado"></div>
-    <a id="more-games" class="more-games" href="https://pensamientoincansable.github.io/Juegos-3D/" target="_blank" rel="noopener noreferrer" title="Jugar a más juegos 3D de Juegos π">🎮 Más juegos 3D de Juegos π</a>
   </aside>
 
   <!-- Controles contextuales -->
   <div id="context-controls" class="ui hidden">
     <span id="selection-label" class="selection-pill"></span>
     <div id="len-control" class="len-control hidden" title="Cuántas piezas seguidas colocar de un clic">
-      <button id="btn-len-minus" class="pill-btn len-btn" title="Acortar la tanda (tecla −)">➖</button>
+      <button id="btn-len-minus" class="pill-btn len-btn" title="Acortar la tanda (tecla −)" type="button">➖</button>
       <span id="len-label" class="len-label">📏 Largo: 1</span>
-      <button id="btn-len-plus" class="pill-btn len-btn" title="Alargar la tanda (tecla +)">➕</button>
+      <button id="btn-len-plus" class="pill-btn len-btn" title="Alargar la tanda (tecla +)" type="button">➕</button>
     </div>
-    <button id="btn-rotate" class="pill-btn">🔄 Rotar 0° <kbd>R</kbd></button>
-    <button id="btn-cancel" class="pill-btn">✖ Cancelar <kbd>Esc</kbd></button>
+    <button id="btn-rotate" class="pill-btn" type="button">🔄 Rotar 0° <kbd>R</kbd></button>
+    <button id="btn-cancel" class="pill-btn" type="button">✖ Cancelar <kbd>Esc</kbd></button>
+  </div>
+
+  <!-- Flechas de alargar en los 4 lados de la pieza -->
+  <div id="extend-hud" class="hidden" aria-hidden="true">
+    <button type="button" class="ext-arrow" data-dir="n" title="Alargar hacia delante">▲</button>
+    <button type="button" class="ext-arrow" data-dir="w" title="Alargar hacia la izquierda">◀</button>
+    <button type="button" class="ext-arrow" data-dir="e" title="Alargar hacia la derecha">▶</button>
+    <button type="button" class="ext-arrow" data-dir="s" title="Alargar hacia atrás">▼</button>
   </div>
 
   <!-- Panel de selección (mano) -->
   <aside id="select-panel" class="ui hidden">
     <div class="sp-head">
       <span id="sp-name">—</span>
-      <button id="sp-close" class="icon-btn" title="Cerrar (Esc)">✖</button>
+      <button id="sp-close" class="icon-btn" title="Cerrar (Esc)" type="button">✖</button>
     </div>
     <div class="sp-row">
       <span class="sp-label">Color</span>
@@ -85,22 +156,24 @@
     <div class="sp-row" id="sp-size-row">
       <span class="sp-label">Tamaño</span>
       <div class="sp-sizes">
-        <button class="pill-btn size-btn" data-scale="0.75" title="Pequeño">S</button>
-        <button class="pill-btn size-btn active" data-scale="1" title="Normal">M</button>
-        <button class="pill-btn size-btn" data-scale="1.3" title="Grande">G</button>
+        <button class="pill-btn size-btn" data-scale="0.75" title="Pequeño" type="button">S</button>
+        <button class="pill-btn size-btn active" data-scale="1" title="Normal" type="button">M</button>
+        <button class="pill-btn size-btn" data-scale="1.3" title="Grande" type="button">G</button>
       </div>
     </div>
     <div class="sp-row" id="sp-len-row">
       <span class="sp-label">Largo</span>
-      <div class="sp-sizes">
-        <button id="sp-len-minus" class="pill-btn len-btn" title="Acortar: quita un tramo contiguo (tecla −)">➖ Acortar</button>
-        <button id="sp-len-plus" class="pill-btn len-btn" title="Alargar: añade un tramo contiguo (tecla +)">➕ Alargar</button>
+      <div class="sp-pad" role="group" aria-label="Alargar por lado">
+        <button type="button" class="pad-arrow" data-dir="n" title="Alargar hacia delante">▲</button>
+        <button type="button" class="pad-arrow" data-dir="w" title="Alargar hacia la izquierda">◀</button>
+        <button type="button" class="pad-arrow" data-dir="e" title="Alargar hacia la derecha">▶</button>
+        <button type="button" class="pad-arrow" data-dir="s" title="Alargar hacia atrás">▼</button>
       </div>
     </div>
     <div class="sp-actions">
-      <button id="sp-rotate" class="pill-btn" title="Rotar 90° (R)">🔄 Rotar</button>
-      <button id="sp-sell" class="pill-btn">♻️ Retirar</button>
-      <button id="sp-delete" class="pill-btn danger">🗑️ Eliminar</button>
+      <button id="sp-rotate" class="pill-btn" title="Rotar 90° (R)" type="button">🔄 Rotar</button>
+      <button id="sp-sell" class="pill-btn" type="button">♻️ Retirar</button>
+      <button id="sp-delete" class="pill-btn danger" type="button">🗑️ Eliminar</button>
     </div>
   </aside>
 
@@ -118,30 +191,28 @@
     🚶 Modo paseo — <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> moverse · ratón mirar · <kbd>Esc</kbd> salir
   </div>
 
-  <!-- Modal de ayuda -->
-  <div id="help-modal" class="modal hidden">
-    <div class="modal-card">
-      <h2>🏠 Bienvenido a Mi Hogar 3D</h2>
-      <p class="subtitle">Construye y decora tu hogar de ensueño</p>
-      <ul class="help-list">
-        <li>🧰 Abre el <b>catálogo</b>, elige una pieza y se ocultará automáticamente para dejarte construir con comodidad.</li>
-        <li>🏗️ Al elegir una pieza entras en el <b>modo colocación</b>: una <b>cuadrícula dorada</b> cubre todo el terreno construible; mueve la pieza donde quieras y haz clic para fijarla (<kbd>R</kbd> rota · <kbd>Esc</kbd> cancela).</li>
-        <li>🌱 <b>Todo el suelo construible</b> usa las texturas verdes del repositorio: céspedes, hierba fina, praderas florales, floración rosa y <b>adoquines ajardinados</b>, también en escaleras y rampas.</li>
-        <li>🛋️ Amuebla tu casa, añade <b>decoración</b> y crea un jardín con árboles (roble, pino, palmera, cerezo, arce, abedul, manzano, sauce…), rosas, margaritas, girasoles, lavanda, hortensias, fuente y estanque.</li>
-        <li>🖐️ Con la herramienta <b>mano</b> arrastra cualquier pieza para <b>cogerla y moverla</b> por la cuadrícula (como en Heartopia): suéltala con un clic en una celda libre; un toque sencillo abre su panel de <b>color</b>, <b>tamaño</b> (S / M / G), <b>largo</b>, rotación, <b>retirarla</b> o eliminarla.</li>
-        <li>📏 <b>Alarga los materiales de construcción</b> (suelos, muros, pilares, vallas, puertas, ventanas, techos…): elige el <b>largo</b> al colocarlos para dibujar tramos largos de un clic, o usa <b>➕ Alargar / ➖ Acortar</b> en el panel de selección (<kbd>+</kbd> / <kbd>−</kbd>).</li>
-        <li>🖼️ Nueva <b>función de texturas</b> en Herramientas: cada pieza colocada o movida estrena uno de los <b>44 albedos de media/image</b> (ladrillo, piedra, metales, agua, azulejos…). Con <b>Auto</b> el ciclo avanza solo y con <b>🪄 Aplicar a todo</b> re-vestirás la casa entera.</li>
-        <li>🎨 <b>Paleta ampliada</b> de 24 colores coordinados con las texturas, y herramienta <b>pintar</b> para personalizarlo todo.</li>
-        <li>🔨 El <b>mazo</b> rompe cualquier cosa de un golpe (con polvo incluido): ideal para los errores de construcción.</li>
-        <li>⛲ Tu casa tiene <b>vida</b>: la fuente salpica, la cocina humea, la hoguera arde, los peces nadan y por el jardín vuelan mariposas y pájaros (¡luciérnagas de noche!).</li>
-        <li>💰 <b>Construcción libre</b>: no hay dinero ni límites económicos; crea todo lo que imagines. Las <b>misiones 🏆</b> son retos para guiarte.</li>
-        <li>🔄 Pulsa <kbd>R</kbd> para rotar muebles, escaleras o rampas (incluso mientras las mueves con la mano) o cambiar el sentido de la tanda de piezas; <kbd>Esc</kbd> cancela/deselecciona y la herramienta 🧹 retira piezas.</li>
-        <li>🚶 Activa el <b>modo paseo</b> para caminar dentro de tu casa en primera persona.</li>
-        <li>🖱️ Cámara: sin herramienta activa, arrastra para orbitar; la rueda acerca y el botón derecho desplaza. Con una pieza cogida, el botón derecho la devuelve a su sitio.</li>
-        <li>💾 Tu casa se <b>guarda automáticamente</b> en este navegador. También puedes exportarla a un archivo.</li>
-        <li>🎮 Al final del menú tienes un acceso a <b>más juegos 3D de Juegos π</b>.</li>
-      </ul>
-      <button id="btn-close-help" class="cta">¡A construir! 🔨</button>
+  <!-- Elección de tutorial -->
+  <div id="tutorial-choice" class="modal hidden">
+    <div class="modal-card tutorial-card">
+      <p class="menu-kicker">Plano de obra</p>
+      <h2>¿Quieres una guía?</h2>
+      <p class="subtitle">Un recorrido corto para familiarizarte, o entra directo si ya conoces este tipo de juegos.</p>
+      <div class="choice-actions">
+        <button id="btn-tutorial-yes" class="cta" type="button">Seguir la guía</button>
+        <button id="btn-tutorial-skip" class="cta ghost" type="button">Saltar, ya lo conozco</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Guía tutorial paso a paso -->
+  <div id="tutorial" class="hidden" role="dialog" aria-live="polite">
+    <div class="tutorial-step">
+      <span id="tutorial-progress">1 / 5</span>
+      <p id="tutorial-text"></p>
+      <div class="tutorial-actions">
+        <button id="tutorial-skip" class="pill-btn" type="button">Saltar</button>
+        <button id="tutorial-next" class="pill-btn primary" type="button">Siguiente</button>
+      </div>
     </div>
   </div>
 
