@@ -21,7 +21,9 @@ python3 -m http.server 8000
 - 🟫 **Base del terreno mate**: el suelo del mundo y la parcela usan el albedo `PTP-Ground_08` (tierra con gravilla) con rugosidad alta y reflejos reducidos, de modo que el terreno no brilla.
 - 🖼️ **Función de cambio de textura**: 44 esquemas hechos con el resto de albedos de la carpeta (ladrillos, piedras, hormigones, maderas, metales, aguas, azulejos, patrones…). Cada pieza colocada o movida estrena el esquema activo; el modo **Auto** avanza el ciclo en cada acción y **🪄 Aplicar a todo** re-vesta la casa entera.
 - 🧱 **Construcción sobre cuadrícula** con muros de piedra, ladrillo, hormigón y madera, minimuros, pilares, vallas, 4 puertas, 4 ventanas y techos.
-- 📏 **Materiales alargables**: elige el **largo** de suelos, muros, pilares, vallas, puertas, ventanas y techos para colocar tramos largos de un clic, y alarga o acorta piezas ya colocadas desde el panel de selección.
+- 🏛️ **Menú principal** con estética de plano de arquitectura, acceso a **más juegos 3D de Juegos π** y partida pensada para **landscape** (al pulsar Jugar se pide pantalla completa y se bloquea la orientación horizontal).
+- 🧭 **Guía tutorial opcional**: al entrar puedes seguir un recorrido corto o saltártelo si ya conoces este tipo de juegos.
+- 📏 **Materiales alargables**: elige el **largo** de suelos, muros, pilares, vallas, puertas, ventanas y techos para colocar tramos largos de un clic, y alarga o acorta piezas ya colocadas con **flechas en los 4 lados**.
 - 🎨 **Materiales PBR** con sombreado, bump y reflejos. Iluminación ACES, reflejos ambientales y cantos suavizados. Todas las superficies usan los albedos incluidos en `media/image/`.
 - 🎨 **Paleta de 24 colores** coordinada con las texturas, más herramienta de pintura para personalizar todo.
 - 🌌 **Cielo en ciclo continuo**: recorre los 50 panoramas/cubemaps de `media/image/Sky` con transiciones suaves y se integra con el modo día/noche.
@@ -32,7 +34,7 @@ python3 -m http.server 8000
 - 🧰 **Inventario plegable**: se oculta al elegir una pieza para dejar libre toda la vista 3D.
 - 💰 **Construcción libre**: sin dinero ni límites económicos; crea todo lo que imagines. La herramienta 🧹 retira piezas.
 - 🏆 **16 misiones** como retos para guiar la partida.
-- 🎮 **Más juegos 3D de Juegos π** desde un acceso al final del menú.
+- 🎮 **Más juegos 3D de Juegos π** desde el menú principal.
 - 🌙 **Ciclo día / noche** con estrellas y lámparas que se encienden de noche.
 - 🚶 **Modo paseo** en primera persona (WASD + ratón) para visitar tu casa.
 - 💾 **Autoguardado** en el navegador + **exportar / importar** la casa en JSON.
@@ -52,7 +54,7 @@ python3 -m http.server 8000
 | Coger y mover una pieza con la mano | 🖐️ + arrastrar · suéltala con un clic · `Esc`/clic derecho la devuelve |
 | Rotar mueble, escalera o rampa | `R` o botón `🔄` |
 | Alargar / acortar la tanda de piezas | Botones `➖` `➕` o teclas `+` / `−` |
-| Alargar / acortar una pieza construida | Selecciona la pieza con 🖐️ y usa `➕ Alargar` / `➖ Acortar` (o `+` / `−`) |
+| Alargar / acortar una pieza construida | Selecciona la pieza con 🖐️ y usa las flechas de los 4 lados (o `+` / `−`) |
 | Cancelar herramienta | `Esc` |
 | Cambiar textura de las piezas | Panel Herramientas 🖼️ (auto o 🪄 aplicar a todo) |
 | Modo paseo | Botón 🚶 · `WASD` + ratón · `Esc` para salir |

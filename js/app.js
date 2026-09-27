@@ -12,7 +12,7 @@ import { RoundedBoxGeometry } from '../vendor/geometries/RoundedBoxGeometry.js';
 const S = 40;             // tamaño de la parcela (celdas)
 const WALL_H = 3;         // altura de pared
 const SAVE_KEY = 'mihogar3d-save-v1';
-const HELP_KEY = 'mihogar3d-help-v1';
+const TUTORIAL_KEY = 'mihogar3d-tutorial-v1';
 const TEXTURE_ROOT = 'media/image/';
 const SKY_ROOT = 'media/image/Sky/';
 
@@ -1034,6 +1034,8 @@ let state = newState();
 function newState() {
   return { floors: {}, walls: {}, roofs: {}, objects: {}, nextId: 1, missionsDone: [] };
 }
+let inMenu = true;
+let menuYaw = 0.7;
 
 /* ---------------- Escena ---------------- */
 const canvas = document.getElementById('scene');
@@ -1910,6 +1912,7 @@ controls.maxPolarAngle = Math.PI / 2.05;
 controls.minDistance = 4;
 controls.maxDistance = 90;
 controls.target.set(0, 0, 0);
+controls.enabled = false;
 
 /* Luces */
 const hemi = new THREE.HemisphereLight(0xcfe6ff, 0x6b7d5e, 0.9);
@@ -3058,6 +3061,7 @@ function clearSelection() {
   selection = null;
   if (selHelper) { scene.remove(selHelper); selHelper = null; }
   if (selPanelEl) selPanelEl.classList.add('hidden');
+  updateExtendHud();
 }
 function refreshSelHelper() {
   if (!selection) return;
@@ -3094,6 +3098,7 @@ function renderSelectPanel() {
   const s = isObj ? (tgt.s || 1) : 1;
   document.querySelectorAll('.size-btn').forEach(b => b.classList.toggle('active', Math.abs(+b.dataset.scale - s) < 0.01));
   selPanelEl.classList.remove('hidden');
+  updateExtendHud();
 }
 function applySelColor(c) {
   if (!selection) return;
@@ -3158,57 +3163,148 @@ function rotateSelected() {
   snd.click();
   scheduleSave();
 }
-/* ---- Alargar / acortar materiales de construcción ya colocados ---- */
-function selNeighborKeys() {
-  if (!selection) return [];
-  if (selection.kind === 'wall') {
-    const [orient, xs, zs] = selection.key.split(':');
+/* ---- Alargar / acortar materiales con flechas en los 4 lados ---- */
+const EXT_DIRS = { e: [1, 0], w: [-1, 0], s: [0, 1], n: [0, -1] };
+
+function neighborKeyForDir(kind, key, dir) {
+  const delta = EXT_DIRS[dir];
+  if (!delta || !key) return null;
+  const [dx, dz] = delta;
+  if (kind === 'wall') {
+    const [orient, xs, zs] = key.split(':');
     const x = +xs, z = +zs;
-    // Los muros solo crecen o menguan siguiendo su propio borde.
-    return orient === 'h'
-      ? [`h:${x + 1}:${z}`, `h:${x - 1}:${z}`]
-      : [`v:${x}:${z + 1}`, `v:${x}:${z - 1}`];
+    if (orient === 'h' && dz !== 0) return null;
+    if (orient === 'v' && dx !== 0) return null;
+    return orient === 'h' ? `h:${x + dx}:${z}` : `v:${x}:${z + dz}`;
   }
-  const [x, z] = selection.key.split(',').map(Number);
-  return [`${x + 1},${z}`, `${x - 1},${z}`, `${x},${z + 1}`, `${x},${z - 1}`];
+  const [x, z] = String(key).split(',').map(Number);
+  if (!Number.isInteger(x) || !Number.isInteger(z)) return null;
+  return `${x + dx},${z + dz}`;
 }
-function growSelected() {
+
+function extendState(dir) {
+  if (!selection || selection.kind === 'object') return 'off';
   const tgt = selTarget();
-  if (!tgt || selection.kind === 'object') return;
+  if (!tgt) return 'off';
+  const key = neighborKeyForDir(selection.kind, selection.key, dir);
+  if (!key) return 'off';
+  const valid = selection.kind === 'wall' ? validEdgeKey(key) : validCellKey(key);
+  if (!valid) return 'off';
   const store = state[selection.kind + 's'];
-  const validKey = selection.kind === 'wall' ? validEdgeKey : validCellKey;
-  for (const key of selNeighborKeys()) {
-    if (!validKey(key) || store[key]) continue;
+  const other = store[key];
+  if (!other) return 'grow';
+  if (other.t === tgt.t) return 'shrink';
+  return 'off';
+}
+
+function extendInDir(dir) {
+  const mode = extendState(dir);
+  if (mode === 'off' || !selection) {
+    toast(mode === 'off' ? 'No cabe ahí 🚫' : 'Elige una pieza primero', 'error');
+    snd.error();
+    return;
+  }
+  const tgt = selTarget();
+  const key = neighborKeyForDir(selection.kind, selection.key, dir);
+  const store = state[selection.kind + 's'];
+  if (mode === 'grow') {
     store[key] = { ...tgt };
     const adder = { floor: addFloorMesh, wall: addWallMesh, roof: addRoofMesh }[selection.kind];
     adder(key, store[key]);
     refreshSelHelper();
+    updateExtendHud();
     snd.place();
     checkMissions();
     scheduleSave();
     return;
   }
+  removeBuildItem(selection.kind, key, false);
+  toast('Tramo acortado ✂️', 'success');
+  snd.remove();
+  refreshSelHelper();
+  updateExtendHud();
+}
+
+function growSelected() {
+  for (const dir of ['e', 'n', 'w', 's']) {
+    if (extendState(dir) === 'grow') { extendInDir(dir); return; }
+  }
   toast('No cabe ahí 🚫', 'error');
   snd.error();
 }
 function shrinkSelected() {
-  const tgt = selTarget();
-  if (!tgt || selection.kind === 'object') return;
-  const store = state[selection.kind + 's'];
-  const validKey = selection.kind === 'wall' ? validEdgeKey : validCellKey;
-  for (const key of selNeighborKeys()) {
-    if (!validKey(key)) continue;
-    const other = store[key];
-    if (other && other.t === tgt.t) {
-      removeBuildItem(selection.kind, key, false);
-      toast('Tramo acortado ✂️', 'success');
-      snd.remove();
-      return;
-    }
+  for (const dir of ['e', 'n', 'w', 's']) {
+    if (extendState(dir) === 'shrink') { extendInDir(dir); return; }
   }
   toast('No hay tramo contiguo que quitar 🚫', 'error');
   snd.error();
 }
+
+const _extScr = new THREE.Vector3();
+function worldToScreen(v) {
+  _extScr.copy(v).project(camera);
+  return {
+    x: (_extScr.x * 0.5 + 0.5) * window.innerWidth,
+    y: (-_extScr.y * 0.5 + 0.5) * window.innerHeight,
+    ok: _extScr.z > -1 && _extScr.z < 1 && Math.abs(_extScr.x) < 1.2 && Math.abs(_extScr.y) < 1.2,
+  };
+}
+
+const _extBox = new THREE.Box3();
+const _extCenter = new THREE.Vector3();
+const _extSize = new THREE.Vector3();
+const _extWorld = {
+  n: new THREE.Vector3(),
+  s: new THREE.Vector3(),
+  e: new THREE.Vector3(),
+  w: new THREE.Vector3(),
+};
+
+function updateExtendHud() {
+  const hud = document.getElementById('extend-hud');
+  if (!hud) return;
+  const playing = document.body.classList.contains('playing');
+  const can = playing && selection && selection.kind !== 'object' && !walkMode && !carry && !inMenu;
+  document.querySelectorAll('.pad-arrow').forEach(btn => {
+    const mode = can ? extendState(btn.dataset.dir) : 'off';
+    btn.classList.toggle('off', mode === 'off');
+    btn.classList.toggle('shrink', mode === 'shrink');
+    btn.title = mode === 'shrink' ? 'Acortar este lado' : mode === 'grow' ? 'Alargar este lado' : 'No se puede alargar aquí';
+  });
+  if (!can) {
+    hud.classList.add('hidden');
+    hud.setAttribute('aria-hidden', 'true');
+    return;
+  }
+  const node = meshes[selection.kind + 's'][selection.key];
+  if (!node) {
+    hud.classList.add('hidden');
+    return;
+  }
+  hud.classList.remove('hidden');
+  hud.setAttribute('aria-hidden', 'false');
+  _extBox.setFromObject(node);
+  _extBox.getCenter(_extCenter);
+  _extBox.getSize(_extSize);
+  const y = _extCenter.y + Math.max(0.28, _extSize.y * 0.38);
+  const reach = 0.62;
+  _extWorld.n.set(_extCenter.x, y, _extCenter.z - _extSize.z / 2 - reach);
+  _extWorld.s.set(_extCenter.x, y, _extCenter.z + _extSize.z / 2 + reach);
+  _extWorld.e.set(_extCenter.x + _extSize.x / 2 + reach, y, _extCenter.z);
+  _extWorld.w.set(_extCenter.x - _extSize.x / 2 - reach, y, _extCenter.z);
+  hud.querySelectorAll('.ext-arrow').forEach(btn => {
+    const dir = btn.dataset.dir;
+    const mode = extendState(dir);
+    btn.classList.toggle('off', mode === 'off');
+    btn.classList.toggle('shrink', mode === 'shrink');
+    btn.title = mode === 'shrink' ? 'Acortar este lado' : mode === 'grow' ? 'Alargar este lado' : 'No se puede alargar aquí';
+    const scr = worldToScreen(_extWorld[dir]);
+    btn.style.left = `${scr.x}px`;
+    btn.style.top = `${scr.y}px`;
+    btn.style.display = scr.ok ? '' : 'none';
+  });
+}
+
 function initSelectPanel() {
   const pal = document.getElementById('sp-colors');
   if (!pal) return;
@@ -3221,8 +3317,14 @@ function initSelectPanel() {
     pal.appendChild(s);
   });
   document.querySelectorAll('.size-btn').forEach(b => b.addEventListener('click', () => applySelScale(+b.dataset.scale)));
-  document.getElementById('sp-len-minus').addEventListener('click', shrinkSelected);
-  document.getElementById('sp-len-plus').addEventListener('click', growSelected);
+  document.querySelectorAll('.pad-arrow, .ext-arrow').forEach(b => {
+    b.addEventListener('click', ev => {
+      ev.preventDefault();
+      ev.stopPropagation();
+      extendInDir(b.dataset.dir);
+    });
+    b.addEventListener('pointerdown', ev => ev.stopPropagation());
+  });
   document.getElementById('sp-rotate').addEventListener('click', rotateSelected);
   document.getElementById('sp-sell').addEventListener('click', () => { if (selection) removeBuildItem(selection.kind, selection.key, true); });
   document.getElementById('sp-delete').addEventListener('click', () => { if (selection) { const { kind, key } = selection; const node = state[kind + 's'][key] && (kind === 'object' ? meshes.objects[key] : meshes[kind + 's'][key]); if (node) spawnDust(new THREE.Box3().setFromObject(node).getCenter(new THREE.Vector3()), 8); removeBuildItem(kind, key, false); } });
@@ -3442,6 +3544,111 @@ function toast(msg, type = '') {
   toastTimer = setTimeout(() => t.classList.add('hidden'), 2600);
 }
 
+/* ---------------- Menú principal, landscape y tutorial ---------------- */
+function updatePortraitClass() {
+  const portrait = window.innerHeight > window.innerWidth + 20;
+  const touch = window.matchMedia('(hover: none), (pointer: coarse)').matches || (navigator.maxTouchPoints || 0) > 0;
+  document.body.classList.toggle('portrait', portrait);
+  document.body.classList.toggle('touch', touch);
+}
+
+async function requestFullscreenSafe() {
+  const el = document.documentElement;
+  if (document.fullscreenElement || document.webkitFullscreenElement) return;
+  try {
+    if (el.requestFullscreen) {
+      await el.requestFullscreen({ navigationUI: 'hide' });
+      return;
+    }
+  } catch (e) { /* denegado */ }
+  try {
+    if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+  } catch (e) { /* iOS Safari no lo permite */ }
+}
+
+async function lockLandscape() {
+  const coarse = window.matchMedia('(hover: none), (pointer: coarse)').matches;
+  const portrait = window.innerHeight > window.innerWidth;
+  if (coarse || portrait) {
+    await requestFullscreenSafe();
+    try {
+      if (screen.orientation && typeof screen.orientation.lock === 'function') {
+        await screen.orientation.lock('landscape');
+      }
+    } catch (e) { /* API no disponible; el aviso de giro cubre el caso */ }
+  }
+  updatePortraitClass();
+}
+
+function showMainMenu() {
+  inMenu = true;
+  document.body.classList.remove('playing');
+  const menu = document.getElementById('main-menu');
+  if (menu) menu.classList.remove('hidden');
+  document.getElementById('tutorial')?.classList.add('hidden');
+  document.getElementById('tutorial-choice')?.classList.add('hidden');
+  if (walkMode) exitWalk();
+  selectTool(null);
+  clearSelection();
+  controls.enabled = false;
+  try { screen.orientation?.unlock?.(); } catch (e) { /* nada */ }
+  try {
+    if (document.fullscreenElement) document.exitFullscreen();
+    else if (document.webkitFullscreenElement) document.webkitExitFullscreen();
+  } catch (e) { /* nada */ }
+  updatePortraitClass();
+}
+
+async function enterPlayMode() {
+  inMenu = false;
+  document.getElementById('main-menu')?.classList.add('hidden');
+  document.body.classList.add('playing');
+  controls.enabled = true;
+  camera.position.set(26, 22, 26);
+  controls.target.set(0, 0, 0);
+  await lockLandscape();
+  if (!localStorage.getItem(TUTORIAL_KEY)) {
+    document.getElementById('tutorial-choice')?.classList.remove('hidden');
+  }
+}
+
+const TUTORIAL_STEPS = [
+  { text: '🧰 Abre el catálogo y elige una pieza. El panel se oculta solo para dejarte construir con holgura.' },
+  { text: '🏗️ Colócala sobre la cuadrícula dorada. R rota la pieza; + y − cambian el largo al colocar muros o suelos.' },
+  { text: '↔️ Con la mano, toca una pieza y usa las flechas de los 4 lados para alargarla o acortarla con precisión.' },
+  { text: '🖐️ Arrastra para coger y mover. El mazo rompe, el pincel pinta. Todo se guarda solo.' },
+  { text: '🚶 Entra en modo paseo para recorrer tu casa. ¡Listo para construir!' },
+];
+let tutorialStep = 0;
+
+function openTutorial() {
+  tutorialStep = 0;
+  document.getElementById('tutorial-choice')?.classList.add('hidden');
+  document.getElementById('tutorial')?.classList.remove('hidden');
+  renderTutorial();
+}
+function renderTutorial() {
+  const step = TUTORIAL_STEPS[tutorialStep];
+  if (!step) { finishTutorial(); return; }
+  const text = document.getElementById('tutorial-text');
+  const prog = document.getElementById('tutorial-progress');
+  const next = document.getElementById('tutorial-next');
+  if (text) text.textContent = step.text;
+  if (prog) prog.textContent = `${tutorialStep + 1} / ${TUTORIAL_STEPS.length}`;
+  if (next) next.textContent = tutorialStep === TUTORIAL_STEPS.length - 1 ? '¡A construir!' : 'Siguiente';
+}
+function nextTutorial() {
+  tutorialStep += 1;
+  if (tutorialStep >= TUTORIAL_STEPS.length) finishTutorial();
+  else renderTutorial();
+}
+function finishTutorial() {
+  document.getElementById('tutorial')?.classList.add('hidden');
+  document.getElementById('tutorial-choice')?.classList.add('hidden');
+  try { localStorage.setItem(TUTORIAL_KEY, '1'); } catch (e) { /* modo privado */ }
+  snd.click();
+}
+
 let inventoryOpen = true;
 function setInventoryOpen(open) {
   inventoryOpen = open;
@@ -3639,7 +3846,7 @@ function makeHover(p) {
   return { ...p, cellOk, cellKey: p.cx + ',' + p.cz, edgeKey: nearestEdge(p) };
 }
 function updatePlacementHover(e) {
-  if (walkMode) {
+  if (inMenu || walkMode) {
     if (ghost) ghost.visible = false;
     hover = null;
     return;
@@ -3679,7 +3886,7 @@ let rightDown = null;
 canvas.addEventListener('pointerdown', e => {
   downPos = { x: e.clientX, y: e.clientY };
   if (e.button === 2) rightDown = { x: e.clientX, y: e.clientY };
-  if (walkMode || e.button !== 0) return;
+  if (inMenu || walkMode || e.button !== 0) return;
   // OrbitControls escucha el mismo canvas. Desactivar solo el giro de este
   // puntero evita que un clic de colocación desplace accidentalmente la cámara.
   if (carry) {
@@ -3708,7 +3915,7 @@ canvas.addEventListener('pointerup', e => {
     placementPointer = null;
     controls.enableRotate = true;
   }
-  if (walkMode) { downPos = null; carryPending = null; return; }
+  if (inMenu || walkMode) { downPos = null; carryPending = null; return; }
   if (carry) {
     downPos = null;
     carryPending = null;
@@ -3758,6 +3965,7 @@ canvas.addEventListener('contextmenu', e => {
 
 window.addEventListener('keydown', e => {
   keys[e.code] = true;
+  if (inMenu) return;
   if (e.code === 'KeyR') {
     if (carry) { e.preventDefault(); if (rotateCarry()) refreshCarryGhost(); }
     else if (selection && (selection.kind === 'object' || selection.kind === 'floor')) { e.preventDefault(); rotateSelected(); }
@@ -3773,6 +3981,12 @@ window.addEventListener('keydown', e => {
     else if (!carry && selection && selection.kind !== 'object') { e.preventDefault(); shrinkSelected(); }
   }
   if (e.code === 'Escape' && !walkMode) {
+    const tut = document.getElementById('tutorial');
+    const choice = document.getElementById('tutorial-choice');
+    if ((tut && !tut.classList.contains('hidden')) || (choice && !choice.classList.contains('hidden'))) {
+      finishTutorial();
+      return;
+    }
     if (carry) cancelCarry();
     else if (selection) clearSelection();
     else selectTool(null);
@@ -3780,11 +3994,21 @@ window.addEventListener('keydown', e => {
 });
 window.addEventListener('keyup', e => { keys[e.code] = false; });
 
-window.addEventListener('resize', () => {
+function onViewportResize() {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
+  updatePortraitClass();
+  updateExtendHud();
+}
+window.addEventListener('resize', onViewportResize);
+window.addEventListener('orientationchange', () => {
+  window.setTimeout(onViewportResize, 220);
 });
+if (screen.orientation && typeof screen.orientation.addEventListener === 'function') {
+  screen.orientation.addEventListener('change', () => window.setTimeout(onViewportResize, 80));
+}
+updatePortraitClass();
 
 /* Botones superiores */
 document.getElementById('btn-catalog').addEventListener('click', () => {
@@ -3824,11 +4048,27 @@ document.getElementById('btn-reset').addEventListener('click', () => {
   saveGame();
   toast('Nueva parcela lista 🌱', 'success');
 });
-document.getElementById('btn-help').addEventListener('click', () => document.getElementById('help-modal').classList.remove('hidden'));
-document.getElementById('btn-close-help').addEventListener('click', () => {
-  document.getElementById('help-modal').classList.add('hidden');
-  localStorage.setItem(HELP_KEY, '1');
+document.getElementById('btn-help').addEventListener('click', () => {
+  openTutorial();
   snd.click();
+});
+document.getElementById('btn-menu')?.addEventListener('click', () => {
+  snd.click();
+  showMainMenu();
+});
+document.getElementById('btn-play')?.addEventListener('click', () => {
+  snd.click();
+  enterPlayMode();
+});
+document.getElementById('btn-tutorial-yes')?.addEventListener('click', () => {
+  snd.click();
+  openTutorial();
+});
+document.getElementById('btn-tutorial-skip')?.addEventListener('click', finishTutorial);
+document.getElementById('tutorial-skip')?.addEventListener('click', finishTutorial);
+document.getElementById('tutorial-next')?.addEventListener('click', () => {
+  snd.click();
+  nextTutorial();
 });
 document.getElementById('btn-rotate').addEventListener('click', rotateTool);
 document.getElementById('btn-len-minus').addEventListener('click', () => setToolLen(toolLen - 1));
@@ -3846,7 +4086,7 @@ async function startGame() {
   buildUI();
   if (loadGame()) rebuildAll();
   renderMissions();
-  if (!localStorage.getItem(HELP_KEY)) document.getElementById('help-modal').classList.remove('hidden');
+  showMainMenu();
   setLoaderMessage('Tu parcela está lista');
 
   const l = document.getElementById('loader');
@@ -3863,7 +4103,12 @@ function animate() {
   requestAnimationFrame(animate);
   const dt = Math.min(clock.getDelta(), 0.1);
   elapsed += dt;
-  if (walkMode) updateWalk(dt);
+  if (inMenu) {
+    menuYaw += dt * 0.12;
+    camera.position.set(Math.cos(menuYaw) * 34, 16.5, Math.sin(menuYaw) * 34);
+    camera.lookAt(0, 1.2, 0);
+    controls.target.set(0, 1.2, 0);
+  } else if (walkMode) updateWalk(dt);
   else controls.update();
   updateDayNight(dt);
   runObjAnims(elapsed);
@@ -3876,6 +4121,7 @@ function animate() {
   if (placementGrid.visible) {
     placementGrid.material.opacity = 0.16 + 0.08 * (0.5 + 0.5 * Math.sin(elapsed * 2.6));
   }
+  if (selection && !inMenu) updateExtendHud();
   renderer.render(scene, camera);
 }
 animate();
